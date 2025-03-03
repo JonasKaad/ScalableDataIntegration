@@ -101,7 +101,7 @@ jobs:
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v5
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.CICD_KEY }}
         commit-message: "Auto-generated client code from proto files"
         title: "Update generated clients from proto files"
         body: |
