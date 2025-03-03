@@ -55,7 +55,7 @@ jobs:
         mkdir -p /tmp/grpc-plugins
         wget -O /tmp/grpc-plugins/protoc-gen-grpc-java https://repo1.maven.org/maven2/io/grpc/protoc-gen-grpc-java/1.58.0/protoc-gen-grpc-java-1.58.0-linux-x86_64.exe
         chmod +x /tmp/grpc-plugins/protoc-gen-grpc-java
-        echo "/tmp/grpc-plugins" >> $GITHUB_PATH
+        sudo mv /tmp/grpc-plugins/protoc-gen-grpc-java /usr/local/bin/protoc-gen-grpc-java
     
     - name: Create output directories
       run: |
