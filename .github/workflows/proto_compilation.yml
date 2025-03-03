@@ -33,14 +33,28 @@ jobs:
         include-pre-releases: false
         repo-token: ${{ secrets.GITHUB_TOKEN }}
     
-    - name: Install Protoc Plugins
+    - name: Install gRPC plugins
       run: |
         # Install Go plugins
         go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.31.0
         go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.3.0
-        
-        # Add Go bin to PATH
         echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+        
+        # Install Python gRPC tools
+        pip install grpcio grpcio-tools
+        
+        # Install C# gRPC tools
+        apt-get update && apt-get install -y nuget
+        nuget install Grpc.Tools -Version 2.59.0
+        GRPC_TOOLS_PATH=$(find . -name "Grpc.Tools.2.59.0" -type d)
+        echo "GRPC_TOOLS_PATH=$GRPC_TOOLS_PATH" >> $GITHUB_ENV
+        
+        # Setup Java gRPC plugin (using pre-compiled plugin)
+        apt-get install -y wget unzip
+        mkdir -p /usr/local/bin/
+        wget -O /tmp/protoc-gen-grpc-java.exe https://repo1.maven.org/maven2/io/grpc/protoc-gen-grpc-java/1.58.0/protoc-gen-grpc-java-1.58.0-linux-x86_64.exe
+        mv /tmp/protoc-gen-grpc-java.exe /usr/local/bin/protoc-gen-grpc-java
+        chmod +x /usr/local/bin/protoc-gen-grpc-java
     
     - name: Create output directories
       run: |
@@ -52,24 +66,25 @@ jobs:
     - name: Compile Proto files for all languages
       run: |
         # Compile for C#
+        PROTOC_CSHARP_PLUGIN="$GRPC_TOOLS_PATH/tools/linux_x64/protoc-gen-grpc"
         protoc -I=Protos \
           --csharp_out=GeneratedClients/csharp \
-          --plugin=protoc-gen-grpc=$(which grpc_csharp_plugin) \
           --grpc_out=GeneratedClients/csharp \
+          --plugin=protoc-gen-grpc=$PROTOC_CSHARP_PLUGIN \
           Protos/*.proto
         
         # Compile for Python
-        protoc -I=Protos \
+        python -m grpc_tools.protoc \
+          -I=Protos \
           --python_out=GeneratedClients/python \
-          --plugin=protoc-gen-grpc_python=$(which grpc_python_plugin) \
           --grpc_python_out=GeneratedClients/python \
           Protos/*.proto
         
         # Compile for Java
         protoc -I=Protos \
           --java_out=GeneratedClients/java \
-          --plugin=protoc-gen-grpc_java=$(which grpc_java_plugin) \
-          --grpc_java_out=GeneratedClients/java \
+          --grpc_out=GeneratedClients/java \
+          --plugin=protoc-gen-grpc=/usr/local/bin/protoc-gen-grpc-java \
           Protos/*.proto
         
         # Compile for Go
