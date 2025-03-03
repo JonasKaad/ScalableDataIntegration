@@ -37,8 +37,7 @@ jobs:
       run: |
         # Install C# gRPC tools (using nuget instead of dotnet)
         sudo apt-get update
-        sudo apt-get install -y nuget
-        nuget install Grpc.Tools -Version 2.31.0 -OutputDirectory /usr/local/bin
+        dotnet tool install Grpc.Tools --version 2.70.0
         
         # Install Go plugins
         go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.31.0
