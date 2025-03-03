@@ -35,6 +35,11 @@ jobs:
     
     - name: Install gRPC plugins
       run: |
+        # Install C# gRPC tools (using nuget instead of dotnet)
+        sudo apt-get update
+        sudo apt-get install -y nuget
+        nuget install Grpc.Tools -Version 2.31.0 -OutputDirectory /usr/local/bin
+        
         # Install Go plugins
         go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.31.0
         go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.3.0
@@ -43,11 +48,7 @@ jobs:
         # Install Python gRPC tools
         pip install grpcio grpcio-tools
         
-        # Install C# gRPC tools (using dotnet instead of nuget)
-        dotnet tool install Grpc.Tools --version 2.31.0 --tool-path /usr/local/bin
-        
         # Setup Java gRPC plugin
-        sudo apt-get update
         sudo apt-get install -y wget unzip
         mkdir -p /tmp/grpc-plugins
         wget -O /tmp/grpc-plugins/protoc-gen-grpc-java https://repo1.maven.org/maven2/io/grpc/protoc-gen-grpc-java/1.58.0/protoc-gen-grpc-java-1.58.0-linux-x86_64.exe
