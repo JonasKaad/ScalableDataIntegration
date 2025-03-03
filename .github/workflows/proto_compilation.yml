@@ -111,4 +111,5 @@ jobs:
         branch: auto-generated-clients
         base: master
         labels: automated-pr, proto-generation
+        add-paths: "GeneratedClients/**"
         draft: false
