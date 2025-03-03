@@ -40,7 +40,7 @@ jobs:
         wget https://www.nuget.org/api/v2/package/Grpc.Tools/2.70.0 -O grpc.tools.nupkg
         mkdir grpc_tools
         unzip grpc.tools.nupkg -d grpc_tools
-        chmod +x grpc_tools/tools/linux_x64/protoc-gen-grpc
+        chmod +x grpc_tools/tools/linux_x64/grpc_csharp_plugin
         
         # Install Go plugins
         go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.31.0
