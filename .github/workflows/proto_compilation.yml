@@ -94,6 +94,8 @@ jobs:
           --go_opt=paths=source_relative \
           --go-grpc_out=GeneratedClients/go \
           --go-grpc_opt=paths=source_relative \
+          --proto_path=Protos \
+          --MProtos/parser.proto=github.com/ScalableDataIntegration/GeneratedClients/go \
           Protos/*.proto
     
     - name: Create Pull Request
