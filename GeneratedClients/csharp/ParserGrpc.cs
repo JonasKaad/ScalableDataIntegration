@@ -51,10 +51,10 @@ namespace Sdi.Parser {
     static readonly grpc::Marshaller<global::Sdi.Parser.ParseResponse> __Marshaller_sdi_parser_ParseResponse = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::Sdi.Parser.ParseResponse.Parser));
 
     [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
-    static readonly grpc::Method<global::Sdi.Parser.ParseRequest, global::Sdi.Parser.ParseResponse> __Method_Parse = new grpc::Method<global::Sdi.Parser.ParseRequest, global::Sdi.Parser.ParseResponse>(
+    static readonly grpc::Method<global::Sdi.Parser.ParseRequest, global::Sdi.Parser.ParseResponse> __Method_ParseCall = new grpc::Method<global::Sdi.Parser.ParseRequest, global::Sdi.Parser.ParseResponse>(
         grpc::MethodType.Unary,
         __ServiceName,
-        "Parse",
+        "ParseCall",
         __Marshaller_sdi_parser_ParseRequest,
         __Marshaller_sdi_parser_ParseResponse);
 
@@ -69,7 +69,7 @@ namespace Sdi.Parser {
     public abstract partial class ParserBase
     {
       [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
-      public virtual global::System.Threading.Tasks.Task<global::Sdi.Parser.ParseResponse> Parse(global::Sdi.Parser.ParseRequest request, grpc::ServerCallContext context)
+      public virtual global::System.Threading.Tasks.Task<global::Sdi.Parser.ParseResponse> ParseCall(global::Sdi.Parser.ParseRequest request, grpc::ServerCallContext context)
       {
         throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
       }
@@ -104,24 +104,24 @@ namespace Sdi.Parser {
       }
 
       [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
-      public virtual global::Sdi.Parser.ParseResponse Parse(global::Sdi.Parser.ParseRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      public virtual global::Sdi.Parser.ParseResponse ParseCall(global::Sdi.Parser.ParseRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
       {
-        return Parse(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+        return ParseCall(request, new grpc::CallOptions(headers, deadline, cancellationToken));
       }
       [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
-      public virtual global::Sdi.Parser.ParseResponse Parse(global::Sdi.Parser.ParseRequest request, grpc::CallOptions options)
+      public virtual global::Sdi.Parser.ParseResponse ParseCall(global::Sdi.Parser.ParseRequest request, grpc::CallOptions options)
       {
-        return CallInvoker.BlockingUnaryCall(__Method_Parse, null, options, request);
+        return CallInvoker.BlockingUnaryCall(__Method_ParseCall, null, options, request);
       }
       [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
-      public virtual grpc::AsyncUnaryCall<global::Sdi.Parser.ParseResponse> ParseAsync(global::Sdi.Parser.ParseRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      public virtual grpc::AsyncUnaryCall<global::Sdi.Parser.ParseResponse> ParseCallAsync(global::Sdi.Parser.ParseRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
       {
-        return ParseAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+        return ParseCallAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
       }
       [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
-      public virtual grpc::AsyncUnaryCall<global::Sdi.Parser.ParseResponse> ParseAsync(global::Sdi.Parser.ParseRequest request, grpc::CallOptions options)
+      public virtual grpc::AsyncUnaryCall<global::Sdi.Parser.ParseResponse> ParseCallAsync(global::Sdi.Parser.ParseRequest request, grpc::CallOptions options)
       {
-        return CallInvoker.AsyncUnaryCall(__Method_Parse, null, options, request);
+        return CallInvoker.AsyncUnaryCall(__Method_ParseCall, null, options, request);
       }
       /// <summary>Creates a new instance of client from given <c>ClientBaseConfiguration</c>.</summary>
       [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
@@ -137,7 +137,7 @@ namespace Sdi.Parser {
     public static grpc::ServerServiceDefinition BindService(ParserBase serviceImpl)
     {
       return grpc::ServerServiceDefinition.CreateBuilder()
-          .AddMethod(__Method_Parse, serviceImpl.Parse).Build();
+          .AddMethod(__Method_ParseCall, serviceImpl.ParseCall).Build();
     }
 
     /// <summary>Register service method with a service binder with or without implementation. Useful when customizing the service binding logic.
@@ -147,7 +147,7 @@ namespace Sdi.Parser {
     [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
     public static void BindService(grpc::ServiceBinderBase serviceBinder, ParserBase serviceImpl)
     {
-      serviceBinder.AddMethod(__Method_Parse, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Sdi.Parser.ParseRequest, global::Sdi.Parser.ParseResponse>(serviceImpl.Parse));
+      serviceBinder.AddMethod(__Method_ParseCall, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Sdi.Parser.ParseRequest, global::Sdi.Parser.ParseResponse>(serviceImpl.ParseCall));
     }
 
   }
