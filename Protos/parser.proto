@@ -3,7 +3,7 @@ syntax = "proto3";
 package sdi.parser;
 
 service Parser {
-	rpc Parse (ParseRequest) returns (ParseResponse);
+	rpc ParseCall (ParseRequest) returns (ParseResponse);
 }
 
 message ParseRequest {
