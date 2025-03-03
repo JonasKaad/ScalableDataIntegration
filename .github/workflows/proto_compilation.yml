@@ -67,7 +67,7 @@ jobs:
     - name: Compile Proto files for all languages
       run: |
         # Compile for C#
-        PROTOC_CSHARP_PLUGIN="$GRPC_TOOLS_PATH/tools/linux_x64/protoc-gen-grpc"
+        PROTOC_CSHARP_PLUGIN="grpc_tools/tools/linux_x64/protoc-gen-grpc"
         protoc -I=Protos \
           --csharp_out=GeneratedClients/csharp \
           --grpc_out=GeneratedClients/csharp \
