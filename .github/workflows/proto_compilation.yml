@@ -9,6 +9,7 @@ on:
     branches: [ master ]
     paths:
       - 'Protos/**'
+  workflow_dispatch:
 
 jobs:
   compile-protos:
