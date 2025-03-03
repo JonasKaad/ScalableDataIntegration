@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+option go_package = "github.com/JonasKaad/ScalableDataIntegration/protos/parser"
+
 package sdi.parser;
 
 service Parser {
