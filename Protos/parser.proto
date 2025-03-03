@@ -5,7 +5,7 @@ option go_package = "github.com/JonasKaad/ScalableDataIntegration/protos/parser"
 package sdi.parser;
 
 service Parser {
-	rpc Parse (ParseRequest) returns (ParseResponse);
+	rpc ParseCall (ParseRequest) returns (ParseResponse);
 }
 
 message ParseRequest {
