@@ -44,12 +44,10 @@ jobs:
         pip install grpcio grpcio-tools
         
         # Install C# gRPC tools (using dotnet instead of nuget)
-        sudo apt-get update
-        sudo apt-get install -y dotnet-sdk-6.0
-        dotnet tool install --global protobuf-net.Grpc.Reflection
-        dotnet tool install --global dotnet-grpc
+        dotnet tool install --global Grpc.Tools
         
         # Setup Java gRPC plugin
+        sudo apt-get update
         sudo apt-get install -y wget unzip
         mkdir -p /tmp/grpc-plugins
         wget -O /tmp/grpc-plugins/protoc-gen-grpc-java https://repo1.maven.org/maven2/io/grpc/protoc-gen-grpc-java/1.58.0/protoc-gen-grpc-java-1.58.0-linux-x86_64.exe
