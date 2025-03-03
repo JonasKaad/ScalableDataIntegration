@@ -43,18 +43,18 @@ jobs:
         # Install Python gRPC tools
         pip install grpcio grpcio-tools
         
-        # Install C# gRPC tools
-        apt-get update && apt-get install -y nuget
-        nuget install Grpc.Tools -Version 2.59.0
-        GRPC_TOOLS_PATH=$(find . -name "Grpc.Tools.2.59.0" -type d)
-        echo "GRPC_TOOLS_PATH=$GRPC_TOOLS_PATH" >> $GITHUB_ENV
+        # Install C# gRPC tools (using dotnet instead of nuget)
+        sudo apt-get update
+        sudo apt-get install -y dotnet-sdk-6.0
+        dotnet tool install --global protobuf-net.Grpc.Reflection
+        dotnet tool install --global dotnet-grpc
         
-        # Setup Java gRPC plugin (using pre-compiled plugin)
-        apt-get install -y wget unzip
-        mkdir -p /usr/local/bin/
-        wget -O /tmp/protoc-gen-grpc-java.exe https://repo1.maven.org/maven2/io/grpc/protoc-gen-grpc-java/1.58.0/protoc-gen-grpc-java-1.58.0-linux-x86_64.exe
-        mv /tmp/protoc-gen-grpc-java.exe /usr/local/bin/protoc-gen-grpc-java
-        chmod +x /usr/local/bin/protoc-gen-grpc-java
+        # Setup Java gRPC plugin
+        sudo apt-get install -y wget unzip
+        mkdir -p /tmp/grpc-plugins
+        wget -O /tmp/grpc-plugins/protoc-gen-grpc-java https://repo1.maven.org/maven2/io/grpc/protoc-gen-grpc-java/1.58.0/protoc-gen-grpc-java-1.58.0-linux-x86_64.exe
+        chmod +x /tmp/grpc-plugins/protoc-gen-grpc-java
+        echo "/tmp/grpc-plugins" >> $GITHUB_PATH
     
     - name: Create output directories
       run: |
