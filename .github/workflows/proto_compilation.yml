@@ -1,0 +1,95 @@
+name: Proto Compilation
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - 'Protos/**'
+  pull_request:
+    branches: [ master ]
+    paths:
+      - 'Protos/**'
+
+jobs:
+  compile-protos:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21'
+    
+    - name: Setup Protoc
+      uses: arduino/setup-protoc@v3.0.0
+      with:
+        version: '24.3'
+        include-pre-releases: false
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Install Protoc Plugins
+      run: |
+        # Install Go plugins
+        go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.31.0
+        go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.3.0
+        
+        # Add Go bin to PATH
+        echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+    
+    - name: Create output directories
+      run: |
+        mkdir -p GeneratedClients/csharp
+        mkdir -p GeneratedClients/python
+        mkdir -p GeneratedClients/java
+        mkdir -p GeneratedClients/go
+    
+    - name: Compile Proto files for all languages
+      run: |
+        # Compile for C#
+        protoc -I=Protos \
+          --csharp_out=GeneratedClients/csharp \
+          --plugin=protoc-gen-grpc=$(which grpc_csharp_plugin) \
+          --grpc_out=GeneratedClients/csharp \
+          Protos/*.proto
+        
+        # Compile for Python
+        protoc -I=Protos \
+          --python_out=GeneratedClients/python \
+          --plugin=protoc-gen-grpc_python=$(which grpc_python_plugin) \
+          --grpc_python_out=GeneratedClients/python \
+          Protos/*.proto
+        
+        # Compile for Java
+        protoc -I=Protos \
+          --java_out=GeneratedClients/java \
+          --plugin=protoc-gen-grpc_java=$(which grpc_java_plugin) \
+          --grpc_java_out=GeneratedClients/java \
+          Protos/*.proto
+        
+        # Compile for Go
+        protoc -I=Protos \
+          --go_out=GeneratedClients/go \
+          --go_opt=paths=source_relative \
+          --go-grpc_out=GeneratedClients/go \
+          --go-grpc_opt=paths=source_relative \
+          Protos/*.proto
+    
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v5
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: "Auto-generated client code from proto files"
+        title: "Update generated clients from proto files"
+        body: |
+          This PR contains auto-generated client code from the latest proto files.
+          
+          Changes were triggered by modifications to files in the `/Protos` directory.
+        branch: auto-generated-clients
+        base: master
+        labels: automated-pr, proto-generation
+        draft: false
