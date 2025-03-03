@@ -15,7 +15,8 @@ public class TestParserService : Parser.ParserBase
     {
          return Task.FromResult(new ParseResponse
          {
-             Success = GetRandomNumberTrueOrFalse()
+             Success = GetRandomNumberTrueOrFalse(),
+             ErrMsg = "From csharp parser!"
          });
     }
 
