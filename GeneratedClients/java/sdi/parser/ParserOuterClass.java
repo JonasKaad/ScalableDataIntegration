@@ -2156,10 +2156,10 @@ public final class ParserOuterClass {
       "\000\210\001\001B\t\n\007_filter\"B\n\rParseResponse\022\017\n\007succ" +
       "ess\030\001 \001(\010\022\024\n\007err_msg\030\002 \001(\tH\000\210\001\001B\n\n\010_err_" +
       "msg\"/\n\rFilterRequest\022\016\n\006filter\030\001 \001(\014\022\016\n\006" +
-      "format\030\002 \001(\t2F\n\006Parser\022<\n\005Parse\022\030.sdi.pa" +
-      "rser.ParseRequest\032\031.sdi.parser.ParseResp" +
-      "onseB<Z:github.com/JonasKaad/ScalableDat" +
-      "aIntegration/protos/parserb\006proto3"
+      "format\030\002 \001(\t2J\n\006Parser\022@\n\tParseCall\022\030.sd" +
+      "i.parser.ParseRequest\032\031.sdi.parser.Parse" +
+      "ResponseB<Z:github.com/JonasKaad/Scalabl" +
+      "eDataIntegration/protos/parserb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

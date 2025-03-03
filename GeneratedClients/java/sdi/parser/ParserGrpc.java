@@ -16,34 +16,34 @@ public final class ParserGrpc {
 
   // Static method descriptors that strictly reflect the proto.
   private static volatile io.grpc.MethodDescriptor<sdi.parser.ParserOuterClass.ParseRequest,
-      sdi.parser.ParserOuterClass.ParseResponse> getParseMethod;
+      sdi.parser.ParserOuterClass.ParseResponse> getParseCallMethod;
 
   @io.grpc.stub.annotations.RpcMethod(
-      fullMethodName = SERVICE_NAME + '/' + "Parse",
+      fullMethodName = SERVICE_NAME + '/' + "ParseCall",
       requestType = sdi.parser.ParserOuterClass.ParseRequest.class,
       responseType = sdi.parser.ParserOuterClass.ParseResponse.class,
       methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<sdi.parser.ParserOuterClass.ParseRequest,
-      sdi.parser.ParserOuterClass.ParseResponse> getParseMethod() {
-    io.grpc.MethodDescriptor<sdi.parser.ParserOuterClass.ParseRequest, sdi.parser.ParserOuterClass.ParseResponse> getParseMethod;
-    if ((getParseMethod = ParserGrpc.getParseMethod) == null) {
+      sdi.parser.ParserOuterClass.ParseResponse> getParseCallMethod() {
+    io.grpc.MethodDescriptor<sdi.parser.ParserOuterClass.ParseRequest, sdi.parser.ParserOuterClass.ParseResponse> getParseCallMethod;
+    if ((getParseCallMethod = ParserGrpc.getParseCallMethod) == null) {
       synchronized (ParserGrpc.class) {
-        if ((getParseMethod = ParserGrpc.getParseMethod) == null) {
-          ParserGrpc.getParseMethod = getParseMethod =
+        if ((getParseCallMethod = ParserGrpc.getParseCallMethod) == null) {
+          ParserGrpc.getParseCallMethod = getParseCallMethod =
               io.grpc.MethodDescriptor.<sdi.parser.ParserOuterClass.ParseRequest, sdi.parser.ParserOuterClass.ParseResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "Parse"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ParseCall"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   sdi.parser.ParserOuterClass.ParseRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   sdi.parser.ParserOuterClass.ParseResponse.getDefaultInstance()))
-              .setSchemaDescriptor(new ParserMethodDescriptorSupplier("Parse"))
+              .setSchemaDescriptor(new ParserMethodDescriptorSupplier("ParseCall"))
               .build();
         }
       }
     }
-    return getParseMethod;
+    return getParseCallMethod;
   }
 
   /**
@@ -96,9 +96,9 @@ public final class ParserGrpc {
 
     /**
      */
-    default void parse(sdi.parser.ParserOuterClass.ParseRequest request,
+    default void parseCall(sdi.parser.ParserOuterClass.ParseRequest request,
         io.grpc.stub.StreamObserver<sdi.parser.ParserOuterClass.ParseResponse> responseObserver) {
-      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getParseMethod(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getParseCallMethod(), responseObserver);
     }
   }
 
@@ -131,10 +131,10 @@ public final class ParserGrpc {
 
     /**
      */
-    public void parse(sdi.parser.ParserOuterClass.ParseRequest request,
+    public void parseCall(sdi.parser.ParserOuterClass.ParseRequest request,
         io.grpc.stub.StreamObserver<sdi.parser.ParserOuterClass.ParseResponse> responseObserver) {
       io.grpc.stub.ClientCalls.asyncUnaryCall(
-          getChannel().newCall(getParseMethod(), getCallOptions()), request, responseObserver);
+          getChannel().newCall(getParseCallMethod(), getCallOptions()), request, responseObserver);
     }
   }
 
@@ -156,9 +156,9 @@ public final class ParserGrpc {
 
     /**
      */
-    public sdi.parser.ParserOuterClass.ParseResponse parse(sdi.parser.ParserOuterClass.ParseRequest request) {
+    public sdi.parser.ParserOuterClass.ParseResponse parseCall(sdi.parser.ParserOuterClass.ParseRequest request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
-          getChannel(), getParseMethod(), getCallOptions(), request);
+          getChannel(), getParseCallMethod(), getCallOptions(), request);
     }
   }
 
@@ -180,14 +180,14 @@ public final class ParserGrpc {
 
     /**
      */
-    public com.google.common.util.concurrent.ListenableFuture<sdi.parser.ParserOuterClass.ParseResponse> parse(
+    public com.google.common.util.concurrent.ListenableFuture<sdi.parser.ParserOuterClass.ParseResponse> parseCall(
         sdi.parser.ParserOuterClass.ParseRequest request) {
       return io.grpc.stub.ClientCalls.futureUnaryCall(
-          getChannel().newCall(getParseMethod(), getCallOptions()), request);
+          getChannel().newCall(getParseCallMethod(), getCallOptions()), request);
     }
   }
 
-  private static final int METHODID_PARSE = 0;
+  private static final int METHODID_PARSE_CALL = 0;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -206,8 +206,8 @@ public final class ParserGrpc {
     @java.lang.SuppressWarnings("unchecked")
     public void invoke(Req request, io.grpc.stub.StreamObserver<Resp> responseObserver) {
       switch (methodId) {
-        case METHODID_PARSE:
-          serviceImpl.parse((sdi.parser.ParserOuterClass.ParseRequest) request,
+        case METHODID_PARSE_CALL:
+          serviceImpl.parseCall((sdi.parser.ParserOuterClass.ParseRequest) request,
               (io.grpc.stub.StreamObserver<sdi.parser.ParserOuterClass.ParseResponse>) responseObserver);
           break;
         default:
@@ -229,12 +229,12 @@ public final class ParserGrpc {
   public static final io.grpc.ServerServiceDefinition bindService(AsyncService service) {
     return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
         .addMethod(
-          getParseMethod(),
+          getParseCallMethod(),
           io.grpc.stub.ServerCalls.asyncUnaryCall(
             new MethodHandlers<
               sdi.parser.ParserOuterClass.ParseRequest,
               sdi.parser.ParserOuterClass.ParseResponse>(
-                service, METHODID_PARSE)))
+                service, METHODID_PARSE_CALL)))
         .build();
   }
 
@@ -283,7 +283,7 @@ public final class ParserGrpc {
         if (result == null) {
           serviceDescriptor = result = io.grpc.ServiceDescriptor.newBuilder(SERVICE_NAME)
               .setSchemaDescriptor(new ParserFileDescriptorSupplier())
-              .addMethod(getParseMethod())
+              .addMethod(getParseCallMethod())
               .build();
         }
       }

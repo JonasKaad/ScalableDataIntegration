@@ -34,8 +34,8 @@ class ParserStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.Parse = channel.unary_unary(
-                '/sdi.parser.Parser/Parse',
+        self.ParseCall = channel.unary_unary(
+                '/sdi.parser.Parser/ParseCall',
                 request_serializer=parser__pb2.ParseRequest.SerializeToString,
                 response_deserializer=parser__pb2.ParseResponse.FromString,
                 _registered_method=True)
@@ -44,7 +44,7 @@ class ParserStub(object):
 class ParserServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def Parse(self, request, context):
+    def ParseCall(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -53,8 +53,8 @@ class ParserServicer(object):
 
 def add_ParserServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'Parse': grpc.unary_unary_rpc_method_handler(
-                    servicer.Parse,
+            'ParseCall': grpc.unary_unary_rpc_method_handler(
+                    servicer.ParseCall,
                     request_deserializer=parser__pb2.ParseRequest.FromString,
                     response_serializer=parser__pb2.ParseResponse.SerializeToString,
             ),
@@ -70,7 +70,7 @@ class Parser(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def Parse(request,
+    def ParseCall(request,
             target,
             options=(),
             channel_credentials=None,
@@ -83,7 +83,7 @@ class Parser(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/sdi.parser.Parser/Parse',
+            '/sdi.parser.Parser/ParseCall',
             parser__pb2.ParseRequest.SerializeToString,
             parser__pb2.ParseResponse.FromString,
             options,

@@ -22,7 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ParserClient interface {
-	Parse(ctx context.Context, in *ParseRequest, opts ...grpc.CallOption) (*ParseResponse, error)
+	ParseCall(ctx context.Context, in *ParseRequest, opts ...grpc.CallOption) (*ParseResponse, error)
 }
 
 type parserClient struct {
@@ -33,9 +33,9 @@ func NewParserClient(cc grpc.ClientConnInterface) ParserClient {
 	return &parserClient{cc}
 }
 
-func (c *parserClient) Parse(ctx context.Context, in *ParseRequest, opts ...grpc.CallOption) (*ParseResponse, error) {
+func (c *parserClient) ParseCall(ctx context.Context, in *ParseRequest, opts ...grpc.CallOption) (*ParseResponse, error) {
 	out := new(ParseResponse)
-	err := c.cc.Invoke(ctx, "/sdi.parser.Parser/Parse", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/sdi.parser.Parser/ParseCall", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +46,7 @@ func (c *parserClient) Parse(ctx context.Context, in *ParseRequest, opts ...grpc
 // All implementations must embed UnimplementedParserServer
 // for forward compatibility
 type ParserServer interface {
-	Parse(context.Context, *ParseRequest) (*ParseResponse, error)
+	ParseCall(context.Context, *ParseRequest) (*ParseResponse, error)
 	mustEmbedUnimplementedParserServer()
 }
 
@@ -54,8 +54,8 @@ type ParserServer interface {
 type UnimplementedParserServer struct {
 }
 
-func (UnimplementedParserServer) Parse(context.Context, *ParseRequest) (*ParseResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Parse not implemented")
+func (UnimplementedParserServer) ParseCall(context.Context, *ParseRequest) (*ParseResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ParseCall not implemented")
 }
 func (UnimplementedParserServer) mustEmbedUnimplementedParserServer() {}
 
@@ -70,20 +70,20 @@ func RegisterParserServer(s grpc.ServiceRegistrar, srv ParserServer) {
 	s.RegisterService(&Parser_ServiceDesc, srv)
 }
 
-func _Parser_Parse_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Parser_ParseCall_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ParseRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ParserServer).Parse(ctx, in)
+		return srv.(ParserServer).ParseCall(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/sdi.parser.Parser/Parse",
+		FullMethod: "/sdi.parser.Parser/ParseCall",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ParserServer).Parse(ctx, req.(*ParseRequest))
+		return srv.(ParserServer).ParseCall(ctx, req.(*ParseRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -96,8 +96,8 @@ var Parser_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*ParserServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Parse",
-			Handler:    _Parser_Parse_Handler,
+			MethodName: "ParseCall",
+			Handler:    _Parser_ParseCall_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

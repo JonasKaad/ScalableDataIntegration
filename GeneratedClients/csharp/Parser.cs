@@ -29,10 +29,10 @@ namespace Sdi.Parser {
             "KAsyGS5zZGkucGFyc2VyLkZpbHRlclJlcXVlc3RIAIgBAUIJCgdfZmlsdGVy",
             "IkIKDVBhcnNlUmVzcG9uc2USDwoHc3VjY2VzcxgBIAEoCBIUCgdlcnJfbXNn",
             "GAIgASgJSACIAQFCCgoIX2Vycl9tc2ciLwoNRmlsdGVyUmVxdWVzdBIOCgZm",
-            "aWx0ZXIYASABKAwSDgoGZm9ybWF0GAIgASgJMkYKBlBhcnNlchI8CgVQYXJz",
-            "ZRIYLnNkaS5wYXJzZXIuUGFyc2VSZXF1ZXN0Ghkuc2RpLnBhcnNlci5QYXJz",
-            "ZVJlc3BvbnNlQjxaOmdpdGh1Yi5jb20vSm9uYXNLYWFkL1NjYWxhYmxlRGF0",
-            "YUludGVncmF0aW9uL3Byb3Rvcy9wYXJzZXJiBnByb3RvMw=="));
+            "aWx0ZXIYASABKAwSDgoGZm9ybWF0GAIgASgJMkoKBlBhcnNlchJACglQYXJz",
+            "ZUNhbGwSGC5zZGkucGFyc2VyLlBhcnNlUmVxdWVzdBoZLnNkaS5wYXJzZXIu",
+            "UGFyc2VSZXNwb25zZUI8WjpnaXRodWIuY29tL0pvbmFzS2FhZC9TY2FsYWJs",
+            "ZURhdGFJbnRlZ3JhdGlvbi9wcm90b3MvcGFyc2VyYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
