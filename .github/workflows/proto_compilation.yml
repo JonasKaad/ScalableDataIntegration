@@ -1,0 +1,115 @@
+name: Proto Compilation
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - 'Protos/**'
+  pull_request:
+    branches: [ master ]
+    paths:
+      - 'Protos/**'
+  workflow_dispatch:
+
+jobs:
+  compile-protos:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21'
+    
+    - name: Setup Protoc
+      uses: arduino/setup-protoc@v3.0.0
+      with:
+        version: '24.3'
+        include-pre-releases: false
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Install gRPC plugins
+      run: |
+        sudo apt-get update
+        # Download and extract Grpc.Tools for C#
+        wget https://www.nuget.org/api/v2/package/Grpc.Tools/2.70.0 -O grpc.tools.nupkg
+        mkdir grpc_tools
+        unzip grpc.tools.nupkg -d grpc_tools
+        chmod +x grpc_tools/tools/linux_x64/grpc_csharp_plugin
+        
+        # Install Go plugins
+        go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.36.5
+        go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2.0
+        echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+        
+        # Install Python gRPC tools
+        pip install grpcio grpcio-tools
+        
+        # Setup Java gRPC plugin
+        sudo apt-get install -y wget unzip
+        mkdir -p /tmp/grpc-plugins
+        wget -O /tmp/grpc-plugins/protoc-gen-grpc-java https://repo1.maven.org/maven2/io/grpc/protoc-gen-grpc-java/1.58.0/protoc-gen-grpc-java-1.58.0-linux-x86_64.exe
+        chmod +x /tmp/grpc-plugins/protoc-gen-grpc-java
+        sudo mv /tmp/grpc-plugins/protoc-gen-grpc-java /usr/local/bin/protoc-gen-grpc-java
+    
+    - name: Create output directories
+      run: |
+        mkdir -p GeneratedClients/csharp
+        mkdir -p GeneratedClients/python
+        mkdir -p GeneratedClients/java
+        mkdir -p GeneratedClients/go
+    
+    - name: Compile Proto files for all languages
+      run: |
+        # Compile for C#
+        PROTOC_CSHARP_PLUGIN="$GITHUB_WORKSPACE/grpc_tools/tools/linux_x64/grpc_csharp_plugin"
+        protoc -I=Protos \
+          --csharp_out=GeneratedClients/csharp \
+          --grpc_out=GeneratedClients/csharp \
+          --plugin=protoc-gen-grpc=$PROTOC_CSHARP_PLUGIN \
+          Protos/*.proto
+        
+        # Compile for Python
+        python -m grpc_tools.protoc \
+          -I=Protos \
+          --python_out=GeneratedClients/python \
+          --grpc_python_out=GeneratedClients/python \
+          Protos/*.proto
+        
+        # Compile for Java
+        protoc -I=Protos \
+          --java_out=GeneratedClients/java \
+          --grpc_out=GeneratedClients/java \
+          --plugin=protoc-gen-grpc=/usr/local/bin/protoc-gen-grpc-java \
+          Protos/*.proto
+        
+        # Compile for Go
+        protoc -I=Protos \
+          --go_out=GeneratedClients/go \
+          --go_opt=paths=source_relative \
+          --go-grpc_out=GeneratedClients/go \
+          --go-grpc_opt=paths=source_relative \
+          --go_opt=MProtos/parser.proto=github.com/ScalableDataIntegration/GeneratedClients/go \
+          --go-grpc_opt=MProtos/parser.proto=github.com/ScalableDataIntegration/GeneratedClients/go \
+          Protos/*.proto
+    
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v5
+      with:
+        token: ${{ secrets.CICD_KEY }}
+        commit-message: "Auto-generated client code from proto files"
+        title: "Update generated clients from proto files"
+        body: |
+          This PR contains auto-generated client code from the latest proto files.
+          
+          Changes were triggered by modifications to files in the `/Protos` directory.
+        branch: auto-generated-clients
+        base: master
+        labels: automated-pr, proto-generation
+        add-paths: "GeneratedClients/**"
+        draft: false
