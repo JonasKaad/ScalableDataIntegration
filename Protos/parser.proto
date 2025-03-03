@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package parser.sdi;
+
+message FilterRequest {
+	bytes filter = 1;
+	string format = 2;
+}
+
+message ParseRequest {
+	bytes raw_data = 1;
+	string format = 2;
+	optional FilterRequest filter = 3;
+}
+
+message ParseResponse {
+	bool success = 1;
+	optional string err_msg = 2;
+}
+
+service Parser {
+	rpc Parse (ParseRequest) returns (ParseResponse) {}
+}
