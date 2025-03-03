@@ -89,19 +89,14 @@ jobs:
           Protos/*.proto
         
         # Compile for Go
-        echo "Compiling Go files..."
-        echo "Protos directory contents:"
-        ls -la Protos
-        
-        echo "Running protoc command..."
         protoc -I=Protos \
           --go_out=GeneratedClients/go \
           --go_opt=paths=source_relative \
           --go-grpc_out=GeneratedClients/go \
           --go-grpc_opt=paths=source_relative \
-          --go_opt=MProtos/parser.proto=github.com/JonasKaad/ScalableDataIntegration/GeneratedClients/go \
-          Protos/*.proto \
-        || { echo "protoc command failed"; exit 1; }
+          --go_opt=MProtos/parser.proto=github.com/ScalableDataIntegration/GeneratedClients/go \
+          --go-grpc_opt=MProtos/parser.proto=github.com/ScalableDataIntegration/GeneratedClients/go \
+          Protos/*.proto
     
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v5
