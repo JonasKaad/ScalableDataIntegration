@@ -7,15 +7,17 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["TestParser.csproj", "./"]
+COPY ["./Parsers/TestParser/TestParser.csproj", "./"]
+COPY ["./GeneratedClients/csharp/Parser.cs", "./"]
+COPY ["./GeneratedClients/csharp/ParserGrpc.cs", "./"]
 RUN dotnet restore "TestParser.csproj"
 COPY . .
 WORKDIR "/src/"
-RUN dotnet build "TestParser.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "./Parsers/TestParser/TestParser.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "TestParser.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./Parsers/TestParser/TestParser.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
