@@ -44,7 +44,7 @@ jobs:
         pip install grpcio grpcio-tools
         
         # Install C# gRPC tools (using dotnet instead of nuget)
-        dotnet tool install --global Grpc.Tools --version 2.31.0 --tool-path /usr/local/bin
+        dotnet tool install Grpc.Tools --version 2.31.0 --tool-path /usr/local/bin
         
         # Setup Java gRPC plugin
         sudo apt-get update
