@@ -27,6 +27,7 @@ class ParserServicer(parser_pb2_grpc.ParserServicer):
         # Log the request (for debugging)
         print(f"Received parse request with format: {format_type}")
         print(f"Data size: {len(raw_data)} bytes")
+        print(f"Raw data: {raw_data}")
 
         if request.HasField('filter'):
             print(f"Filter format: {request.filter.format}")
