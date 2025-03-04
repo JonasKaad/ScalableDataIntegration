@@ -1,40 +1,47 @@
-namespace Sdi.Parser;
+namespace Downloader.Utils;
 
-public class DISHttpClient
+public class DisHttpClient
 {
     private HttpClient Client { get; }
-    private Uri _url;
+    private string _url;
     
-    public DISHttpClient(string address)
+    public DisHttpClient(string url, string token = "", string tokenName = "")
     {
+        // Create a new HttpClient
         Client = new HttpClient();
-        _url = new Uri(address);
+        
+        // Set url and token
+        _url = url;
+        if (token != "" && tokenName != "")
+        {
+            Client.DefaultRequestHeaders.Add(tokenName, token);
+        }
     }
-    
-    public void SetUrl(string address)
-    {
-        _url = new Uri(address);
-    }
-    
+
     public async Task FetchData()
     {
-        using HttpResponseMessage response = await Client.GetAsync(_url);
-        WriteRequestToConsole(response.EnsureSuccessStatusCode());
-    
-        var jsonResponse = await response.Content.ReadAsStringAsync();
-        Console.WriteLine($"{jsonResponse}\n");
+        try
+        {
+            using HttpResponseMessage response = await Client.GetAsync(_url);
+            WriteRequestToConsole(response.EnsureSuccessStatusCode());
+            
+            var jsonResponse = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"{jsonResponse}\n");
+        }
+        catch (HttpRequestException e)
+        {
+            //TODO: handle exception
+            Console.WriteLine(e);
+        }
+    }
+
     }
     
     void WriteRequestToConsole(HttpResponseMessage response)
-    {
-        if (response is null)
-        {
-            return;
-        }
-
+    { 
         var request = response.RequestMessage;
         Console.Write($"{request?.Method} ");
         Console.Write($"{request?.RequestUri} ");
-        Console.WriteLine($"HTTP/{request?.Version}");        
+        Console.WriteLine($"HTTP/{request?.Version}");
     }
 }
