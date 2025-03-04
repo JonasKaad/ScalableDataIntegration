@@ -1,14 +1,22 @@
+using Downloader.Utils;
 using FluentFTP;
 
 namespace Sdi.Parser.Utils;
 
-public class DisFtpClient
+public class DisFtpClient : IDownloaderClient
 {
     private AsyncFtpClient _ftpClient;
     
     public DisFtpClient(string host, string userName, string password)
     {
         _ftpClient = new AsyncFtpClient(host, userName, password);
+    }
+
+    public async Task FetchData()
+    {
+        await _ftpClient.Connect();
+        var firstItem = _ftpClient.GetListing().Result.Skip(1).FirstOrDefault();
+        await DownloadFile(firstItem?.Name);
     }
 
     public void SwitchHost(string host, string username, string password)
@@ -22,9 +30,14 @@ public class DisFtpClient
         _ftpClient.Credentials.Password = password;
     }
 
+    public void Dispose()
+    {
+        _ftpClient.Dispose();
+    }
+
     public async Task DownloadFile(string sourceFile)
     {
-        await _ftpClient.Connect();
+        //await _ftpClient.Connect();
         if (await _ftpClient.FileExists(sourceFile))
         {
             var downloadedBytes = await _ftpClient.DownloadBytes(sourceFile, CancellationToken.None);
