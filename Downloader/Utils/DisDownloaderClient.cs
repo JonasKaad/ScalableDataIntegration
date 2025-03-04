@@ -53,7 +53,7 @@ public class DisDownloaderClient
         if (String.IsNullOrEmpty(token) || String.IsNullOrEmpty(tokenName))
         {
             // TODO: handle exception
-            throw new ArgumentNullException("No credentials provided for FTP");
+            throw new ArgumentNullException("", "No credentials provided for FTP");
         }
     }
     
