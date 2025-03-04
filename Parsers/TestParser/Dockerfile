@@ -11,7 +11,6 @@ COPY ["./Parsers/TestParser/TestParser.csproj", "./Parsers/TestParser/"]
 COPY ["./GeneratedClients/csharp/Parser.cs", "./GeneratedClients/csharp/"]
 COPY ["./GeneratedClients/csharp/ParserGrpc.cs", "./GeneratedClients/csharp/"]
 RUN dotnet restore "./Parsers/TestParser/TestParser.csproj"
-
 COPY . .
 WORKDIR "/src/"
 RUN dotnet build "./Parsers/TestParser/TestParser.csproj" -c $BUILD_CONFIGURATION -o /app/build
