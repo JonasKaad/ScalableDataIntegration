@@ -1,6 +1,6 @@
 namespace Downloader.Utils;
 
-public class DisHttpClient
+public class DisHttpClient : IDownloaderClient
 {
     private HttpClient Client { get; }
     private string _url;
@@ -12,11 +12,9 @@ public class DisHttpClient
         
         // Set url and token
         _url = url;
-        if (token != "" && tokenName != "")
-        {
-            Client.DefaultRequestHeaders.Add(tokenName, token);
-        }
+        SetTokenHeader(token, tokenName);
     }
+
 
     public async Task FetchData()
     {
@@ -42,17 +40,27 @@ public class DisHttpClient
         
         // Update client to new url and token
         _url = url;
-        if (token != "" && tokenName != "")
-        {
-            Client.DefaultRequestHeaders.Add(tokenName, token);
-        }
+        SetTokenHeader(token, tokenName);
     }
-    
+
+    public void Dispose()
+    {
+        Client.Dispose();
+    }
+
     void WriteRequestToConsole(HttpResponseMessage response)
     { 
         var request = response.RequestMessage;
         Console.Write($"{request?.Method} ");
         Console.Write($"{request?.RequestUri} ");
         Console.WriteLine($"HTTP/{request?.Version}");
+    }
+    
+    private void SetTokenHeader(string token, string tokenName)
+    {
+        if (!String.IsNullOrEmpty(token) && !String.IsNullOrEmpty(tokenName))
+        {
+            Client.DefaultRequestHeaders.Add(tokenName, token);
+        }
     }
 }
