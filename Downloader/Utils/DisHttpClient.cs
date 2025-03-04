@@ -35,6 +35,17 @@ public class DisHttpClient
         }
     }
 
+    public void SwitchHost(string url, string token = "", string tokenName = "")
+    {
+        // Clear headers
+        Client.DefaultRequestHeaders.Clear();
+        
+        // Update client to new url and token
+        _url = url;
+        if (token != "" && tokenName != "")
+        {
+            Client.DefaultRequestHeaders.Add(tokenName, token);
+        }
     }
     
     void WriteRequestToConsole(HttpResponseMessage response)
