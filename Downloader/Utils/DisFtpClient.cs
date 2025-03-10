@@ -12,11 +12,11 @@ public class DisFtpClient : IDownloaderClient
         _ftpClient = new AsyncFtpClient(host, userName, password);
     }
 
-    public async Task FetchData()
+    public async Task<byte[]> FetchData()
     {
         await _ftpClient.Connect();
         var firstItem = _ftpClient.GetListing().Result.Skip(1).FirstOrDefault();
-        await DownloadFile(firstItem?.Name);
+        return await DownloadFile(firstItem?.Name);
     }
 
     public void SwitchHost(string host, string username, string password)
@@ -35,12 +35,12 @@ public class DisFtpClient : IDownloaderClient
         _ftpClient.Dispose();
     }
 
-    public async Task DownloadFile(string sourceFile)
+    private async Task<byte[]> DownloadFile(string sourceFile)
     {
-        //await _ftpClient.Connect();
+        byte[] downloadedBytes;
         if (await _ftpClient.FileExists(sourceFile))
         {
-            var downloadedBytes = await _ftpClient.DownloadBytes(sourceFile, CancellationToken.None);
+            downloadedBytes = await _ftpClient.DownloadBytes(sourceFile, CancellationToken.None);
             Console.WriteLine(downloadedBytes.Length);
         }
         else
@@ -52,5 +52,6 @@ public class DisFtpClient : IDownloaderClient
             throw new FileNotFoundException($"File not found at {_ftpClient.Host}:", sourceFile);
         }
         await _ftpClient.Disconnect();
+        return downloadedBytes;
     }
 }

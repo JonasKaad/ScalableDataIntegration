@@ -57,8 +57,8 @@ public class DisDownloaderClient
         }
     }
     
-    public async Task FetchData()
+    public async Task<byte[]> FetchData()
     {
-        await _downloaderClient.FetchData();
+        return await _downloaderClient.FetchData();
     }
 }
