@@ -34,7 +34,7 @@ class ParserServicer(parser_pb2_grpc.ParserServicer):
             print(f"Filter size: {len(request.filter.filter)} bytes")
 
         # For this example, we'll just return success
-        response = parser_pb2.ParseResponse(success=True, err_msg="Parsed from Python!")
+        response = parser_pb2.ParseResponse(success=True, err_msg=f"Parsing {raw_data} in Python!")
 
         # If there was an error, it can be set like:
         # response = parser_pb2.ParseResponse(success=False, err_msg="Failed to parse data")

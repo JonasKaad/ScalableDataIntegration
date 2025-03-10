@@ -16,14 +16,15 @@ public class DisHttpClient : IDownloaderClient
     }
 
 
-    public async Task FetchData()
+    public async Task<byte[]> FetchData()
     {
+        byte[] jsonResponse = [];
         try
         {
             using HttpResponseMessage response = await Client.GetAsync(_url);
             WriteRequestToConsole(response.EnsureSuccessStatusCode());
             
-            var jsonResponse = await response.Content.ReadAsStringAsync();
+            jsonResponse = await response.Content.ReadAsByteArrayAsync();
             Console.WriteLine($"{jsonResponse}\n");
         }
         catch (HttpRequestException e)
@@ -31,6 +32,8 @@ public class DisHttpClient : IDownloaderClient
             //TODO: handle exception
             Console.WriteLine(e);
         }
+
+        return jsonResponse;
     }
 
     public void SwitchHost(string url, string token = "", string tokenName = "")
