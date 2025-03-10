@@ -107,10 +107,13 @@
     
     string theTime;    
     Timer aTimer;
+    TimeZoneInfo localZone = TimeZoneInfo.Local;
 
     private void Tick(object _)
     {
-        theTime = DateTime.UtcNow.ToString("HH:mm:ss") + " UTC";
+        if(localZone.StandardName == "Central European Standard Time")
+             theTime = DateTime.Now.ToString("HH:mm:ss") + " CET";
+        else theTime = DateTime.Now.ToString("HH:mm:ss ") + localZone.StandardName;
         InvokeAsync(StateHasChanged);
     }
 
