@@ -2,11 +2,11 @@
 <PageTitle>Graphs</PageTitle>
 
 <MudText Typo="Typo.h3" GutterBottom="true">Graphs</MudText>
-<MudText Typo="Typo.h2" Class="mb-8">This opoks demonstrates fake loading and displaying a graph.</MudText>
+<MudText Typo="Typo.h4" Class="mb-8">This page demonstrates fake loading and displaying a graph.</MudText>
 
 @if (_fakeLoading == false)
 {
-    <MudProgressCircular Color="Color.Default" Indeterminate="true" />
+    <MudProgressCircular Color="Color.Info" Indeterminate="true" Size="Size.Large" />
 }
 else
 {
@@ -19,7 +19,7 @@ else
     protected override async Task OnInitializedAsync()
     {
         // Simulate asynchronous loading to demonstrate a loading indicator
-        await Task.Delay(500);
+        await Task.Delay(1500);
         _fakeLoading = true;
     }
 
