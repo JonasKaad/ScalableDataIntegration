@@ -10,4 +10,8 @@
     <ItemGroup>
       <PackageReference Include="MudBlazor" Version="8.3.0" />
     </ItemGroup>
+
+    <ItemGroup>
+      <None Include="wwwroot\images\foreflight_logo.png" />
+    </ItemGroup>
 </Project>

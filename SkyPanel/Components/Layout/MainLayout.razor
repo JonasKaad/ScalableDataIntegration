@@ -1,4 +1,4 @@
-@inherits LayoutComponentBase
+﻿@inherits LayoutComponentBase
 
 <MudThemeProvider Theme="@_theme" IsDarkMode="_isDarkMode" />
 <MudPopoverProvider />
@@ -7,10 +7,14 @@
 <MudLayout>
     <MudAppBar Elevation="1">
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-        <MudText Typo="Typo.h5" Class="ml-3">Application</MudText>
+        <MudImage Src="images/foreflight_logo.png" Width="56" Height="56"/>
+        <MudText Typo="Typo.h5" Class="ml-3">Data Integration Service</MudText>
         <MudSpacer />
+        
+        <MudText Typo="Typo.body1" >@theTime</MudText>
         <MudIconButton Icon="@(DarkLightModeButtonIcon)" Color="Color.Inherit" OnClick="@DarkModeToggle" />
-        <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" />
+        <MudIconButton Icon="@Icons.Material.Outlined.AccountCircle" Color="Color.Inherit"  />
+        <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit"  Edge="Edge.End" />
     </MudAppBar>
     <MudDrawer id="nav-drawer" @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
         <NavMenu />
@@ -35,6 +39,8 @@
     protected override void OnInitialized()
     {
         base.OnInitialized();
+        
+        aTimer = new Timer(Tick, null, 0, 1000);        
 
         _theme = new()
         {
@@ -95,7 +101,22 @@
 
     public string DarkLightModeButtonIcon => _isDarkMode switch
     {
-        true => Icons.Material.Rounded.AutoMode,
+        true => Icons.Material.Filled.LightMode,
         false => Icons.Material.Outlined.DarkMode,
     };
+    
+    string theTime;    
+    Timer aTimer;
+
+    private void Tick(object _)
+    {
+        theTime = DateTime.UtcNow.ToString("HH:mm:ss") + " UTC";
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        aTimer?.Dispose();
+    }
+    
 }
