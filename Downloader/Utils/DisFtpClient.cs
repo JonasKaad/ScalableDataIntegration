@@ -9,7 +9,15 @@ public class DisFtpClient : IDownloaderClient
     
     public DisFtpClient(string host, string userName, string password)
     {
-        _ftpClient = new AsyncFtpClient(host, userName, password);
+        int port = 21;
+        if (host[5..].Contains(':'))
+        {
+            string[] parts = host.Split(':');
+            host = parts[0] + ":" + parts[1];
+            port = int.Parse(parts[2]);
+        }
+
+        _ftpClient = new AsyncFtpClient(host, userName, password, port);
     }
 
     public async Task<byte[]> FetchData()
