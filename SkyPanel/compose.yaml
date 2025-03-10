@@ -1,0 +1,6 @@
+﻿services:
+  skypanel:
+    image: skypanel
+    build:
+      context: .
+      dockerfile: Dockerfile
