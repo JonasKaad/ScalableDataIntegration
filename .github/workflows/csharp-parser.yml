@@ -27,7 +27,7 @@ jobs:
         context: .
         file: ./Parsers/TestParser/Dockerfile
         push: true
-        tags: parsers.azurecr.io/testparser:${{ github.sha }}
+        tags: parsers.azurecr.io/test-parser:${{ github.sha }}
     - name: Add command to summary
       run: |
         echo "-----------------" >> $GITHUB_STEP_SUMMARY
