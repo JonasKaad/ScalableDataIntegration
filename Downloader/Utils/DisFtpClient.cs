@@ -1,7 +1,6 @@
-using Downloader.Utils;
 using FluentFTP;
 
-namespace Sdi.Parser.Utils;
+namespace Downloader.Utils;
 
 public class DisFtpClient : IDownloaderClient
 {

@@ -1,5 +1,4 @@
 using Downloader.Utils;
-using Sdi.Parser.Utils;
 using Source = Downloader.Utils.IDownloaderClient.Source;
 namespace Downloader.Utils;
 
