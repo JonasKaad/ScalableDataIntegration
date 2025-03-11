@@ -1,0 +1,36 @@
+name: Python parser build and push
+
+on:
+  push:
+    branches: [ master ]
+    paths: 
+      - 'Parsers/PythonParser/*'
+  workflow_dispatch:
+
+jobs:
+  deploy-parser:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Azure Container Registry Login
+      uses: Azure/docker-login@v1
+      with:
+        username: ${{ secrets.ACR_USERNAME }}
+        password: ${{ secrets.ACR_PASSWORD }}
+        login-server: parsers.azurecr.io
+          
+  
+    - name: Build and push Docker images
+      uses: docker/build-push-action@v6.15.0
+      with:
+        context: .
+        file: ./Parsers/PythonParser/Dockerfile
+        push: true
+        tags: parsers.azurecr.io/python-test:${{ github.sha }}
+
+    - name: Add command to summary
+      run: |
+        echo "-----------------" >> $GITHUB_STEP_SUMMARY
+        echo "**Image pushed!** Run this in the terminal to deploy the new image: \`az containerapp update --name python-test --resource-group ScalableDataIntegration --image parsers.azurecr.io/python-test:${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "-----------------" >> $GITHUB_STEP_SUMMARY
