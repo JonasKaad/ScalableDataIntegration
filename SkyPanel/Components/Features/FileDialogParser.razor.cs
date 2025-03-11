@@ -19,6 +19,7 @@ public partial class FileDialogParser : ComponentBase
         ClearDragClass();
     }
     
+    //TODO: Before using, fix bug where clicking on removing file opens file picker
     private void RemoveFile(string fileName)
     {
         _fileNames.Remove(fileName);
@@ -42,7 +43,8 @@ public partial class FileDialogParser : ComponentBase
     
     private void Upload()
     {
-        // Upload the files here
+        // TODO: Implement logic for handling file uploads
+        DialogSubmit();
         Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
         Snackbar.Add("Uploaded your files!");
     }
