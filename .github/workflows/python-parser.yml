@@ -1,4 +1,4 @@
-name: Parser build and deploy
+name: Python parser build and push
 
 on:
   push:
