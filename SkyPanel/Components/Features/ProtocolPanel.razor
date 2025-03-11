@@ -1,0 +1,30 @@
+
+<MudGrid Spacing="4">
+    
+    <MudItem xs="12" sm="6">
+        <MudText>Protocol</MudText>
+    </MudItem>
+    <MudItem xs="12" sm="6">
+        <MudText>URL</MudText>
+    </MudItem>
+    <MudItem xs="12" sm="6">
+        <MudSelect T="string" Label="Search" AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.BottomCenter" Variant="Variant.Outlined" AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary">
+            <MudSelectItem Value="@("boo")">Boo</MudSelectItem>
+            <MudSelectItem Value="@("far")">Far</MudSelectItem>
+        </MudSelect>
+    </MudItem>
+    <MudItem xs="12" sm="6">    
+        <MudInputString Variant="Variant.Outlined" Placeholder="Unchanged" Label="URL" AutoGrow="true"/>
+    </MudItem>
+    <MudItem xs="12" sm="6">
+        <MudText>URL</MudText>
+        <MudInputString Variant="Variant.Outlined" Placeholder="Unchanged" Label="URL"/>
+    </MudItem>
+    <MudItem xs="12" sm="6">
+        <MudText>URL</MudText>
+        <MudInputString Variant="Variant.Outlined" Placeholder="Unchanged" Label="URL"/>
+    </MudItem>
+</MudGrid>
+@code {
+    
+}
