@@ -18,6 +18,10 @@ public class DisHttpClient : IDownloaderClient
 
     public async Task<byte[]> FetchData()
     {
+        if (Client == null)
+        {
+            throw new NullReferenceException("Client is null");
+        }
         byte[] jsonResponse = [];
         try
         {
