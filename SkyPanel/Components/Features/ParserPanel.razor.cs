@@ -8,8 +8,8 @@ public partial class ParserPanel : ComponentBase
 {
     private Task OpenDialogAsync()
     {
-        var options = new DialogOptions { CloseOnEscapeKey = true };
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small, FullWidth = true };
 
-        return DialogService.ShowAsync<FileDialogParser>("Simple Dialog", options);
+        return DialogService.ShowAsync<FileDialogParser>("Upload Dataset", options);
     }
 }
