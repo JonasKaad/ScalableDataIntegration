@@ -28,3 +28,9 @@ jobs:
         file: ./Parsers/PythonParser/Dockerfile
         push: true
         tags: parsers.azurecr.io/python-test
+
+    - name: Add command to summary
+      run: |
+        echo "-----------------" >> $GITHUB_STEP_SUMMARY
+        echo "**Image pushed!** Run this in the terminal to deploy the new image: \`az containerapp update --name python-test --resource-group ScalableDataIntegration --image parsers.azurecr.io/python-test:${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "-----------------" >> $GITHUB_STEP_SUMMARY
