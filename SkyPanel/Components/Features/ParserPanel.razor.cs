@@ -10,7 +10,7 @@ public partial class ParserPanel : ComponentBase
     private string _dragClass = DefaultDragClass;
     private readonly List<string> _fileNames = new();
     private MudFileUpload<IReadOnlyList<IBrowserFile>>? _fileUpload;
-
+    
     private async Task ClearAsync()
     {
         await (_fileUpload?.ClearAsync() ?? Task.CompletedTask);
@@ -19,17 +19,16 @@ public partial class ParserPanel : ComponentBase
         ClearDragClass();
     }
     
-    private async Task RemoveFileAsync(string fileName)
+    private void RemoveFile(string fileName)
     {
-        await (_fileUpload?.ClearAsync() ?? Task.CompletedTask);
         _fileNames.Remove(fileName);
         StateHasChanged();
         ClearDragClass();
     }
-
+    
     private Task OpenFilePickerAsync()
         => _fileUpload?.OpenFilePickerAsync() ?? Task.CompletedTask;
-
+    
     private void OnInputFileChanged(InputFileChangeEventArgs e)
     {
         ClearDragClass();
@@ -37,21 +36,22 @@ public partial class ParserPanel : ComponentBase
         foreach (var file in files)
         {
             _fileNames.Add(file.Name);
+            FilePopUp(file.Name);
         }
     }
-
+    
     private void Upload()
     {
         // Upload the files here
         Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
-        Snackbar.Add("TODO: Upload your files!");
+        Snackbar.Add("Uploaded your files!");
     }
-
+    
     private void SetDragClass()
     {
         _dragClass = $"{DefaultDragClass} mud-border-warning";
     }
-
+    private void FilePopUp(string file) => Snackbar.Add($"Added file: {file}", Severity.Success );
 
     private void ClearDragClass()
     {
