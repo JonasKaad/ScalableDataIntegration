@@ -1,4 +1,4 @@
-name: CSharp Parser build and deploy
+name: CSharp Parser build and push
 
 on:
   push:
