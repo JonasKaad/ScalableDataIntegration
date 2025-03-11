@@ -1,13 +1,21 @@
-<h3>Dashboard Component</h3>
-
-<MudText>@_name</MudText>
-
-<MudButton OnClick="@(() => { 
-    PrintName();
-    SetName("testName");
-    PrintName();
-})"> Set Name </MudButton>
-
+@using SkyPanel.Components.Features
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+   <MudGrid>
+      <MudItem xs="12" sm="5" Class="pr-8">
+         <MudPaper Elevation="3" Class="pa-4 h-100">
+            <MudText Typo="Typo.h5" Class="mb-4">Parser</MudText>
+            <ParserPanel />
+         </MudPaper>
+      </MudItem>
+      <MudItem xs="12" sm="7" Class="pl-8">
+         <MudPaper Elevation="3" Class="pa-4 h-100">
+            <MudText Typo="Typo.h5" Class="mb-4">Protocol</MudText>
+            <ProtocolPanel />
+         </MudPaper>
+      </MudItem>
+   </MudGrid>
+</MudContainer>
 @code {
    //string testName = "name";
 }
+
