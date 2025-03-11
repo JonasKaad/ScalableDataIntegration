@@ -53,7 +53,11 @@ public partial class FileDialogParser : ComponentBase
     {
         _dragClass = $"{DefaultDragClass} mud-border-warning";
     }
-    private void FilePopUp(string file) => Snackbar.Add($"Added file: {file}", Severity.Success );
+    private void FilePopUp(string file)
+    {
+        Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
+        Snackbar.Add($"Added file: {file}", Severity.Success);
+    }
 
     private void ClearDragClass()
     {
