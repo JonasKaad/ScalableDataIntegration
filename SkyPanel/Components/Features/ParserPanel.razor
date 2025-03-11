@@ -1,0 +1,50 @@
+
+<MudInputLabel> Parser</MudInputLabel>
+<MudGrid>
+    <MudItem xs="12">
+        <MudSelect T="string" Label="Search" AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.BottomCenter" Variant="Variant.Outlined" AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary">
+            <MudSelectItem Value="@("foo")">Foo</MudSelectItem>
+            <MudSelectItem Value="@("bar")">Bar</MudSelectItem>
+        </MudSelect>
+    </MudItem>
+    <MudItem xs="12">
+        <MudFileUpload T="IReadOnlyList<IBrowserFile>" AppendMultipleFiles="true" FilesChanged="UploadFiles" MaximumFileCount="100" multiple>
+            <ActivatorContent>
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.CloudUpload">
+                    Upload Dataset
+                </MudButton>
+            </ActivatorContent>
+            <SelectedTemplate>
+                @if (context != null)
+                {
+                    @foreach (var file in context)
+                    {
+                        <MudText>@file.Name</MudText>
+                    }
+                }
+                else
+                {
+                    <MudText>No File</MudText>
+                }
+            </SelectedTemplate>
+        </MudFileUpload>
+    </MudItem>
+    <MudItem>
+        @if (_files != null)
+        {
+            <MudList T="string">
+                @foreach (var file in _files)
+                {
+                    <MudListItem Icon="@Icons.Material.Filled.AttachFile">
+                        @file.Name <code>@file.Size bytes</code>
+                    </MudListItem>
+                }
+            </MudList>
+        }
+    </MudItem>
+</MudGrid>
+@code {
+    
+}
