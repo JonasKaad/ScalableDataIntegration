@@ -37,7 +37,7 @@ public partial class FileDialogParser : ComponentBase
         foreach (var file in files)
         {
             _fileNames.Add(file.Name);
-            FilePopUp(file.Name);
+            FilePopUp(files);
         }
     }
     
@@ -53,10 +53,15 @@ public partial class FileDialogParser : ComponentBase
     {
         _dragClass = $"{DefaultDragClass} mud-border-warning";
     }
-    private void FilePopUp(string file)
+    private void FilePopUp( IReadOnlyList<IBrowserFile> files)
     {
         Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
-        Snackbar.Add($"Added file: {file}", Severity.Success);
+        if (files.Count == 1)
+        {
+            Snackbar.Add($"Added file: {files[0].Name}", Severity.Success);
+            return;
+        } 
+        Snackbar.Add($"Added {files.Count} files", Severity.Success);
     }
 
     private void ClearDragClass()
