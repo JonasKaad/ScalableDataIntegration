@@ -1,0 +1,30 @@
+name: CSharp Parser build and deploy
+
+on:
+  push:
+    branches: [ master ]
+    paths: 
+      - 'Parsers/TestParser/*'
+  workflow_dispatch:
+
+jobs:
+  deploy-parser:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Azure Container Registry Login
+      uses: Azure/docker-login@v1
+      with:
+        username: ${{ secrets.ACR_USERNAME }}
+        password: ${{ secrets.ACR_PASSWORD }}
+        login-server: parsers.azurecr.io
+          
+  
+    - name: Build and push Docker images
+      uses: docker/build-push-action@v6.15.0
+      with:
+        context: .
+        file: ./Parsers/TestParser/Dockerfile
+        push: true
+        tags: parsers.azurecr.io/testparser
