@@ -27,4 +27,4 @@ jobs:
         context: .
         file: ./Parsers/PythonParser/Dockerfile
         push: true
-        tag: parsers.azurecr.io/python-test
+        tags: parsers.azurecr.io/python-test
