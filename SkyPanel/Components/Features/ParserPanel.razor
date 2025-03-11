@@ -2,54 +2,74 @@
 @inject ISnackbar Snackbar
 
 <MudInputLabel> Parser</MudInputLabel>
-<MudGrid>
-    <MudItem xs="12">
-        <MudSelect T="string" Label="Search" AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.BottomCenter" Variant="Variant.Outlined" AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary">
-            <MudSelectItem Value="@("foo")">Foo</MudSelectItem>
-            <MudSelectItem Value="@("bar")">Bar</MudSelectItem>
-        </MudSelect>
-    </MudItem>
-    <MudItem xs="12">
-        <MudFileUpload T="IReadOnlyList<IBrowserFile>"
-                       @ref="@_fileUpload"
-                       OnFilesChanged="OnInputFileChanged"
-                       AppendMultipleFiles
-                       Hidden="@false"
-                       InputClass="absolute mud-width-full mud-height-full overflow-hidden z-10"
-                       InputStyle="opacity:0"
-                       tabindex="-1"
-                       @ondrop="@ClearDragClass"
-                       @ondragenter="@SetDragClass"
-                       @ondragleave="@ClearDragClass"
-                       @ondragend="@ClearDragClass">
-            <ActivatorContent>
-                <MudPaper Height="300px"
-                          Outlined="true"
-                          Class="@_dragClass">
-                    <MudText Typo="Typo.h6">
-                        Drag and drop files here or click
-                    </MudText>
-                    @foreach (var file in _fileNames)
-                    {
-                        <MudChip T="string"
-                                 Icon="@Icons.Material.Filled.Description"
-                                 Color="Color.Primary"
-                                 Text="@file"
-                                 OnClose="() => { RemoveFileAsync(file); }"
-                                 Style="z-index: 11"
-                                 tabindex="-1" />
-                    }
-                </MudPaper>
-            </ActivatorContent>
-        </MudFileUpload>
-    </MudItem>
-    <MudItem>
-        @if (_fileNames != null)
-        {
-            <MudButton OnClick="() => { ClearAsync(); }" Variant="Variant.Filled" Color="Color.Error" >Clear All files</MudButton>
-        }
-    </MudItem>
-</MudGrid>
+<MudStack>
+    <MudGrid>
+        <MudItem xs="12">
+            <MudSelect T="string" Label="Search" AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.BottomCenter" Variant="Variant.Outlined" AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary">
+                <MudSelectItem Value="@("foo")">Foo</MudSelectItem>
+                <MudSelectItem Value="@("bar")">Bar</MudSelectItem>
+            </MudSelect>
+        </MudItem>
+        <MudItem xs="12">
+            <MudFileUpload T="IReadOnlyList<IBrowserFile>"
+                           @ref="@_fileUpload"
+                           OnFilesChanged="OnInputFileChanged"
+                           AppendMultipleFiles
+                           Hidden="@false"
+                           InputClass="absolute mud-width-full mud-height-full overflow-hidden z-10"
+                           InputStyle="opacity:0"
+                           tabindex="-1"
+                           @ondrop="@ClearDragClass"
+                           @ondragenter="@SetDragClass"
+                           @ondragleave="@ClearDragClass"
+                           @ondragend="@ClearDragClass">
+                <ActivatorContent>
+                    <MudPaper Height="300px"
+                              Outlined="true"
+                              Class="@_dragClass">
+                        <MudText Typo="Typo.h6">
+                            Drag and drop files here or click
+                        </MudText>
+
+                    </MudPaper>
+                </ActivatorContent>
+            </MudFileUpload>
+            @foreach (var file in _fileNames)
+            {
+                <MudChip T="string"
+                         Icon="@Icons.Material.Filled.Description"
+                         Color="Color.Primary"
+                         Text="@file"
+                         OnClose="() => { RemoveFile(file); }"
+                         Style="z-index: 11;"
+                         tabindex="-1" />
+            }
+        </MudItem>
+        <MudItem>
+            <MudToolBar Gutters="@false"
+                        Class="relative d-flex justify-end gap-4">
+                <MudButton Color="Color.Primary"
+                           OnClick="@OpenFilePickerAsync"
+                           Variant="Variant.Filled">
+                    Open file picker
+                </MudButton>
+                <MudButton Color="Color.Primary"
+                           Disabled="@(!_fileNames.Any())"
+                           OnClick="@Upload"
+                           Variant="Variant.Filled">
+                    Upload
+                </MudButton>
+                <MudButton Color="Color.Error"
+                           Disabled="@(!_fileNames.Any())"
+                           OnClick="@ClearAsync"
+                           Variant="Variant.Filled">
+                    Clear
+                </MudButton>
+            </MudToolBar>
+        </MudItem>
+    </MudGrid>
+</MudStack>
+
 @code {
-    private void FilePopUp(string file) => Snackbar.Add($"Added file: {file}", Severity.Success );
+
 }
