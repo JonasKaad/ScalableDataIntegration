@@ -32,51 +32,21 @@
                     @foreach (var file in _fileNames)
                     {
                         <MudChip T="string"
-                                 Color="Color.Dark"
+                                 Icon="@Icons.Material.Filled.Description"
+                                 Color="Color.Primary"
                                  Text="@file"
+                                 OnClose="() => { RemoveFileAsync(file); }"
+                                 Style="z-index: 11"
                                  tabindex="-1" />
                     }
                 </MudPaper>
             </ActivatorContent>
         </MudFileUpload>
-        @* <MudFileUpload T="IReadOnlyList<IBrowserFile>" AppendMultipleFiles="true" FilesChanged="UploadFiles" MaximumFileCount="100" multiple> *@
-        @*     <ActivatorContent> *@
-        @*         <MudButton Variant="Variant.Filled" *@
-        @*                    Color="Color.Primary" *@
-        @*                    StartIcon="@Icons.Material.Filled.CloudUpload"> *@
-        @*             Upload Dataset *@
-        @*         </MudButton> *@
-        @*     </ActivatorContent> *@
-        @*     <SelectedTemplate> *@
-        @*         @if (context != null) *@
-        @*         { *@
-        @*             @foreach (var file in context) *@
-        @*             { *@
-        @*                 <MudText>@file.Name</MudText> *@
-        @*                 <MudButton OnClick="() => { RemoveFile(file); }" >Delete</MudButton> *@
-        @*             } *@
-        @*             //FilePopUp(@context[0].Name); *@
-        @*         } *@
-        @*         else *@
-        @*         { *@
-        @*             <MudText>No File</MudText> *@
-        @*         } *@
-        @*     </SelectedTemplate> *@
-        @* </MudFileUpload> *@
     </MudItem>
     <MudItem>
         @if (_fileNames != null)
         {
-            <MudList T="string">
-                @foreach (var file in _fileNames)
-                {
-                    <MudListItem Icon="@Icons.Material.Filled.AttachFile">
-                        @file
-                    </MudListItem>
-                    <MudButton OnClick="() => { RemoveFileAsync(file); }" >Delete</MudButton>
-                }
-            </MudList>
-            <MudButton OnClick="() => { ClearAsync(); }" >Clear All files</MudButton>
+            <MudButton OnClick="() => { ClearAsync(); }" Variant="Variant.Filled" Color="Color.Error" >Clear All files</MudButton>
         }
     </MudItem>
 </MudGrid>
