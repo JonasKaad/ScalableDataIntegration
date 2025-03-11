@@ -1,4 +1,6 @@
 
+@inject ISnackbar Snackbar
+
 <MudInputLabel> Parser</MudInputLabel>
 <MudGrid>
     <MudItem xs="12">
@@ -8,43 +10,76 @@
         </MudSelect>
     </MudItem>
     <MudItem xs="12">
-        <MudFileUpload T="IReadOnlyList<IBrowserFile>" AppendMultipleFiles="true" FilesChanged="UploadFiles" MaximumFileCount="100" multiple>
+        <MudFileUpload T="IReadOnlyList<IBrowserFile>"
+                       @ref="@_fileUpload"
+                       OnFilesChanged="OnInputFileChanged"
+                       AppendMultipleFiles
+                       Hidden="@false"
+                       InputClass="absolute mud-width-full mud-height-full overflow-hidden z-10"
+                       InputStyle="opacity:0"
+                       tabindex="-1"
+                       @ondrop="@ClearDragClass"
+                       @ondragenter="@SetDragClass"
+                       @ondragleave="@ClearDragClass"
+                       @ondragend="@ClearDragClass">
             <ActivatorContent>
-                <MudButton Variant="Variant.Filled"
-                           Color="Color.Primary"
-                           StartIcon="@Icons.Material.Filled.CloudUpload">
-                    Upload Dataset
-                </MudButton>
-            </ActivatorContent>
-            <SelectedTemplate>
-                @if (context != null)
-                {
-                    @foreach (var file in context)
+                <MudPaper Height="300px"
+                          Outlined="true"
+                          Class="@_dragClass">
+                    <MudText Typo="Typo.h6">
+                        Drag and drop files here or click
+                    </MudText>
+                    @foreach (var file in _fileNames)
                     {
-                        <MudText>@file.Name</MudText>
+                        <MudChip T="string"
+                                 Color="Color.Dark"
+                                 Text="@file"
+                                 tabindex="-1" />
                     }
-                }
-                else
-                {
-                    <MudText>No File</MudText>
-                }
-            </SelectedTemplate>
+                </MudPaper>
+            </ActivatorContent>
         </MudFileUpload>
+        @* <MudFileUpload T="IReadOnlyList<IBrowserFile>" AppendMultipleFiles="true" FilesChanged="UploadFiles" MaximumFileCount="100" multiple> *@
+        @*     <ActivatorContent> *@
+        @*         <MudButton Variant="Variant.Filled" *@
+        @*                    Color="Color.Primary" *@
+        @*                    StartIcon="@Icons.Material.Filled.CloudUpload"> *@
+        @*             Upload Dataset *@
+        @*         </MudButton> *@
+        @*     </ActivatorContent> *@
+        @*     <SelectedTemplate> *@
+        @*         @if (context != null) *@
+        @*         { *@
+        @*             @foreach (var file in context) *@
+        @*             { *@
+        @*                 <MudText>@file.Name</MudText> *@
+        @*                 <MudButton OnClick="() => { RemoveFile(file); }" >Delete</MudButton> *@
+        @*             } *@
+        @*             //FilePopUp(@context[0].Name); *@
+        @*         } *@
+        @*         else *@
+        @*         { *@
+        @*             <MudText>No File</MudText> *@
+        @*         } *@
+        @*     </SelectedTemplate> *@
+        @* </MudFileUpload> *@
     </MudItem>
     <MudItem>
-        @if (_files != null)
+        @if (_fileNames != null)
         {
             <MudList T="string">
-                @foreach (var file in _files)
+                @foreach (var file in _fileNames)
                 {
                     <MudListItem Icon="@Icons.Material.Filled.AttachFile">
-                        @file.Name <code>@file.Size bytes</code>
+                        @file
                     </MudListItem>
+                    <MudButton OnClick="() => { RemoveFileAsync(file); }" >Delete</MudButton>
                 }
             </MudList>
+            <MudButton OnClick="() => { ClearAsync(); }" >Clear All files</MudButton>
         }
     </MudItem>
 </MudGrid>
 @code {
-    
+    private void FilePopUp(string file) => Snackbar.Add($"Added file: {file}", Severity.Success );
 }
