@@ -1,10 +1,10 @@
-name: Python parser build and push
+name: CSharp Parser build and push
 
 on:
   push:
     branches: [ master ]
     paths: 
-      - 'Parsers/PythonParser/*'
+      - 'Parsers/TestParser/*'
   workflow_dispatch:
 
 jobs:
@@ -25,6 +25,6 @@ jobs:
       uses: docker/build-push-action@v6.15.0
       with:
         context: .
-        file: ./Parsers/PythonParser/Dockerfile
+        file: ./Parsers/TestParser/Dockerfile
         push: true
-        tags: parsers.azurecr.io/python-test
+        tags: parsers.azurecr.io/testparser
