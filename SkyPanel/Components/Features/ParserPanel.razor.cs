@@ -7,7 +7,8 @@ namespace SkyPanel.Components.Features;
 
 public partial class ParserPanel : ComponentBase
 {
-    private Task OpenDialogAsync()
+    public string ParserName { get; set; }
+    
     private Task OpenFileDialogAsync()
     {
         var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small, FullWidth = true };

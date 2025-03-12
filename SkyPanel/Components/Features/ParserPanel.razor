@@ -6,9 +6,40 @@
 <MudStack>
     <MudGrid>
         <MudItem xs="12">
-            <MudSelect T="string" Label="Search" AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.BottomCenter" Variant="Variant.Outlined" AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary">
-                <MudSelectItem Value="@("foo")">Foo</MudSelectItem>
-                <MudSelectItem Value="@("bar")">Bar</MudSelectItem>
+            <MudSelect T="string" @bind-Value="ParserName" Label="Search" AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.BottomCenter" Variant="Variant.Outlined" Clearable="true" AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary">
+                <MudSelectItem Value="@("BufrParser")">BufrParser</MudSelectItem>
+                <MudSelectItem Value="@("NatTrackParser")">NatTrackParser</MudSelectItem>
+                <MudSelectItem Value="@("MonsterParser")">MonsterParser</MudSelectItem>
+                <MudSelectItem Value="@("WeatherParser")">WeatherParser</MudSelectItem>
+                <MudSelectItem Value="@("MetarParser")">MetarParser</MudSelectItem>
+                <MudSelectItem Value="@("SigmetParser")">SigmetParser</MudSelectItem>
+                <MudSelectItem Value="@("AirepParser")">AirepParser</MudSelectItem>
+                <MudSelectItem Value="@("NotamParser")">NotamParser</MudSelectItem>
+                <MudSelectItem Value="@("TafParser")">TafParser</MudSelectItem>
+                <MudSelectItem Value="@("GfsParser")">GfsParser</MudSelectItem>
+                <MudSelectItem Value="@("PacotParser")">PacotParser</MudSelectItem>
+                <MudSelectItem Value="@("TrackParser")">TrackParser</MudSelectItem>
+                <MudSelectItem Value="@("FlightPlanParser")">FlightPlanParser</MudSelectItem>
+                <MudSelectItem Value="@("RadarParser")">RadarParser</MudSelectItem>
+                <MudSelectItem Value="@("SatelliteParser")">SatelliteParser</MudSelectItem>
+                <MudSelectItem Value="@("OceanicRouteParser")">OceanicRouteParser</MudSelectItem>
+                <MudSelectItem Value="@("WindParser")">WindParser</MudSelectItem>
+                <MudSelectItem Value="@("TemperatureParser")">TemperatureParser</MudSelectItem>
+                <MudSelectItem Value="@("TurbulenceParser")">TurbulenceParser</MudSelectItem>
+                <MudSelectItem Value="@("IcingParser")">IcingParser</MudSelectItem>
+                <MudSelectItem Value="@("CloudParser")">CloudParser</MudSelectItem>
+                <MudSelectItem Value="@("StormParser")">StormParser</MudSelectItem>
+                <MudSelectItem Value="@("AviationWeatherParser")">AviationWeatherParser</MudSelectItem>
+                <MudSelectItem Value="@("AirspaceParser")">AirspaceParser</MudSelectItem>
+                <MudSelectItem Value="@("TrafficParser")">TrafficParser</MudSelectItem>
+                <MudSelectItem Value="@("RunwayParser")">RunwayParser</MudSelectItem>
+                <MudSelectItem Value="@("AirportParser")">AirportParser</MudSelectItem>
+                <MudSelectItem Value="@("FuelDataParser")">FuelDataParser</MudSelectItem>
+                <MudSelectItem Value="@("ClearanceParser")">ClearanceParser</MudSelectItem>
+                <MudSelectItem Value="@("LoadSheetParser")">LoadSheetParser</MudSelectItem>
+                <MudSelectItem Value="@("PirepParser")">PirepParser</MudSelectItem>
+                <MudSelectItem Value="@("FIRParser")">FIRParser</MudSelectItem>
+                <MudSelectItem Value="@("SectorParser")">SectorParser</MudSelectItem>
             </MudSelect>
         </MudItem>
         
