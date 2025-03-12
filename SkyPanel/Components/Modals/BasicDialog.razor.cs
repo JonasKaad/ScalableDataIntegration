@@ -3,7 +3,7 @@ using MudBlazor;
 
 namespace SkyPanel.Components.Modals;
 
-public partial class TextModal : ComponentBase
+public partial class BasicDialog : ComponentBase
 {
     [Parameter]
     public string ContentText { get; set; } = string.Empty;
