@@ -8,27 +8,30 @@
             <MudToggleItem Value="@("Ftp")" Text="FTP"/>
         </MudToggleGroup>
     </MudItem>
-    <MudItem xs="12" sm="6">
-        <MudText>URL</MudText>
-    </MudItem>
-    <MudItem xs="12" sm="6">
-        <MudSelect T="string" Label="Search" AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.BottomCenter" Variant="Variant.Outlined" AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary">
-            <MudSelectItem Value="@("boo")">Boo</MudSelectItem>
-            <MudSelectItem Value="@("far")">Far</MudSelectItem>
-        </MudSelect>
-    </MudItem>
     <MudItem xs="12" sm="6">    
-        <MudInputString Variant="Variant.Outlined" Placeholder="Unchanged" Label="URL" AutoGrow="true"/>
+        @* <MudText>URL</MudText> *@
+        <MudTextField  T="string" Variant="Variant.Outlined" Placeholder="Unchanged" Label="URL"/>
     </MudItem>
     <MudItem xs="12" sm="6">
-        <MudText>URL</MudText>
-        <MudInputString Variant="Variant.Outlined" Placeholder="Unchanged" Label="URL"/>
+        @* <MudText>AWS Secret</MudText> *@
+        <MudTextField  T="string" Variant="Variant.Outlined" Placeholder="Unchanged" Label="AWS Secret"/>
+        <MudStack Row="true" Style="margin-top: 0.4em; margin-bottom: 0.4em" Spacing="2">
+            <MudIcon Icon="@Icons.Material.Filled.Info" Title="Info" Size="Size.Small" /> 
+            <MudInputLabel>Need to add or update an AWS Secret?</MudInputLabel>
+        </MudStack>
+        <MudButton Variant="Variant.Outlined">Manage Secret</MudButton>
     </MudItem>
     <MudItem xs="12" sm="6">
-        <MudText>URL</MudText>
-        <MudInputString Variant="Variant.Outlined" Placeholder="Unchanged" Label="URL"/>
+        @* <MudText>Polling</MudText> *@
+        <MudTextField T="int" @bindbind-Value="@TextValue" Variant="Variant.Outlined" Placeholder="Unchanged" Label="Polling"/>
+    </MudItem>
+</MudGrid>
+<MudGrid Class="d-flex justify-center" Style="margin-top: 0.3em">
+    <MudItem>
+        <MudButton Size="Size.Large" Variant="Variant.Filled" Color="Color.Primary">Update</MudButton>
     </MudItem>
 </MudGrid>
 @code {
-    
+    public string TextValue { get; set; }
+    public string Protocol { get; set; }
 }
