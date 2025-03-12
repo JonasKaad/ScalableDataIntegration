@@ -1,26 +1,132 @@
 ﻿@page "/graphs"
+@using ApexCharts
 <PageTitle>SkyPanel — Graphs</PageTitle>
-
-<MudText Typo="Typo.h2" GutterBottom="true">Graphs</MudText>
-<MudText Typo="Typo.h4" Class="mb-8">This page demonstrates fake loading and displaying a graph.</MudText>
-
-@if (_fakeLoading == false)
-{
-    <MudProgressCircular Color="Color.Info" Indeterminate="true" Size="Size.Large" />
-}
-else
-{
-    <MudImage ObjectPosition="ObjectPosition.Center" Src="images/graph.png" Height="400" Width="400"/>
-}
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+    <MudGrid>
+        <MudItem xs="12" sm="6">
+            <MudPaper Elevation="3" Class="pa-8 ma-2" Style="border-radius: 16px;">
+                <MudText Typo="Typo.h5" Class="mb-4">Parser</MudText>
+                <MudItem xs="12" sm="5">
+                    <MudStack>
+                        <MudGrid>
+                            <MudItem xs="12">
+                                <MudSelect T="string" Label="Parsers" MultiSelection="true" SelectedValues="_selectedParsers" SelectedValuesChanged="AddParser">
+                                    @foreach (var parser in _parsers)
+                                    {
+                                        <MudSelectItem T="string" Value="@parser">@parser</MudSelectItem>
+                                    }
+                                </MudSelect>
+                            </MudItem>
+                        </MudGrid>
+                    </MudStack>
+                </MudItem>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12" sm="6">
+            <MudPaper Elevation="3" Class="pa-8 ma-2" Style="border-radius: 16px;">
+                <MudText Typo="Typo.h5" Class="mb-4">Filters</MudText>
+                <MudItem xs="12" sm="5">
+                    <MudStack>
+                        <MudGrid>
+                            <MudItem xs="12">
+                                <MudDateRangePicker PickerVariant="PickerVariant.Inline" Label="Date Range" Editable="true" @bind-DateRange="Date" Placeholder="Select Date" />
+                                <MudTimePicker Label="From hour:min" Editable="true" @bind-Time="_time" />
+                                <MudButton OnClick="Zoom">Filter</MudButton>
+                            </MudItem>
+                        </MudGrid>
+                    </MudStack>
+                </MudItem>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
+<MudGrid Justify="Justify.Center">
+    <MudItem xs="12" sm="8">
+        <MudPaper Class="pa-8 ma-2" >
+            @if (_loading)
+            {
+                <MudProgressCircular Indeterminate="true"/>
+            }
+            else
+            {
+                <ApexChart TItem="ParserData"
+                           Options="options"
+                           Title="Sample Data" @ref="chart"
+                           XAxisType="XAxisType.Datetime">
+                    @foreach (string parser in _selectedParsers)
+                    {
+                        <ApexPointSeries TItem="ParserData"
+                                         Items="@parserData[@parser]"
+                                         Name="@parser"
+                                         SeriesType="SeriesType.Line"
+                                         XValue="e => e.Time"
+                                         YValue="e => e.DownloadedBytes"/>
+                    }
+                </ApexChart>
+            }
+        </MudPaper>
+    </MudItem>
+</MudGrid>
 
 @code {
-    private bool _fakeLoading;
+    private bool _loading = true;
+    private ApexChart<ParserData> chart { get; set; } = new();
+    private ApexChartOptions<ParserData> options;
+    [CascadingParameter] private bool IsDarkMode { get; set; }
+    private IEnumerable<string> _selectedParsers = [];
+    private Dictionary<string, List<ParserData>> parserData = new();
+    private List<string> _parsers = new() { "parser", "2ndParser" };
+    private DateRange Date { get; set; }
+    private TimeSpan? _time = new TimeSpan(00, 45, 00);
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        // Simulate asynchronous loading to demonstrate a loading indicator
-        await Task.Delay(1500);
-        _fakeLoading = true;
+        options = new ApexChartOptions<ParserData>
+        {
+            Theme = new Theme
+            {
+                Mode = IsDarkMode ? Mode.Dark : Mode.Light,
+                Palette = PaletteType.Palette1
+            }
+        };
+        
+        parserData.Add(_parsers.First(), new ()
+        {
+            new() {Time = DateTime.Parse("2025-11-03 11:22"), DownloadedBytes = 33 },
+            new () { Time = DateTime.Parse("2025-11-03 11:24"), DownloadedBytes = 42 },
+            new () { Time = DateTime.Parse("2025-11-03 11:30"), DownloadedBytes = 23 }
+        });
+        
+        parserData.Add(_parsers.Skip(1).First(), new ()
+        {
+            new() {Time = DateTime.Parse("2025-11-03 11:21"), DownloadedBytes = 99 },
+            new () { Time = DateTime.Parse("2025-11-03 11:28"), DownloadedBytes = 12 },
+            new () { Time = DateTime.Parse("2025-11-03 11:35"), DownloadedBytes = 56 }
+        });
+        _loading = false;
+        StateHasChanged();
     }
 
+    private async Task AddParser(IEnumerable<string> values)
+    {
+        _loading = true;
+        _selectedParsers = values;
+        await Task.Delay(720);
+        await chart.UpdateOptionsAsync(true, true, false);
+        StateHasChanged();
+        _loading = false;
+    }
+    
+    private async Task Zoom()
+    {
+        var start = Date.Start.GetValueOrDefault().Add(_time.GetValueOrDefault());
+        var end = Date.End.GetValueOrDefault();
+        await chart.ZoomXAsync(start.ToUnixTimeMilliseconds(), end.ToUnixTimeMilliseconds());
+    }
+
+    public class ParserData
+    {
+        public DateTime Time { get; set; }
+        public decimal DownloadedBytes { get; set; }
+    }
 }
