@@ -6,6 +6,9 @@ namespace SkyPanel.Components.Modals;
 
 public partial class FileDialogParser : ComponentBase
 {
+    [Parameter]
+    public string ParserName { get; set; }
+    
     private const string DefaultDragClass = "relative rounded-lg border-2 border-dashed pa-4 mt-4 mud-width-full mud-height-full";
     private string _dragClass = DefaultDragClass;
     private readonly List<string> _fileNames = new();

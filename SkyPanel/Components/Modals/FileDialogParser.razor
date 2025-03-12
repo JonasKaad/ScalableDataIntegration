@@ -2,6 +2,10 @@
 
 <MudDialog>
     <DialogContent>
+        <MudStack Row="true">
+            <MudText Typo="Typo.body1">Upload dataset for:</MudText>
+            <MudText Typo="Typo.body1" Style="font-weight: bold">@ParserName</MudText>
+        </MudStack>
         <MudFileUpload T="IReadOnlyList<IBrowserFile>"
                        @ref="@_fileUpload"
                        OnFilesChanged="OnInputFileChanged"
@@ -28,34 +32,31 @@
                                  Icon="@Icons.Material.Filled.Description"
                                  Color="Color.Primary"
                                  Text="@file"
-                                 tabindex="-1" />
+                                 tabindex="-1"/>
                     }
                 </MudPaper>
             </ActivatorContent>
         </MudFileUpload>
         <MudStack Row="true" Style="margin-top: 2em">
-                <MudButton OnClick="@DialogCancel" Variant="Variant.Filled">Cancel</MudButton>
-                <MudSpacer/>
-                <MudButton Color="Color.Primary"
-                           OnClick="@OpenFilePickerAsync"
-                           Variant="Variant.Filled">
-                    Open file picker
-                </MudButton>
-                <MudButton Color="Color.Error"
-                           Disabled="@(!_fileNames.Any())"
-                           OnClick="@ClearAsync"
-                           Variant="Variant.Filled">
-                    Clear
-                </MudButton>
-                <MudButton Color="Color.Success"
-                           Disabled="@(!_fileNames.Any())"
-                           OnClick="@(() =>
-                                    {
-                                        Upload();
-                                    })"
-                           Variant="Variant.Filled">
-                    Upload
-                </MudButton>
+            <MudButton OnClick="@DialogCancel" Variant="Variant.Filled">Cancel</MudButton>
+            <MudSpacer/>
+            <MudButton Color="Color.Primary"
+                       OnClick="@OpenFilePickerAsync"
+                       Variant="Variant.Filled">
+                Open file picker
+            </MudButton>
+            <MudButton Color="Color.Error"
+                       Disabled="@(!_fileNames.Any())"
+                       OnClick="@ClearAsync"
+                       Variant="Variant.Filled">
+                Clear
+            </MudButton>
+            <MudButton Color="Color.Success"
+                       Disabled="@(!_fileNames.Any())"
+                       OnClick="@(() => { Upload(); })"
+                       Variant="Variant.Filled">
+                Upload
+            </MudButton>
         </MudStack>
     </DialogContent>
         
