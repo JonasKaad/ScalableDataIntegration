@@ -2,7 +2,6 @@
 @inject ISnackbar Snackbar
 @inject IDialogService DialogService
 
-<MudInputLabel> Parser</MudInputLabel>
 <MudStack>
     <MudGrid>
         <MudItem xs="12">
@@ -13,34 +12,6 @@
                                      Label="Select Parser"
                                      Placeholder="No Parser Selected"
                                      />
-                <MudSelectItem Value="@("AirepParser")">AirepParser</MudSelectItem>
-                <MudSelectItem Value="@("NotamParser")">NotamParser</MudSelectItem>
-                <MudSelectItem Value="@("TafParser")">TafParser</MudSelectItem>
-                <MudSelectItem Value="@("GfsParser")">GfsParser</MudSelectItem>
-                <MudSelectItem Value="@("PacotParser")">PacotParser</MudSelectItem>
-                <MudSelectItem Value="@("TrackParser")">TrackParser</MudSelectItem>
-                <MudSelectItem Value="@("FlightPlanParser")">FlightPlanParser</MudSelectItem>
-                <MudSelectItem Value="@("RadarParser")">RadarParser</MudSelectItem>
-                <MudSelectItem Value="@("SatelliteParser")">SatelliteParser</MudSelectItem>
-                <MudSelectItem Value="@("OceanicRouteParser")">OceanicRouteParser</MudSelectItem>
-                <MudSelectItem Value="@("WindParser")">WindParser</MudSelectItem>
-                <MudSelectItem Value="@("TemperatureParser")">TemperatureParser</MudSelectItem>
-                <MudSelectItem Value="@("TurbulenceParser")">TurbulenceParser</MudSelectItem>
-                <MudSelectItem Value="@("IcingParser")">IcingParser</MudSelectItem>
-                <MudSelectItem Value="@("CloudParser")">CloudParser</MudSelectItem>
-                <MudSelectItem Value="@("StormParser")">StormParser</MudSelectItem>
-                <MudSelectItem Value="@("AviationWeatherParser")">AviationWeatherParser</MudSelectItem>
-                <MudSelectItem Value="@("AirspaceParser")">AirspaceParser</MudSelectItem>
-                <MudSelectItem Value="@("TrafficParser")">TrafficParser</MudSelectItem>
-                <MudSelectItem Value="@("RunwayParser")">RunwayParser</MudSelectItem>
-                <MudSelectItem Value="@("AirportParser")">AirportParser</MudSelectItem>
-                <MudSelectItem Value="@("FuelDataParser")">FuelDataParser</MudSelectItem>
-                <MudSelectItem Value="@("ClearanceParser")">ClearanceParser</MudSelectItem>
-                <MudSelectItem Value="@("LoadSheetParser")">LoadSheetParser</MudSelectItem>
-                <MudSelectItem Value="@("PirepParser")">PirepParser</MudSelectItem>
-                <MudSelectItem Value="@("FIRParser")">FIRParser</MudSelectItem>
-                <MudSelectItem Value="@("SectorParser")">SectorParser</MudSelectItem>
-            </MudSelect>
         </MudItem>
         
         <MudItem xs="12">
@@ -58,4 +29,23 @@
 </MudStack>
 
 @code {
+
+    private string[] _parsers =
+    [
+        "NatTrackParser","BufrParser","WeatherParser", "MetarParser", "SigmetParser", "AirepParser", "NotamParser", "TafParser", "GfsParser", 
+        "PacotParser", "TrackParser", "FlightPlanParser", "RadarParser", "SatelliteParser", "OceanicRouteParser", 
+        "WindParser", "TemperatureParser", "TurbulenceParser", "IcingParser", "CloudParser", "StormParser", 
+        "AviationWeatherParser", "AirspaceParser", "TrafficParser", "RunwayParser", "AirportParser", "FuelDataParser", 
+        "ClearanceParser", "LoadSheetParser", "PirepParser", "FIRParser", "SectorParser"
+    ];
+    
+    private async Task<IEnumerable<string>> Search(string value, CancellationToken token)
+    {
+        // if text is null or empty, show complete list
+        if (string.IsNullOrEmpty(value))
+            return _parsers;
+
+        return _parsers.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+    }
+
 }
