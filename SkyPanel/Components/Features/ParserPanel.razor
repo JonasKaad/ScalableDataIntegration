@@ -8,7 +8,7 @@
                     <MudAutocomplete @bind-Value=ParserName
                                      Clearable="true"
                                      SearchFunc="Search"
-                                     Variant="Variant.Filled"
+                                     Variant="Variant.Outlined"
                                      Label="Select Parser"
                                      Placeholder="No Parser Selected"
                                      />
@@ -21,7 +21,7 @@
            
         </MudItem>
         <MudItem>
-            <MudButton OnClick="() => OpenReparseDialogAsync()" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.PublishedWithChanges" Color="Color.Primary">
+            <MudButton OnClick="@(() => OpenReparseDialogAsync())" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.PublishedWithChanges" Color="Color.Primary">
                 Fetch and Parse Latest Dataset
             </MudButton>
         </MudItem>
