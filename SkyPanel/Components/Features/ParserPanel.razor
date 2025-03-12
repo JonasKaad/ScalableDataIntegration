@@ -15,13 +15,13 @@
         </MudItem>
         
         <MudItem xs="12">
-            <MudButton OnClick="@(() => OpenFileDialogAsync())" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.FileUpload" Color="Color.Primary">
+            <MudButton OnClick="@(() => OpenFileDialogAsync())" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.FileUpload" Color="Color.Primary" Disabled="@(string.IsNullOrEmpty(ParserName))">
                 Upload Dataset
             </MudButton>
            
         </MudItem>
         <MudItem>
-            <MudButton OnClick="@(() => OpenReparseDialogAsync())" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.PublishedWithChanges" Color="Color.Primary">
+            <MudButton OnClick="@(() => OpenReparseDialogAsync())" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.PublishedWithChanges" Color="Color.Primary" Disabled="@(string.IsNullOrEmpty(ParserName))">
                 Fetch and Parse Latest Dataset
             </MudButton>
         </MudItem>
