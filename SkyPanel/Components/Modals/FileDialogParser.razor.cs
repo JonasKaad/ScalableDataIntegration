@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using MudBlazor;
 
-namespace SkyPanel.Components.Features;
+namespace SkyPanel.Components.Modals;
 
 public partial class FileDialogParser : ComponentBase
 {
