@@ -1,5 +1,13 @@
-<h3>TextModal</h3>
+<MudDialog>
+    <DialogContent>
+        @ContentText
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@DialogCancel" Variant="Variant.Filled">Cancel</MudButton>
+        <MudSpacer/>
+        <MudButton Color="@Color" OnClick="@DialogSubmit" Variant="Variant.Filled">@ConfirmationButtonText</MudButton>
+    </DialogActions>
+</MudDialog>
 
 @code {
-    
 }
