@@ -1,8 +1,12 @@
 
 <MudGrid Spacing="4">
-    
+    @* <MudText>Protocol</MudText> *@
     <MudItem xs="12" sm="6">
         <MudText>Protocol</MudText>
+        <MudToggleGroup T="string" SelectionMode="SelectionMode.SingleSelection" @bind-Value="@Protocol" Color="Color.Primary">
+            <MudToggleItem Value="@("Http")" Text="HTTP"/>
+            <MudToggleItem Value="@("Ftp")" Text="FTP"/>
+        </MudToggleGroup>
     </MudItem>
     <MudItem xs="12" sm="6">
         <MudText>URL</MudText>
