@@ -5,6 +5,12 @@ namespace SkyPanel.Components.Modals;
 
 public partial class BasicDialog : ComponentBase
 {
+    [Parameter, EditorRequired]
+    public required string ContentText { get; set; }
+    
+    [Parameter]
+    public string EmphasizedCenterText { get; set; } = string.Empty;
+    
     [Parameter]
     public string ContentText { get; set; } = string.Empty;
     
