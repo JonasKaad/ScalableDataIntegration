@@ -53,6 +53,16 @@
                                         <MudSelectItem Value="@(new TimeSpan(24*7,0,0))">1 week</MudSelectItem>
                                     </MudSelect>
                                 </MudItem>
+                                <MudItem>
+                                    <MudSelect
+                                        Label="Y-axis"
+                                        Variant="Variant.Filled"
+                                        @bind-Value="_yaxis">
+                                        <MudSelectItem Value="Amount.Kilo">Kilobytes</MudSelectItem>
+                                        <MudSelectItem Value="Amount.Mega">Megabytes</MudSelectItem>
+                                        <MudSelectItem Value="Amount.Giga">Gigabytes</MudSelectItem>
+                                    </MudSelect>
+                                </MudItem>
 
                                 <MudItem xs="6">
                                     <MudButton Variant="Variant.Filled"Class="ma-2" OnClick="Zoom">Apply Filter</MudButton>
@@ -74,28 +84,28 @@
             else
             {
                 <ApexChart TItem="ParserData"
-                           Options=options
-                           Title="Downloaded data amount" @ref="chart"
+                           Options=_options
+                           Title="Downloaded data amount" @ref="Chart"
                            XAxisType="XAxisType.Datetime">
                     <ApexPointTooltip>
                         <div class="ma-2">
                             @{
                                 var point = (DataPoint<ParserData>)context.DataPoint;
-                                <h3>@Selected.ToList()[context.SeriesIndex]</h3>
+                                <h3>@_selected.ToList()[context.SeriesIndex]</h3>
                                 <p>Time: @point.X</p>
                                 <p>Downloaded: @point.Y Megabytes</p>
                             }
                         </div>
                     </ApexPointTooltip>
                     <ChildContent>
-                    @foreach (string parser in Selected)
+                    @foreach (string parser in _selected)
                     {
                         <ApexPointSeries TItem="ParserData"
-                                         Items="@parserData[@parser]"
+                                         Items="@_parserData[@parser]"
                                          Name="@parser"
                                          SeriesType="SeriesType.Bar"
                                          XValue="e => e.Time"
-                                         YAggregate="e => e.Sum(es => es.DownloadedBytes)"
+                                         YAggregate="e => Math.Round(e.Sum(es => es.DownloadedBytes),5)"
                                          OrderByDescending="e => e.X"
                                          ShowDataLabels />
                     }
@@ -108,30 +118,31 @@
 
 @code {
     private bool _loading = true;
-    private ApexChart<ParserData> chart { get; set; } = new();
-    private ApexChartOptions<ParserData> options;
+    private ApexChart<ParserData> Chart { get; set; } = new();
+    private ApexChartOptions<ParserData> _options;
     [CascadingParameter] private bool IsDarkMode { get; set; }
     private IEnumerable<string> _selectedParsers = [];
-    private List<string> Selected = [];
-    private Dictionary<string, List<ParserData>> parserData = new();
-    private Dictionary<string, List<ParserData>> rawParserData = new();
+    private List<string> _selected = [];
+    private Dictionary<string, List<ParserData>> _parserData = new();
+    private Dictionary<string, List<ParserData>> _rawParserData = new();
     private readonly List<string> _parsers = ["parser", "2ndParser"];
     private DateRange Date { get; set; } = new (DateTime.Today, DateTime.Today);
     private TimeSpan? _fromTime = new TimeSpan(00, 00,00);
     private TimeSpan? _toTime = new TimeSpan(23, 59, 59);
     private TimeSpan _groupSpan = new TimeSpan(1, 0, 0);
+    private Amount _yaxis = Amount.Mega;
 
     protected override void OnInitialized()
     {
-        options = new ApexChartOptions<ParserData>
+        _options = new ApexChartOptions<ParserData>
         {
-            Yaxis = new List<YAxis>()
-            {
-              new()
-              {
-                  Title = new (){Text="MegaBytes"}
-              }  
-            },
+            Yaxis =
+            [
+                new()
+                {
+                    Title = new() { Text = "bytes" }
+                }
+            ],
             Chart = new Chart()
             {
                 Stacked = true
@@ -147,7 +158,8 @@
                             Style = new BarDataLabelsStyle
                             {
                                 FontWeight = "800"
-                            }
+                            },
+                            Formatter = "(value) => Math.round(value * 10000) / 10000"
                         }
                     }
                 }
@@ -159,22 +171,67 @@
             }
         };
         
-        rawParserData.Add(_parsers.First(), new ()
+        _rawParserData.Add(_parsers.First(), new ()
         {
-            new(time: new DateTime(2025, 03, 13, 06, 00, 00, DateTimeKind.Utc), downloadedBytes: 33),
-            new(time: new DateTime(2025, 03, 13, 12, 00, 00, DateTimeKind.Utc), downloadedBytes: 42),
-            new(time: new DateTime(2025, 03, 13, 18, 00, 00, DateTimeKind.Utc), downloadedBytes: 23),
-            new(time: new DateTime(2025, 03, 13, 18, 00, 00, DateTimeKind.Utc), downloadedBytes: 23),
-            new(time: new DateTime(2025, 03, 17, 06, 00, 00, DateTimeKind.Utc), downloadedBytes: 500),
-            new(time: new DateTime(2025, 03, 22, 12, 00, 00, DateTimeKind.Utc), downloadedBytes: 80),
+            new(time: new DateTime(2025, 03, 13, 00, 00, 00, DateTimeKind.Utc), downloadedBytes: 456),
+            new(time: new DateTime(2025, 03, 13, 06, 00, 00, DateTimeKind.Utc), downloadedBytes: 789),
+            new(time: new DateTime(2025, 03, 13, 12, 00, 00, DateTimeKind.Utc), downloadedBytes: 234),
+            new(time: new DateTime(2025, 03, 13, 18, 00, 00, DateTimeKind.Utc), downloadedBytes: 567),
+            new(time: new DateTime(2025, 03, 14, 00, 00, 00, DateTimeKind.Utc), downloadedBytes: 890),
+            new(time: new DateTime(2025, 03, 14, 06, 00, 00, DateTimeKind.Utc), downloadedBytes: 123),
+            new(time: new DateTime(2025, 03, 14, 12, 00, 00, DateTimeKind.Utc), downloadedBytes: 678),
+            new(time: new DateTime(2025, 03, 14, 18, 00, 00, DateTimeKind.Utc), downloadedBytes: 345),
+            new(time: new DateTime(2025, 03, 15, 00, 00, 00, DateTimeKind.Utc), downloadedBytes: 901),
+            new(time: new DateTime(2025, 03, 15, 06, 00, 00, DateTimeKind.Utc), downloadedBytes: 234),
+            new(time: new DateTime(2025, 03, 15, 12, 00, 00, DateTimeKind.Utc), downloadedBytes: 567),
+            new(time: new DateTime(2025, 03, 15, 18, 00, 00, DateTimeKind.Utc), downloadedBytes: 890),
+            new(time: new DateTime(2025, 03, 16, 00, 00, 00, DateTimeKind.Utc), downloadedBytes: 123),
+            new(time: new DateTime(2025, 03, 16, 06, 00, 00, DateTimeKind.Utc), downloadedBytes: 456),
+            new(time: new DateTime(2025, 03, 16, 12, 00, 00, DateTimeKind.Utc), downloadedBytes: 789),
+            new(time: new DateTime(2025, 03, 16, 18, 00, 00, DateTimeKind.Utc), downloadedBytes: 234),
+            new(time: new DateTime(2025, 03, 17, 00, 00, 00, DateTimeKind.Utc), downloadedBytes: 567),
+            new(time: new DateTime(2025, 03, 17, 06, 00, 00, DateTimeKind.Utc), downloadedBytes: 890),
+            new(time: new DateTime(2025, 03, 17, 12, 00, 00, DateTimeKind.Utc), downloadedBytes: 123),
+            new(time: new DateTime(2025, 03, 17, 18, 00, 00, DateTimeKind.Utc), downloadedBytes: 456),
+            new(time: new DateTime(2025, 03, 18, 00, 00, 00, DateTimeKind.Utc), downloadedBytes: 789),
+            new(time: new DateTime(2025, 03, 18, 06, 00, 00, DateTimeKind.Utc), downloadedBytes: 234),
+            new(time: new DateTime(2025, 03, 18, 12, 00, 00, DateTimeKind.Utc), downloadedBytes: 567),
+            new(time: new DateTime(2025, 03, 18, 18, 00, 00, DateTimeKind.Utc), downloadedBytes: 890),
+            new(time: new DateTime(2025, 03, 19, 00, 00, 00, DateTimeKind.Utc), downloadedBytes: 123),
+            new(time: new DateTime(2025, 03, 19, 06, 00, 00, DateTimeKind.Utc), downloadedBytes: 456),
+            new(time: new DateTime(2025, 03, 19, 12, 00, 00, DateTimeKind.Utc), downloadedBytes: 789),
+            new(time: new DateTime(2025, 03, 19, 18, 00, 00, DateTimeKind.Utc), downloadedBytes: 234),
         });
         
-        rawParserData.Add(_parsers.Skip(1).First(), [
-            new(time: new DateTime(2025, 03, 13, 06, 21, 00, DateTimeKind.Utc), downloadedBytes: 99),
-            new(time: new DateTime(2025, 03, 13, 14, 28, 00, DateTimeKind.Utc), downloadedBytes: 12),
-            new(time: new DateTime(2025, 03, 13, 21, 35, 00, DateTimeKind.Utc), downloadedBytes: 56),
-            new(time: new DateTime(2025, 03, 18, 18, 35, 00, DateTimeKind.Utc), downloadedBytes: 22),
-            new(time: new DateTime(2025, 03, 21, 12, 35, 00, DateTimeKind.Utc), downloadedBytes: 730),
+        _rawParserData.Add(_parsers.Skip(1).First(), [
+            new(time: new DateTime(2025, 03, 13, 00, 00, 00, DateTimeKind.Utc), downloadedBytes: 321),
+            new(time: new DateTime(2025, 03, 13, 06, 00, 00, DateTimeKind.Utc), downloadedBytes: 654),
+            new(time: new DateTime(2025, 03, 13, 12, 00, 00, DateTimeKind.Utc), downloadedBytes: 187),
+            new(time: new DateTime(2025, 03, 13, 18, 00, 00, DateTimeKind.Utc), downloadedBytes: 923),
+            new(time: new DateTime(2025, 03, 14, 00, 00, 00, DateTimeKind.Utc), downloadedBytes: 546),
+            new(time: new DateTime(2025, 03, 14, 06, 00, 00, DateTimeKind.Utc), downloadedBytes: 789),
+            new(time: new DateTime(2025, 03, 14, 12, 00, 00, DateTimeKind.Utc), downloadedBytes: 432),
+            new(time: new DateTime(2025, 03, 14, 18, 00, 00, DateTimeKind.Utc), downloadedBytes: 101),
+            new(time: new DateTime(2025, 03, 15, 00, 00, 00, DateTimeKind.Utc), downloadedBytes: 876),
+            new(time: new DateTime(2025, 03, 15, 06, 00, 00, DateTimeKind.Utc), downloadedBytes: 543),
+            new(time: new DateTime(2025, 03, 15, 12, 00, 00, DateTimeKind.Utc), downloadedBytes: 210),
+            new(time: new DateTime(2025, 03, 15, 18, 00, 00, DateTimeKind.Utc), downloadedBytes: 765),
+            new(time: new DateTime(2025, 03, 16, 00, 00, 00, DateTimeKind.Utc), downloadedBytes: 398),
+            new(time: new DateTime(2025, 03, 16, 06, 00, 00, DateTimeKind.Utc), downloadedBytes: 621),
+            new(time: new DateTime(2025, 03, 16, 12, 00, 00, DateTimeKind.Utc), downloadedBytes: 954),
+            new(time: new DateTime(2025, 03, 16, 18, 00, 00, DateTimeKind.Utc), downloadedBytes: 287),
+            new(time: new DateTime(2025, 03, 17, 00, 00, 00, DateTimeKind.Utc), downloadedBytes: 732),
+            new(time: new DateTime(2025, 03, 17, 06, 00, 00, DateTimeKind.Utc), downloadedBytes: 165),
+            new(time: new DateTime(2025, 03, 17, 12, 00, 00, DateTimeKind.Utc), downloadedBytes: 890),
+            new(time: new DateTime(2025, 03, 17, 18, 00, 00, DateTimeKind.Utc), downloadedBytes: 543),
+            new(time: new DateTime(2025, 03, 18, 00, 00, 00, DateTimeKind.Utc), downloadedBytes: 276),
+            new(time: new DateTime(2025, 03, 18, 06, 00, 00, DateTimeKind.Utc), downloadedBytes: 709),
+            new(time: new DateTime(2025, 03, 18, 12, 00, 00, DateTimeKind.Utc), downloadedBytes: 132),
+            new(time: new DateTime(2025, 03, 18, 18, 00, 00, DateTimeKind.Utc), downloadedBytes: 865),
+            new(time: new DateTime(2025, 03, 19, 00, 00, 00, DateTimeKind.Utc), downloadedBytes: 498),
+            new(time: new DateTime(2025, 03, 19, 06, 00, 00, DateTimeKind.Utc), downloadedBytes: 321),
+            new(time: new DateTime(2025, 03, 19, 12, 00, 00, DateTimeKind.Utc), downloadedBytes: 654),
+            new(time: new DateTime(2025, 03, 19, 18, 00, 00, DateTimeKind.Utc), downloadedBytes: 987),
         ]);
         _loading = false;
         StateHasChanged();
@@ -183,13 +240,10 @@
     private async Task AddParser(IEnumerable<string> values)
     {
         _loading = true;
-        var start = Date.Start.GetValueOrDefault().Add(_fromTime.GetValueOrDefault());
-        var end = Date.End.GetValueOrDefault().Add(_toTime.GetValueOrDefault());
         var selected = values.ToList();
         _selectedParsers = selected;
-        ClampData(start, end);
         
-        Selected = selected;
+        _selected = selected;
         
         await Zoom();
         _loading = false;
@@ -197,15 +251,40 @@
 
     private void ClampData(DateTime start, DateTime end)
     {
+        var ratio = 1;
+        var axis = Chart.Options.Yaxis.FirstOrDefault();
+        if (axis is not null)
+        {
+            var title = new AxisTitle();
+            switch (_yaxis)
+            {
+                case Amount.Giga:
+                    title.Text = "Gigabytes";
+                    ratio = 1000000;
+                    break;
+                case Amount.Kilo:
+                    title.Text = "Kilobytes";
+                    ratio = 1;
+                    break;
+                case Amount.Mega:
+                    title.Text = "Megabytes";
+                    ratio = 1000;
+                    break;
+            }
+            axis.Title = title;
+        }
         foreach (var parser in _selectedParsers)
         {
-            parserData[parser] = rawParserData[parser].Where(p => start < p.Time && p.Time < end).ToList()
+            _parserData[parser] = _rawParserData[parser].Where(p => start < p.Time && p.Time < end).ToList()
                 .ConvertAll(p => new ParserData(p.Time, p.DownloadedBytes));
-            foreach (var data in parserData[parser])
+            foreach (var data in _parserData[parser])
             {
-                data.Time = FloorDate(data.Time, _groupSpan); 
+                data.Time = FloorDate(data.Time, _groupSpan);
+                data.DownloadedBytes = Math.Round(data.DownloadedBytes/ratio, 4);
             }
         }
+
+        
     }
 
     private DateTime FloorDate(DateTime date, TimeSpan span)
@@ -218,13 +297,19 @@
         var start = Date.Start.GetValueOrDefault().Add(_fromTime.GetValueOrDefault());
         var end = Date.End.GetValueOrDefault().Add(_toTime.GetValueOrDefault());
         ClampData(start, end);
-        await chart.UpdateOptionsAsync(true, true, false);
-        //await chart.ZoomXAsync(start.ToUnixTimeMilliseconds(), end.ToUnixTimeMilliseconds());
+        await Chart.UpdateOptionsAsync(true, false, false);
     }
 
     public class ParserData(DateTime time, decimal downloadedBytes)
     {
         public DateTime Time { get; set; } = time;
         public decimal DownloadedBytes { get; set; } = downloadedBytes;
+    }
+
+    enum Amount
+    {
+        Kilo,
+        Mega,
+        Giga
     }
 }
