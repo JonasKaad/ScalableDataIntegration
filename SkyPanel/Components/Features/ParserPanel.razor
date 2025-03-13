@@ -1,3 +1,5 @@
+@using SkyPanel.Components.Models
+@using SkyPanel.Components.Services
 
 @inject ISnackbar Snackbar
 @inject IDialogService DialogService
@@ -5,7 +7,7 @@
 <MudStack>
     <MudGrid>
         <MudItem xs="12">
-                    <MudAutocomplete @bind-Value=ParserName
+                    <MudAutocomplete @bind-Value=Parser
                                      Clearable="true"
                                      SearchFunc="@Search"
                                      Variant="Variant.Outlined"
