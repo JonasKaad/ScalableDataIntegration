@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 
-namespace SkyPanel.Components.Modals;
+namespace SkyPanel.Components.Dialogs;
 
 public partial class BasicDialog : ComponentBase
 {

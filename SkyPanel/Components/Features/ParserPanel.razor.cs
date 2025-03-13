@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
-using SkyPanel.Components.Modals;
+using SkyPanel.Components.Dialogs;
 
 namespace SkyPanel.Components.Features;
 
