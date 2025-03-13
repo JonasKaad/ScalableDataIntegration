@@ -1,10 +1,11 @@
 using MudBlazor.Services;
 using SkyPanel.Components;
+using SkyPanel.Components.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddMudServices();
-
+builder.Services.AddScoped<ParserStateService>();
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
