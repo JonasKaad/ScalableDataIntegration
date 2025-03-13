@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Forms;
 using MudBlazor;
 using SkyPanel.Components.Modals;
 
@@ -7,7 +6,7 @@ namespace SkyPanel.Components.Features;
 
 public partial class ParserPanel : ComponentBase
 {
-    public string ParserName { get; set; }
+    public required string ParserName { get; set; }
     
     private Task OpenFileDialogAsync()
     {

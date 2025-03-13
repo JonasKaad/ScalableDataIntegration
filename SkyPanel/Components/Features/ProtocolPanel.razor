@@ -10,11 +10,11 @@
     </MudItem>
     <MudItem xs="12" sm="6">    
         @* <MudText>URL</MudText> *@
-        <MudTextField  T="string" Variant="Variant.Outlined" Placeholder="Unchanged" Label="URL"/>
+        <MudTextField  T="string" @bind-Value="UrlValue" Variant="Variant.Outlined" Placeholder="Unchanged" Label="URL"/>
     </MudItem>
     <MudItem xs="12" sm="6">
         @* <MudText>AWS Secret</MudText> *@
-        <MudTextField  T="string" Variant="Variant.Outlined" Placeholder="Unchanged" Label="AWS Secret"/>
+        <MudTextField  T="string" @bind-Value="AwsValue" Variant="Variant.Outlined" Placeholder="Unchanged" Label="AWS Secret"/>
         <MudStack Row="true" Style="margin-top: 0.4em; margin-bottom: 0.4em" Spacing="2">
             <MudIcon Icon="@Icons.Material.Filled.Info" Title="Info" Size="Size.Small" /> 
             <MudInputLabel>Need to add or update an AWS Secret?</MudInputLabel>
@@ -23,7 +23,7 @@
     </MudItem>
     <MudItem xs="12" sm="6">
         @* <MudText>Polling</MudText> *@
-        <MudTextField T="int" @bindbind-Value="@TextValue" Variant="Variant.Outlined" Placeholder="Unchanged" Label="Polling"/>
+        <MudTextField T="int" @bind-Value="PollingValue" Variant="Variant.Outlined" Placeholder="Unchanged" Label="Polling"/>
     </MudItem>
 </MudGrid>
 <MudGrid Class="d-flex justify-center" Style="margin-top: 0.3em">
@@ -32,6 +32,8 @@
     </MudItem>
 </MudGrid>
 @code {
-    public string TextValue { get; set; }
-    public string Protocol { get; set; }
+    public string? UrlValue { get; set; }
+    public string? AwsValue { get; set; }
+    public int PollingValue { get; set; }
+    private string? Protocol { get; set; }
 }

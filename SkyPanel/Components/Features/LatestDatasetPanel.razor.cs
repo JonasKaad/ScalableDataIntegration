@@ -4,7 +4,7 @@ namespace SkyPanel.Components.Features;
 
 public partial class LatestDatasetPanel : ComponentBase
 {
-    private WeatherForecast[]? forecasts;
+    private WeatherForecast[]? _forecasts;
 
     protected override async Task OnInitializedAsync()
     {
@@ -13,7 +13,7 @@ public partial class LatestDatasetPanel : ComponentBase
 
         var startDate = DateOnly.FromDateTime(DateTime.Now);
         var summaries = new[] { "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching" };
-        forecasts = Enumerable.Range(1, 30).Select(index => new WeatherForecast
+        _forecasts = Enumerable.Range(1, 30).Select(index => new WeatherForecast
         {
             Date = startDate.AddDays(index),
             Summary = summaries[Random.Shared.Next(summaries.Length)]
