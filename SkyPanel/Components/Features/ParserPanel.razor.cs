@@ -1,12 +1,40 @@
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using SkyPanel.Components.Dialogs;
+using SkyPanel.Components.Models;
+using SkyPanel.Components.Services;
 
 namespace SkyPanel.Components.Features;
 
-public partial class ParserPanel : ComponentBase
+public partial class ParserPanel : ComponentBase, IDisposable
 {
-    public required string ParserName { get; set; }
+    [Inject] private ParserStateService ParserState { get; set; } = default!;
+
+    private string ParserName
+    {
+        get => ParserState.ParserName;
+    }
+
+    class ParserWrapper
+    {
+       
+    }
+    public string Parser
+    {
+        get => ParserState.ParserName;
+        set => ParserState.SetParser(ParserState.TestParsers.FirstOrDefault(x => x.Name == value));
+    }
+    
+    protected override void OnInitialized()
+    {
+        ParserState.OnChange += StateHasChanged;
+        //_parserName = ParserState.ParserName;
+    }
+    
+    public void Dispose()
+    {
+        ParserState.OnChange -= StateHasChanged;
+    }
     
     private Task OpenFileDialogAsync()
     {
