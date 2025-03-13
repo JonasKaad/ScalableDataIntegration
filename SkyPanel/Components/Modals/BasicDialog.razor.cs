@@ -12,7 +12,9 @@ public partial class BasicDialog : ComponentBase
     public string EmphasizedCenterText { get; set; } = string.Empty;
     
     [Parameter]
-    public string ContentText { get; set; } = string.Empty;
+    public string SnackbarMessage { get; set; } = string.Empty;
+
+    [Parameter] public Severity SnackbarSeverity { get; set; } = Severity.Normal;
     
     [Parameter]
     public string ConfirmationButtonText { get; set; } = "Ok";
@@ -20,9 +22,17 @@ public partial class BasicDialog : ComponentBase
     [Parameter]
     public Color Color { get; set; } = Color.Success;
     
-    
     [CascadingParameter]
-    private IMudDialogInstance MudDialog { get; set; }
-    private void DialogSubmit() => MudDialog.Close(DialogResult.Ok(true));
-    private void DialogCancel() => MudDialog.Cancel();
+    private IMudDialogInstance? MudDialog { get; set; }
+    private void DialogSubmit()
+    {
+        MudDialog?.Close(DialogResult.Ok(true));
+        if (!string.IsNullOrEmpty(SnackbarMessage))
+        {
+            Snackbar.Add(SnackbarMessage, SnackbarSeverity);
+        }
+
+    }
+
+    private void DialogCancel() => MudDialog?.Cancel();
 }
