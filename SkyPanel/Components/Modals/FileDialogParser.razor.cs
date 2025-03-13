@@ -48,7 +48,6 @@ public partial class FileDialogParser : ComponentBase
     {
         // TODO: Implement logic for handling file uploads
         DialogSubmit();
-        Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
         Snackbar.Add("Uploaded your files!");
     }
     
@@ -58,13 +57,12 @@ public partial class FileDialogParser : ComponentBase
     }
     private void FilePopUp( IReadOnlyList<IBrowserFile> files)
     {
-        Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
         if (files.Count == 1)
         {
-            Snackbar.Add($"Added file: {files[0].Name}", Severity.Success);
+            Snackbar.Add($"Added file: {files[0].Name}", Severity.Info);
             return;
         } 
-        Snackbar.Add($"Added {files.Count} files", Severity.Success);
+        Snackbar.Add($"Added {files.Count} files", Severity.Info);
     }
 
     private void ClearDragClass()
