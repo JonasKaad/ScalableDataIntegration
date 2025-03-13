@@ -33,23 +33,21 @@
 
 @code {
 
-    private string[] _parsers =
-    [
-        "NatTrackParser","BufrParser","WeatherParser", "MetarParser", "SigmetParser", "AirepParser", "NotamParser", "TafParser", "GfsParser", 
-        "PacotParser", "TrackParser", "FlightPlanParser", "RadarParser", "SatelliteParser", "OceanicRouteParser", 
-        "WindParser", "TemperatureParser", "TurbulenceParser", "IcingParser", "CloudParser", "StormParser", 
-        "AviationWeatherParser", "AirspaceParser", "TrafficParser", "RunwayParser", "AirportParser", "FuelDataParser", 
-        "ClearanceParser", "LoadSheetParser", "PirepParser", "FIRParser", "SectorParser"
-    ];
+    
     
     private Task<IEnumerable<string>> Search(string value, CancellationToken token)
     {
         
         // if text is null or empty, show complete list
         if (string.IsNullOrEmpty(value))
-           return Task.FromResult<IEnumerable<string>>(_parsers);
-
-        return Task.FromResult(_parsers.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase)));
+        { 
+            var temp = Task.FromResult<IEnumerable<Parser>>(ParserState.TestParsers); 
+            return Task.FromResult(temp.Result.Select(x => x.Name));
+        }
+        else
+        {
+            var temp = Task.FromResult<IEnumerable<Parser>>(ParserState.TestParsers);
+            return Task.FromResult(temp.Result.Where(x => x.Name.Contains(value, StringComparison.InvariantCultureIgnoreCase)).Select(x => x.Name));
+        }
     }
-
 }
