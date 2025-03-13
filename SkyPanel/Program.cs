@@ -6,6 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddMudServices();
 builder.Services.AddScoped<ParserStateService>();
+builder.Services.AddScoped<SecretCredentialsService>();
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
