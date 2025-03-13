@@ -25,13 +25,14 @@ public partial class ParserPanel : ComponentBase
     {
         var parameters = new DialogParameters<BasicDialog>
         {
-            { x => x.ContentText, "Do you want to fetch and reparse the latest data for: \n" + ParserName },
-            { x => x.ConfirmationButtonText, "Ok" },
-            { x => x.Color, Color.Success }
+            { x => x.ContentText, "Do you want to fetch and parse the latest dataset for:" },
+            { x => x.ConfirmationButtonText, "Confirm" },
+            { x => x.EmphasizedCenterText, ParserName },
+            { x => x.SnackbarMessage, $"Started fetching and parsing latest dataset for {ParserName}"},
+            { x => x.SnackbarSeverity, Severity.Info },
         };
         
         var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.ExtraSmall, FullWidth = true };
-        
         return DialogService.ShowAsync<BasicDialog>("Fetch and parse latest dataset", parameters, options);
     }
 }
