@@ -6,7 +6,7 @@ using SkyPanel.Components.Services;
 
 namespace SkyPanel.Components.Features;
 
-public partial class ParserPanel : ComponentBase, IDisposable
+public partial class ParserPanel : ComponentBase
 {
     [Inject] private ParserStateService ParserState { get; set; } = default!;
 
@@ -28,12 +28,6 @@ public partial class ParserPanel : ComponentBase, IDisposable
     protected override void OnInitialized()
     {
         ParserState.OnChange += StateHasChanged;
-        //_parserName = ParserState.ParserName;
-    }
-    
-    public void Dispose()
-    {
-        ParserState.OnChange -= StateHasChanged;
     }
     
     private Task OpenFileDialogAsync()
