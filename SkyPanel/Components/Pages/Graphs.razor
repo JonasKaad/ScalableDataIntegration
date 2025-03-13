@@ -3,10 +3,10 @@
 <PageTitle>SkyPanel — Graphs</PageTitle>
 <MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
     <MudGrid>
-        <MudItem xs="12" sm="6">
-            <MudPaper Elevation="3" Class="pa-8 ma-2" Style="border-radius: 16px;">
+        <MudItem xs="12" sm="4">
+            <MudPaper Elevation="3" Class="pa-8 ma-2" Style="border-radius: 16px; height: 95%">
                 <MudText Typo="Typo.h5" Class="mb-4">Parser</MudText>
-                <MudItem xs="12" sm="5">
+                <MudItem xs="12" sm="12">
                     <MudStack>
                         <MudGrid>
                             <MudItem xs="12">
@@ -25,14 +25,38 @@
         <MudItem xs="12" sm="6">
             <MudPaper Elevation="3" Class="pa-8 ma-2" Style="border-radius: 16px;">
                 <MudText Typo="Typo.h5" Class="mb-4">Filters</MudText>
-                <MudItem xs="12" sm="5">
+                <MudItem xs="12" sm="12">
                     <MudStack>
-                        <MudGrid>
-                            <MudItem xs="12">
-                                <MudDateRangePicker PickerVariant="PickerVariant.Inline" Label="Date Range" Editable="true" @bind-DateRange="Date" Placeholder="Select Date" />
-                                <MudTimePicker Label="From hour:min" Editable="true" @bind-Time="_time" />
-                                <MudButton OnClick="Zoom">Filter</MudButton>
-                            </MudItem>
+                        <MudGrid xs="12">
+                                <MudItem xs="6" sm="6" Class="mb-2">
+                                    <MudDateRangePicker PickerVariant="PickerVariant.Inline" Label="Date Range" Editable="true" @bind-DateRange="Date" Placeholder="Select Date"/>
+                                </MudItem>
+                                <MudItem xs="5" sm="5">
+                                    <MudGrid>
+                                        <MudItem xs="6">
+                                            <MudTimePicker Label="From hour:min" Editable="true" @bind-Time="_fromTime"/>
+                                        </MudItem>
+                                        <MudItem xs="6">
+                                            <MudTimePicker Label="To hour:min" Editable="true" @bind-Time="_toTime"/>
+                                        </MudItem>
+                                    </MudGrid>
+                                </MudItem>
+                                <MudItem xs="6">
+                                    <MudSelect
+                                        Label="Data grouping"
+                                        Variant="Variant.Filled"
+                                        @bind-Value="_groupSpan">
+                                        <MudSelectItem Value="@(new TimeSpan(0,15,0))">15 Minutes</MudSelectItem>
+                                        <MudSelectItem Value="@(new TimeSpan(1,0,0))">1 Hour</MudSelectItem>
+                                        <MudSelectItem Value="@(new TimeSpan(6,0,0))">6 Hours</MudSelectItem>
+                                        <MudSelectItem Value="@(new TimeSpan(24,0,0))">1 day</MudSelectItem>
+                                        <MudSelectItem Value="@(new TimeSpan(24*7,0,0))">1 week</MudSelectItem>
+                                    </MudSelect>
+                                </MudItem>
+
+                                <MudItem xs="6">
+                                    <MudButton Variant="Variant.Filled"Class="ma-2" OnClick="Zoom">Apply Filter</MudButton>
+                                </MudItem>
                         </MudGrid>
                     </MudStack>
                 </MudItem>
@@ -50,18 +74,32 @@
             else
             {
                 <ApexChart TItem="ParserData"
-                           Options="options"
-                           Title="Sample Data" @ref="chart"
+                           Options=options
+                           Title="Downloaded data amount" @ref="chart"
                            XAxisType="XAxisType.Datetime">
-                    @foreach (string parser in _selectedParsers)
+                    <ApexPointTooltip>
+                        <div class="ma-2">
+                            @{
+                                var point = (DataPoint<ParserData>)context.DataPoint;
+                                <h3>@Selected.ToList()[context.SeriesIndex]</h3>
+                                <p>Time: @point.X</p>
+                                <p>Downloaded: @point.Y Megabytes</p>
+                            }
+                        </div>
+                    </ApexPointTooltip>
+                    <ChildContent>
+                    @foreach (string parser in Selected)
                     {
                         <ApexPointSeries TItem="ParserData"
                                          Items="@parserData[@parser]"
                                          Name="@parser"
-                                         SeriesType="SeriesType.Line"
+                                         SeriesType="SeriesType.Bar"
                                          XValue="e => e.Time"
-                                         YValue="e => e.DownloadedBytes"/>
+                                         YAggregate="e => e.Sum(es => es.DownloadedBytes)"
+                                         OrderByDescending="e => e.X"
+                                         ShowDataLabels />
                     }
+                    </ChildContent>
                 </ApexChart>
             }
         </MudPaper>
@@ -74,15 +112,46 @@
     private ApexChartOptions<ParserData> options;
     [CascadingParameter] private bool IsDarkMode { get; set; }
     private IEnumerable<string> _selectedParsers = [];
+    private List<string> Selected = [];
     private Dictionary<string, List<ParserData>> parserData = new();
-    private List<string> _parsers = new() { "parser", "2ndParser" };
-    private DateRange Date { get; set; }
-    private TimeSpan? _time = new TimeSpan(00, 45, 00);
+    private Dictionary<string, List<ParserData>> rawParserData = new();
+    private readonly List<string> _parsers = ["parser", "2ndParser"];
+    private DateRange Date { get; set; } = new (DateTime.Today, DateTime.Today);
+    private TimeSpan? _fromTime = new TimeSpan(00, 00,00);
+    private TimeSpan? _toTime = new TimeSpan(23, 59, 59);
+    private TimeSpan _groupSpan = new TimeSpan(1, 0, 0);
 
     protected override void OnInitialized()
     {
         options = new ApexChartOptions<ParserData>
         {
+            Yaxis = new List<YAxis>()
+            {
+              new()
+              {
+                  Title = new (){Text="MegaBytes"}
+              }  
+            },
+            Chart = new Chart()
+            {
+                Stacked = true
+            },
+            PlotOptions = new PlotOptions
+            {
+                Bar = new PlotOptionsBar
+                {
+                    DataLabels = new PlotOptionsBarDataLabels
+                    {
+                        Total = new BarTotalDataLabels
+                        {
+                            Style = new BarDataLabelsStyle
+                            {
+                                FontWeight = "800"
+                            }
+                        }
+                    }
+                }
+            },
             Theme = new Theme
             {
                 Mode = IsDarkMode ? Mode.Dark : Mode.Light,
@@ -90,19 +159,23 @@
             }
         };
         
-        parserData.Add(_parsers.First(), new ()
+        rawParserData.Add(_parsers.First(), new ()
         {
-            new() {Time = DateTime.Parse("2025-11-03 11:22"), DownloadedBytes = 33 },
-            new () { Time = DateTime.Parse("2025-11-03 11:24"), DownloadedBytes = 42 },
-            new () { Time = DateTime.Parse("2025-11-03 11:30"), DownloadedBytes = 23 }
+            new(time: new DateTime(2025, 03, 13, 06, 00, 00, DateTimeKind.Utc), downloadedBytes: 33),
+            new(time: new DateTime(2025, 03, 13, 12, 00, 00, DateTimeKind.Utc), downloadedBytes: 42),
+            new(time: new DateTime(2025, 03, 13, 18, 00, 00, DateTimeKind.Utc), downloadedBytes: 23),
+            new(time: new DateTime(2025, 03, 13, 18, 00, 00, DateTimeKind.Utc), downloadedBytes: 23),
+            new(time: new DateTime(2025, 03, 17, 06, 00, 00, DateTimeKind.Utc), downloadedBytes: 500),
+            new(time: new DateTime(2025, 03, 22, 12, 00, 00, DateTimeKind.Utc), downloadedBytes: 80),
         });
         
-        parserData.Add(_parsers.Skip(1).First(), new ()
-        {
-            new() {Time = DateTime.Parse("2025-11-03 11:21"), DownloadedBytes = 99 },
-            new () { Time = DateTime.Parse("2025-11-03 11:28"), DownloadedBytes = 12 },
-            new () { Time = DateTime.Parse("2025-11-03 11:35"), DownloadedBytes = 56 }
-        });
+        rawParserData.Add(_parsers.Skip(1).First(), [
+            new(time: new DateTime(2025, 03, 13, 06, 21, 00, DateTimeKind.Utc), downloadedBytes: 99),
+            new(time: new DateTime(2025, 03, 13, 14, 28, 00, DateTimeKind.Utc), downloadedBytes: 12),
+            new(time: new DateTime(2025, 03, 13, 21, 35, 00, DateTimeKind.Utc), downloadedBytes: 56),
+            new(time: new DateTime(2025, 03, 18, 18, 35, 00, DateTimeKind.Utc), downloadedBytes: 22),
+            new(time: new DateTime(2025, 03, 21, 12, 35, 00, DateTimeKind.Utc), downloadedBytes: 730),
+        ]);
         _loading = false;
         StateHasChanged();
     }
@@ -110,23 +183,48 @@
     private async Task AddParser(IEnumerable<string> values)
     {
         _loading = true;
-        _selectedParsers = values;
-        await Task.Delay(720);
-        await chart.UpdateOptionsAsync(true, true, false);
-        StateHasChanged();
+        var start = Date.Start.GetValueOrDefault().Add(_fromTime.GetValueOrDefault());
+        var end = Date.End.GetValueOrDefault().Add(_toTime.GetValueOrDefault());
+        var selected = values.ToList();
+        _selectedParsers = selected;
+        ClampData(start, end);
+        
+        Selected = selected;
+        
+        await Zoom();
         _loading = false;
+    }
+
+    private void ClampData(DateTime start, DateTime end)
+    {
+        foreach (var parser in _selectedParsers)
+        {
+            parserData[parser] = rawParserData[parser].Where(p => start < p.Time && p.Time < end).ToList()
+                .ConvertAll(p => new ParserData(p.Time, p.DownloadedBytes));
+            foreach (var data in parserData[parser])
+            {
+                data.Time = FloorDate(data.Time, _groupSpan); 
+            }
+        }
+    }
+
+    private DateTime FloorDate(DateTime date, TimeSpan span)
+    {
+        return date.AddTicks(-(date.Ticks % span.Ticks));
     }
     
     private async Task Zoom()
     {
-        var start = Date.Start.GetValueOrDefault().Add(_time.GetValueOrDefault());
-        var end = Date.End.GetValueOrDefault();
-        await chart.ZoomXAsync(start.ToUnixTimeMilliseconds(), end.ToUnixTimeMilliseconds());
+        var start = Date.Start.GetValueOrDefault().Add(_fromTime.GetValueOrDefault());
+        var end = Date.End.GetValueOrDefault().Add(_toTime.GetValueOrDefault());
+        ClampData(start, end);
+        await chart.UpdateOptionsAsync(true, true, false);
+        //await chart.ZoomXAsync(start.ToUnixTimeMilliseconds(), end.ToUnixTimeMilliseconds());
     }
 
-    public class ParserData
+    public class ParserData(DateTime time, decimal downloadedBytes)
     {
-        public DateTime Time { get; set; }
-        public decimal DownloadedBytes { get; set; }
+        public DateTime Time { get; set; } = time;
+        public decimal DownloadedBytes { get; set; } = downloadedBytes;
     }
 }
