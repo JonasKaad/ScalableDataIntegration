@@ -14,9 +14,10 @@
                                      SelectValueOnTab="true"
                                      Placeholder="No Parser Selected"
                                      />
-        </MudItem>
-        
-        <MudItem xs="12">
+        </MudItem> 
+    </MudGrid>
+    <MudGrid Class="d-flex justify-center" Style="margin-top: 0.1em">
+        <MudItem>
             <MudButton OnClick="@(() => OpenFileDialogAsync())" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.FileUpload" Color="Color.Primary" Disabled="@(string.IsNullOrEmpty(ParserName))">
                 Upload Dataset
             </MudButton>
