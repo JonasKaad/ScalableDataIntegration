@@ -1,6 +1,5 @@
 using System.Text;
 using Downloader.Utils;
-using HtmlAgilityPack;
 
 namespace Downloader.Downloaders;
 
@@ -17,13 +16,12 @@ public class AusotDownloader : BaseDownloader
     {
         try
         {
-            var doc = new HtmlDocument();
+            Console.WriteLine("Downloading AusotTracks...");
             var bytes = await _downloaderClient.FetchData();
-            doc.Load(new MemoryStream(bytes));
-            var result = Encoding.UTF8.GetBytes(doc.DocumentNode.InnerText.Trim());
 
-            Log(_name, result.Length, DateTime.Now);
-            await SendToParser(result);
+            Log(_name, bytes.Length, DateTime.Now);
+            Console.WriteLine("Sending to parser...");
+            await SendToParser(bytes);
         }
         catch (Exception e)
         {

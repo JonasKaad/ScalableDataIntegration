@@ -1,0 +1,25 @@
+﻿FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
+USER $APP_UID
+WORKDIR /app
+EXPOSE 8080
+EXPOSE 8084
+
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+ARG BUILD_CONFIGURATION=Release
+WORKDIR /src
+COPY ["./Parsers/AusotParser/AusotParser.csproj", "./Parsers/AusotParser/"]
+COPY ["./GeneratedClients/csharp/Parser.cs", "./GeneratedClients/csharp/"]
+COPY ["./GeneratedClients/csharp/ParserGrpc.cs", "./GeneratedClients/csharp/"]
+RUN dotnet restore "./Parsers/AusotParser/AusotParser.csproj"
+COPY . .
+WORKDIR "/src/"
+RUN dotnet build "./Parsers/AusotParser/AusotParser.csproj" -c $BUILD_CONFIGURATION -o /app/build
+
+FROM build AS publish
+ARG BUILD_CONFIGURATION=Release
+RUN dotnet publish "./Parsers/AusotParser/AusotParser.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "AusotParser.dll"]
