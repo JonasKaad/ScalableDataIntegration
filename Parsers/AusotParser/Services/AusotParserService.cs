@@ -67,9 +67,9 @@ public class AusotParserService : Parser.ParserBase
 
     private static async Task SaveDataToBlob(string result, List<Track> tracks)
     {
-        var blobServiceClient = new BlobServiceClient(
-            new Uri("https://parserstorage.blob.core.windows.net"),
-            new DefaultAzureCredential());
+        DotNetEnv.Env.Load();
+        var connectionString = Environment.GetEnvironmentVariable("blobConnection");
+        var blobServiceClient = new BlobServiceClient(connectionString);
 
         var container = blobServiceClient.GetBlobContainerClient(_name);
         await container.CreateIfNotExistsAsync();
