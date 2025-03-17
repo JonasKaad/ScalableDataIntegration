@@ -15,6 +15,12 @@ public partial class ProtocolPanel : ComponentBase, INotifyPropertyChanged
     private bool _awsUsernamePasswordDebug = false;
     private string _protoParserName = string.Empty;
     private string _secretName = string.Empty;
+    private string? Protocol { get; set; }
+    public string? UrlValue { get; set; }
+    public int PollingValue { get; set; }
+    public string Username { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
+    public string PlaceholderText { get; set; } = "No Secret Selected";
     
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -108,6 +114,21 @@ public partial class ProtocolPanel : ComponentBase, INotifyPropertyChanged
         var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small, FullWidth = true };
 
         return DialogService.ShowAsync<CredentialsDialog>("Secret Management", parameters, options);
+    }
+    
+    private Task<IEnumerable<string>> Search(string value, CancellationToken token)
+    {
+        var allParserNames = CredentialsService.GetParserSecretNames();
+
+        // if text is null or empty, return all parser names
+        if (string.IsNullOrEmpty(value))
+            return Task.FromResult(allParserNames);
+    
+        // Filter parser names based on the input value
+        var filteredParsers = allParserNames
+            .Where(key => key.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+        
+        return Task.FromResult(filteredParsers);
     }
 
     private void OnPropertyChanged()

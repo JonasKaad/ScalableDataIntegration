@@ -48,26 +48,4 @@
         <MudButton Size="Size.Large" Variant="Variant.Filled" Color="Color.Primary" >Update</MudButton>
     </MudItem>
 </MudGrid>
-@code {
-    public string? UrlValue { get; set; }
-    public int PollingValue { get; set; }
-    private string? Protocol { get; set; }
-    public string Username { get; set; } = string.Empty;
-    public string Password { get; set; } = string.Empty;
-    public string PlaceholderText { get; set; } = "No Secret Selected";
-    
-    private Task<IEnumerable<string>> Search(string value, CancellationToken token)
-    {
-        var allParserNames = CredentialsService.GetParserSecretNames();
-
-        // if text is null or empty, return all parser names
-        if (string.IsNullOrEmpty(value))
-            return Task.FromResult(allParserNames);
-    
-        // Filter parser names based on the input value
-        var filteredParsers = allParserNames
-            .Where(key => key.Contains(value, StringComparison.InvariantCultureIgnoreCase));
-        
-        return Task.FromResult(filteredParsers);
-    }
-}
+@code {}
