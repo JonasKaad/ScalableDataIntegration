@@ -1,26 +1,117 @@
 ﻿@page "/graphs"
+@using ApexCharts
 <PageTitle>SkyPanel — Graphs</PageTitle>
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+    <MudGrid>
+        <MudItem xs="12" sm="4">
+            <MudPaper Elevation="3" Class="pa-8 ma-2" Style="border-radius: 16px; height: 95%">
+                <MudText Typo="Typo.h5" Class="mb-4">Parser</MudText>
+                <MudItem xs="12" sm="12">
+                    <MudStack>
+                        <MudGrid>
+                            <MudItem xs="12">
+                                <MudSelect T="string" Label="Parsers" MultiSelection="true" SelectedValues="_selectedParsers" SelectedValuesChanged="AddParser">
+                                    @foreach (var parser in _parsers)
+                                    {
+                                        <MudSelectItem T="string" Value="@parser">@parser</MudSelectItem>
+                                    }
+                                </MudSelect>
+                            </MudItem>
+                        </MudGrid>
+                    </MudStack>
+                </MudItem>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12" sm="6">
+            <MudPaper Elevation="3" Class="pa-8 ma-2" Style="border-radius: 16px;">
+                <MudText Typo="Typo.h5" Class="mb-4">Filters</MudText>
+                <MudItem xs="12" sm="12">
+                    <MudStack>
+                        <MudGrid xs="12">
+                                <MudItem xs="6" sm="6" Class="mb-2">
+                                    <MudDateRangePicker PickerVariant="PickerVariant.Inline" Label="Date Range" Editable="true" @bind-DateRange="Date" Placeholder="Select Date"/>
+                                </MudItem>
+                                <MudItem xs="5" sm="5">
+                                    <MudGrid>
+                                        <MudItem xs="6">
+                                            <MudTimePicker Label="From hour:min" Editable="true" @bind-Time="_fromTime"/>
+                                        </MudItem>
+                                        <MudItem xs="6">
+                                            <MudTimePicker Label="To hour:min" Editable="true" @bind-Time="_toTime"/>
+                                        </MudItem>
+                                    </MudGrid>
+                                </MudItem>
+                                <MudItem xs="6">
+                                    <MudSelect
+                                        Label="Data grouping"
+                                        Variant="Variant.Filled"
+                                        @bind-Value="_groupSpan">
+                                        <MudSelectItem Value="@(new TimeSpan(0,15,0))">15 Minutes</MudSelectItem>
+                                        <MudSelectItem Value="@(new TimeSpan(1,0,0))">1 Hour</MudSelectItem>
+                                        <MudSelectItem Value="@(new TimeSpan(6,0,0))">6 Hours</MudSelectItem>
+                                        <MudSelectItem Value="@(new TimeSpan(24,0,0))">1 day</MudSelectItem>
+                                        <MudSelectItem Value="@(new TimeSpan(24*7,0,0))">1 week</MudSelectItem>
+                                    </MudSelect>
+                                </MudItem>
+                                <MudItem>
+                                    <MudSelect
+                                        Label="Y-axis"
+                                        Variant="Variant.Filled"
+                                        @bind-Value="_yaxis">
+                                        <MudSelectItem Value="Amount.Kilo">Kilobytes</MudSelectItem>
+                                        <MudSelectItem Value="Amount.Mega">Megabytes</MudSelectItem>
+                                        <MudSelectItem Value="Amount.Giga">Gigabytes</MudSelectItem>
+                                    </MudSelect>
+                                </MudItem>
 
-<MudText Typo="Typo.h2" GutterBottom="true">Graphs</MudText>
-<MudText Typo="Typo.h4" Class="mb-8">This page demonstrates fake loading and displaying a graph.</MudText>
-
-@if (_fakeLoading == false)
-{
-    <MudProgressCircular Color="Color.Info" Indeterminate="true" Size="Size.Large" />
-}
-else
-{
-    <MudImage ObjectPosition="ObjectPosition.Center" Src="images/graph.png" Height="400" Width="400"/>
-}
-
-@code {
-    private bool _fakeLoading;
-
-    protected override async Task OnInitializedAsync()
-    {
-        // Simulate asynchronous loading to demonstrate a loading indicator
-        await Task.Delay(1500);
-        _fakeLoading = true;
-    }
-
-}
+                                <MudItem xs="6">
+                                    <MudButton Variant="Variant.Filled"Class="ma-2" OnClick="Zoom">Apply Filter</MudButton>
+                                </MudItem>
+                        </MudGrid>
+                    </MudStack>
+                </MudItem>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
+<MudGrid Justify="Justify.Center">
+    <MudItem xs="12" sm="8">
+        <MudPaper Class="pa-8 ma-2" >
+            @if (_loading)
+            {
+                <MudProgressCircular Indeterminate="true"/>
+            }
+            else
+            {
+                <ApexChart TItem="ParserData"
+                           Options=_options
+                           Title="Downloaded data amount" @ref="Chart"
+                           XAxisType="XAxisType.Datetime">
+                    <ApexPointTooltip>
+                        <div class="ma-2">
+                            @{
+                                var point = (DataPoint<ParserData>)context.DataPoint;
+                                <h3>@_selected.ToList()[context.SeriesIndex]</h3>
+                                <p>Time: @point.X</p>
+                                <p>Downloaded: @point.Y Megabytes</p>
+                            }
+                        </div>
+                    </ApexPointTooltip>
+                    <ChildContent>
+                    @foreach (string parser in _selected)
+                    {
+                        <ApexPointSeries TItem="ParserData"
+                                         Items="@_parserData[@parser]"
+                                         Name="@parser"
+                                         SeriesType="SeriesType.Bar"
+                                         XValue="e => e.Time"
+                                         YAggregate="e => Math.Round(e.Sum(es => es.DownloadedBytes),5)"
+                                         OrderByDescending="e => e.X"
+                                         ShowDataLabels />
+                    }
+                    </ChildContent>
+                </ApexChart>
+            }
+        </MudPaper>
+    </MudItem>
+</MudGrid>
