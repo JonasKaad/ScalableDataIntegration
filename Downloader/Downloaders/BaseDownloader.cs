@@ -10,11 +10,13 @@ public class BaseDownloader : IDownloader
 {
     private readonly DisDownloaderClient _downloaderClient;
     private readonly string _parser;
+    private readonly string _name;
 
-    public BaseDownloader(DisDownloaderClient downloaderClient, string parser)
+    public BaseDownloader(DisDownloaderClient downloaderClient, string parser, string name = "basedownloader")
     {
         _downloaderClient = downloaderClient ?? throw new ArgumentNullException(nameof(downloaderClient));
         _parser = parser ?? throw new ArgumentNullException(nameof(parser));
+        _name = name;
     }
 
     public async Task Download()
@@ -22,7 +24,7 @@ public class BaseDownloader : IDownloader
         try
         {
             var bytes = await _downloaderClient.FetchData();
-            Log(_parser, bytes.Length, DateTime.Now);
+            Log(_name, bytes.Length, DateTime.Now);
             await SendToParser(bytes);
         }
         catch (Exception e)
@@ -42,7 +44,7 @@ public class BaseDownloader : IDownloader
         Console.WriteLine(parserName + "," + bytesAmount + "," + date);
     }
     
-    private async Task SendToParser(byte[] downloadedBytes)
+    protected async Task SendToParser(byte[] downloadedBytes)
     {
         using var channel = GrpcChannel.ForAddress(_parser);
         var client = new Parser.ParserClient(channel);
