@@ -6,7 +6,7 @@ using SkyPanel.Components.Services;
 
 namespace SkyPanel.Components.Features;
 
-public partial class ProtocolPanel : ComponentBase, INotifyPropertyChanged
+public partial class ProtocolPanel : ComponentBase
 {
     [Inject] private ParserStateService ParserState { get; set; } = default!;
     
@@ -21,9 +21,6 @@ public partial class ProtocolPanel : ComponentBase, INotifyPropertyChanged
     private string Username { get; set; } = string.Empty;
     private string Password { get; set; } = string.Empty;
     private string PlaceholderText { get; set; } = "No Secret Selected";
-    
-    public event PropertyChangedEventHandler? PropertyChanged;
-
 
     public string SecretName
     {
@@ -36,18 +33,7 @@ public partial class ProtocolPanel : ComponentBase, INotifyPropertyChanged
                 Username = string.Empty;
                 Password = string.Empty;
             }
-            else if (CredentialsService.GetParserSecretNames().Contains(value))
-            {
-                _secretName = value;
-                Username = CredentialsService.GetUsername(_secretName);
-                Password = CredentialsService.GetPassword(_secretName);
-            }
-            else
-            {
-                _secretName = string.Empty;
-                Username = string.Empty;
-                Password = string.Empty;
-            }
+            else CheckForCredentials(value);
         }
     }
 
@@ -99,7 +85,7 @@ public partial class ProtocolPanel : ComponentBase, INotifyPropertyChanged
         set
         {
             _protoParserName = value;
-            OnPropertyChanged();
+            OnParserChanged();
         } 
     }
     
@@ -131,13 +117,16 @@ public partial class ProtocolPanel : ComponentBase, INotifyPropertyChanged
         return Task.FromResult(filteredParsers);
     }
 
-    private void OnPropertyChanged()
+    private void OnParserChanged()
     {
         if (string.IsNullOrEmpty(_protoParserName)) return;
         if (!CredentialsService.GetParserSecretNames().Contains(_protoParserName))
         {
             PlaceholderText = "No Secret Found!";
         }
-        PlaceholderText = "No Secret Selected";
+        else
+        {
+            PlaceholderText = "No Secret Selected";
+        }
     }
 }
