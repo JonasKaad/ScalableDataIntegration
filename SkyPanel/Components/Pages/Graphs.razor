@@ -17,6 +17,10 @@
                                     }
                                 </MudSelect>
                             </MudItem>
+                            <MudItem>
+                                <MudText>Showing parsers with downloaded data in the last 31 days</MudText>
+                                <MudButton Variant="Variant.Filled" OnClick="@(() => FetchDataFromDb(DateTime.Parse("2023-01-01").ToUniversalTime()))">Fetch more?</MudButton>
+                            </MudItem>
                         </MudGrid>
                     </MudStack>
                 </MudItem>
@@ -44,6 +48,7 @@
                                 <MudItem xs="6">
                                     <MudSelect
                                         Label="Data grouping"
+                                        Dense="true"
                                         Variant="Variant.Filled"
                                         @bind-Value="_groupSpan">
                                         <MudSelectItem Value="@(new TimeSpan(0,15,0))">15 Minutes</MudSelectItem>
@@ -53,11 +58,13 @@
                                         <MudSelectItem Value="@(new TimeSpan(24*7,0,0))">1 week</MudSelectItem>
                                     </MudSelect>
                                 </MudItem>
-                                <MudItem>
+                                <MudItem xs="6">
                                     <MudSelect
+                                        Dense="true"
                                         Label="Y-axis"
                                         Variant="Variant.Filled"
                                         @bind-Value="_yaxis">
+                                        <MudSelectItem Value="Amount.Byte">Bytes</MudSelectItem>
                                         <MudSelectItem Value="Amount.Kilo">Kilobytes</MudSelectItem>
                                         <MudSelectItem Value="Amount.Mega">Megabytes</MudSelectItem>
                                         <MudSelectItem Value="Amount.Giga">Gigabytes</MudSelectItem>
