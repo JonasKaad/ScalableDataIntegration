@@ -6,12 +6,12 @@
 <MudSnackbarProvider />
 <MudLayout>
     <MudAppBar Elevation="1">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@(() => DrawerToggle())" />
         <MudImage Src="images/foreflight_logo.png" Width="56" Height="56"/>
         <MudText Typo="Typo.h5" Class="ml-3">Data Integration Service — SkyPanel</MudText>
         <MudSpacer />
         
-        <MudText Typo="Typo.body1" >@theTime</MudText>
+        <MudText Typo="Typo.body1" >@_theTime</MudText>
         <MudIconButton Icon="@(DarkLightModeButtonIcon)" Color="Color.Inherit" OnClick="@DarkModeToggle" />
         <MudIconButton Icon="@Icons.Material.Outlined.AccountCircle" Color="Color.Inherit"  />
         <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit"  Edge="Edge.End" />
@@ -35,14 +35,14 @@
 
 @code {
     private bool _drawerOpen = true;
-    private bool _isDarkMode = true;
-    private MudTheme? _theme = null;
+    private bool _isDarkMode;
+    private MudTheme? _theme;
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
         
-        aTimer = new Timer(Tick, null, 0, 1000);        
+        _aTimer = new Timer(Tick!, null, 0, 1000);        
 
         _theme = new()
         {
@@ -64,6 +64,7 @@
 
     private readonly PaletteLight _lightPalette = new()
     {
+        Primary = "#880088",
         Black = "#110e2d",
         AppbarText = "#ffffff",
         AppbarBackground = "rgba(136,0,136,1)",
@@ -107,18 +108,18 @@
         false => Icons.Material.Outlined.DarkMode,
     };
     
-    string theTime;    
-    Timer aTimer;
+    string? _theTime;    
+    Timer? _aTimer;
     
     private void Tick(object _)
     {
-        theTime = DateTime.UtcNow.ToString("HH:mm:ss") + "Z";
+        _theTime = DateTime.UtcNow.ToString("HH:mm:ss") + "Z";
         InvokeAsync(StateHasChanged);
     }
 
     public void Dispose()
     {
-        aTimer?.Dispose();
+        _aTimer?.Dispose();
     }
     
 }

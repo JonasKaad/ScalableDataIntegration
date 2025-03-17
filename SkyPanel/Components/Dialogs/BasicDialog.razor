@@ -1,0 +1,21 @@
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <DialogContent>
+        <MudText Typo="Typo.body1">@ContentText</MudText>
+        @if (!string.IsNullOrEmpty(EmphasizedCenterText))
+        {
+            <MudGrid Class="d-flex justify-center" Style="margin-top: 0.1em">
+                <MudText Typo="Typo.h6" Style="font-weight:bolder; font-style: italic">@EmphasizedCenterText</MudText>
+            </MudGrid>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@DialogCancel" Variant="Variant.Filled">Cancel</MudButton>
+        <MudSpacer/>
+        <MudButton Color="@Color" OnClick="@DialogSubmit" Variant="Variant.Filled">@ConfirmationButtonText</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+}

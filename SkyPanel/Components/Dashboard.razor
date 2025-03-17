@@ -1,13 +1,41 @@
-<h3>Dashboard Component</h3>
-
-<MudText>@_name</MudText>
-
-<MudButton OnClick="@(() => { 
-    PrintName();
-    SetName("testName");
-    PrintName();
-})"> Set Name </MudButton>
-
+@using System.Drawing
+@using MudBlazor.Extensions
+@using SkyPanel.Components.Features
+@using Color = MudBlazor.Color
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+   <MudGrid>
+      <MudItem xs="12" sm="5" Class="pr-8">
+         <MudPaper Elevation="3" Class="pa-8 ma-2" Style="border-radius: 16px;">
+            <ParserPanel />
+         </MudPaper>
+      </MudItem>
+      <MudItem xs="12" sm="7" Class="pl-8">
+         <MudPaper Elevation="3" Class="pa-8 ma-2" Style="@ParserSelectedStyle()">
+               <ProtocolPanel/>
+         </MudPaper>
+      </MudItem>
+      <MudItem xs="12" sm="12">
+         <MudPaper Elevation="3" Class="pa-8 ma-2" Style="border-radius: 16px;">
+            <MudText Typo="Typo.h6">Latest Dataset</MudText>
+            <LatestDatasetPanel />
+         </MudPaper>
+      </MudItem>
+   </MudGrid>
+</MudContainer>
 @code {
-   //string testName = "name";
+   private string ParserSelectedStyle() => $"border-radius: 16px; {(ParserState.ParserIsNotSelected() ? $"opacity: 0.33" : string.Empty)}";
+   
+   private void UpdateState()
+   {
+      StateHasChanged();
+   }
+
+   protected override void OnAfterRender(bool firstRender)
+   {
+      if (firstRender)
+      {
+         ParserState.OnChange += UpdateState;
+      }
+   }
 }
+

@@ -1,9 +1,25 @@
+using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
 using SkyPanel.Components;
-
+using SkyPanel.Components.Services;
+using DotNetEnv;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddMudServices();
+builder.Services.AddScoped<ParserStateService>();
+builder.Services.AddScoped<SecretCredentialsService>();
+//Database service setup
+builder.Services.AddDbContext<StatisticsDatabaseService>(options =>
+{
+    // Load environment variables
+    Env.Load();
+    // Npgsql formatted connection string
+    var connectionString = "Server=" + Env.GetString("SERVER") + ";" + 
+                           "Database=" + Env.GetString("DATABASE")+ ";"  + 
+                           "Username=" + Env.GetString("USER")+ ";"  + 
+                           "Password=" + Env.GetString("PASSWORD") + ";" ;
+    options.UseNpgsql(connectionString);
+});
 
 // Add services to the container.
 builder.Services.AddRazorComponents()

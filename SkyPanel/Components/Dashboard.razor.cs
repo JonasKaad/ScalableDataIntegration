@@ -1,19 +1,9 @@
 using Microsoft.AspNetCore.Components;
 
 namespace SkyPanel.Components;
+using SkyPanel.Components.Services;
 
 public partial class Dashboard : ComponentBase
 {
-    private string _name = "World";
-
-
-    public void SetName(string Name)
-    {
-        _name = Name;
-    }
-
-    public void PrintName()
-    {
-        Console.WriteLine(_name);
-    }
+    [Inject] private ParserStateService ParserState { get; set; } = default!;
 }
