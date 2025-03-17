@@ -1,7 +1,5 @@
-﻿using Downloader.Utils;
-using Google.Protobuf;
-using Grpc.Net.Client;
-using Sdi.Parser;
+﻿using Downloader.Downloaders;
+using Downloader.Utils;
 using Source = Downloader.Utils.IDownloaderClient.Source;
 
 Dictionary<string, string> downloaders = new()
@@ -13,11 +11,13 @@ Dictionary<string, string> downloaders = new()
 
 var parsers = new Dictionary<string, string>()
 {
-    { "1", "http://newdis-parser--tdixdfe.agreeablewave-0f8fa504.westeurope.azurecontainerapps.io" },
-    { "2", "https://python-test--rku67b7.agreeablewave-0f8fa504.westeurope.azurecontainerapps.io" },
+    { "1", "http://csharpparser.jonaskaad.com" },
+    { "2", "https://pythonparser.jonaskaad.com" },
 };
 
-var combinedClient = new DisDownloaderClient();
+var combinedClient = new DisDownloaderClient("http://sdihttp.jonaskaad.com");
+var downloaderParser = parsers["1"];
+var downloader = new BaseDownloader(combinedClient, downloaderParser);
 
 while (true)
 {
@@ -34,30 +34,20 @@ while (true)
     {
         return;
     }
-    var downloadedBytes = await FetchData(address, combinedClient);
-    if (downloadedBytes.Length == 0)
+
+    try
     {
-        throw new Exception($"Unable to fetch data from {address}");
+        SetUrl(address, downloader);
+        await downloader.Download();
     }
-    Console.WriteLine($"Downloaded {downloadedBytes.Length} bytes");
-    Console.WriteLine("Select a parser:\n1 - csharp-parser\n2 - python-parser\n3 - testingparser");
-
-    var selectedParser = Console.ReadLine() ?? "";
-
-    if (!parsers.TryGetValue(selectedParser, out var parser))
+    catch (Exception e)
     {
-        Console.WriteLine("Invalid downloader selected");
-        throw new ArgumentException($"Unknown source type: {selectedParser}");
+        Console.WriteLine(e);
     }
 
-    using var channel = GrpcChannel.ForAddress(parser);
-    var client = new Parser.ParserClient(channel);
-
-    var reply = await client.ParseCallAsync(new (){ RawData = ByteString.CopyFrom(downloadedBytes) });
-    Console.WriteLine($"Success: {reply.Success}. Msg: {reply.ErrMsg}");
 }
 
-async Task<byte[]> FetchData(string value, DisDownloaderClient disDownloaderClient)
+void SetUrl(string protocol, BaseDownloader baseDownloader)
 {
     Console.WriteLine("Enter URL:");
     var url = Console.ReadLine() ?? "";
@@ -65,25 +55,23 @@ async Task<byte[]> FetchData(string value, DisDownloaderClient disDownloaderClie
     {
         throw new ArgumentException("URL is required");
     }
-    Console.WriteLine("Enter user/tokenName:");
+    Console.WriteLine($"Enter {(String.Equals(protocol, "HTTP") ? "token name":"username")}:");
     var user = Console.ReadLine() ?? "";
-    Console.WriteLine("Enter password:");
+    Console.WriteLine($"Enter {(String.Equals(protocol, "HTTP") ? "token":"password")}:");
     var password = Console.ReadLine() ?? "";
 
-    if (value is not ("HTTP" or "FTP"))
+    if (protocol is not ("HTTP" or "FTP"))
     {
         throw new FormatException("How did you get here?");
     }
-
-    switch (value)
+    
+    switch (protocol)
     {
         case "HTTP":
-            disDownloaderClient.SwitchSource(Source.Http, url, user, password);
+            baseDownloader.SwitchSource(Source.Http, url, user, password);
             break;
         case "FTP":
-            disDownloaderClient.SwitchSource(Source.Ftp, url, user, password);
+            baseDownloader.SwitchSource(Source.Ftp, url, user, password);
             break;
     }
-
-    return await disDownloaderClient.FetchData();
 }

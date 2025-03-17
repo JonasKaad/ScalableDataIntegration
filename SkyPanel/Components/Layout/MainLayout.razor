@@ -19,9 +19,11 @@
     <MudDrawer id="nav-drawer" @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
         <NavMenu />
     </MudDrawer>
-    <MudMainContent Class="mt-16 pa-4">
-        @Body
-    </MudMainContent>
+    <CascadingValue Value="_isDarkMode">
+        <MudMainContent Class="mt-16 pa-4">
+            @Body
+        </MudMainContent>
+    </CascadingValue>
 </MudLayout>
 
 
