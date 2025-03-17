@@ -1,9 +1,7 @@
 using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using SkyPanel.Components.Dialogs;
-using SkyPanel.Components.Features;
 using SkyPanel.Components.Services;
 
 namespace SkyPanel.Components.Features;
@@ -18,7 +16,7 @@ public partial class ProtocolPanel : ComponentBase, INotifyPropertyChanged
     private string _protoParserName = string.Empty;
     private string _secretName = string.Empty;
     
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
 
 
     public string SecretName
@@ -88,8 +86,8 @@ public partial class ProtocolPanel : ComponentBase, INotifyPropertyChanged
         }
         
     }
-    
-    public string ProtoParserName
+
+    private string ProtoParserName
     {
         get => _protoParserName;
         set
@@ -111,14 +109,14 @@ public partial class ProtocolPanel : ComponentBase, INotifyPropertyChanged
 
         return DialogService.ShowAsync<CredentialsDialog>("Secret Management", parameters, options);
     }
-    protected void OnPropertyChanged([CallerMemberName] string parserName = null)
+
+    private void OnPropertyChanged()
     {
-        if (!String.IsNullOrEmpty(_protoParserName))
+        if (string.IsNullOrEmpty(_protoParserName)) return;
+        if (!CredentialsService.GetParserSecretNames().Contains(_protoParserName))
         {
-            if (!CredentialsService.GetParserSecretNames().Contains(parserName))
-            {
-                PlaceholderText = "No Secret Found!";
-            }
+            PlaceholderText = "No Secret Found!";
         }
+        PlaceholderText = "No Secret Selected";
     }
 }
