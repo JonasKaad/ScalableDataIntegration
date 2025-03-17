@@ -9,9 +9,9 @@ namespace Downloader.Downloaders;
 public class BaseDownloader : IDownloader
 {
     private readonly DisDownloaderClient _downloaderClient;
-    private readonly String _parser;
+    private readonly string _parser;
 
-    public BaseDownloader(DisDownloaderClient downloaderClient, String parser)
+    public BaseDownloader(DisDownloaderClient downloaderClient, string parser)
     {
         _downloaderClient = downloaderClient ?? throw new ArgumentNullException(nameof(downloaderClient));
         _parser = parser ?? throw new ArgumentNullException(nameof(parser));
@@ -19,8 +19,16 @@ public class BaseDownloader : IDownloader
 
     public async Task Download()
     {
-        var bytes = await _downloaderClient.FetchData();
-        await SendToParser(bytes);
+        try
+        {
+            var bytes = await _downloaderClient.FetchData();
+            Log(_parser, bytes.Length, DateTime.Now);
+            await SendToParser(bytes);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
     }
 
     public void SwitchSource(Source source, string url, string token = "", string tokenName = "")
@@ -28,6 +36,12 @@ public class BaseDownloader : IDownloader
         _downloaderClient.SwitchSource(source, url, token, tokenName);
     }
 
+    public void Log(string parserName, int bytesAmount, DateTime date)
+    {
+        // Save to database
+        Console.WriteLine(parserName + "," + bytesAmount + "," + date);
+    }
+    
     private async Task SendToParser(byte[] downloadedBytes)
     {
         using var channel = GrpcChannel.ForAddress(_parser);
