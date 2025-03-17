@@ -52,7 +52,7 @@ public class SecretCredentialsService
             { "WeatherParser", new Dictionary<string, string> { { "username", "username1" }, { "password", "password1" } } },
             { "MetarParser", new Dictionary<string, string> { { "username", "username2" }, { "password", "password2" } } },
             { "SigmetParser", new Dictionary<string, string> { { "username", "username3" }, { "password", "password3" } } },
-            { "BufrParser", new Dictionary<string, string> { { "username", "jonas" }, { "password", "1233334" } } },
+            { "BufrrrrParser", new Dictionary<string, string> { { "username", "jonas" }, { "password", "1233334" } } },
             { "NatTrackParser", new Dictionary<string, string> { { "username", "victor" }, { "password", "4321" } } },
             { "AirepParser", new Dictionary<string, string> { { "username", "username4" }, { "password", "password4" } } },
             { "NotamParser", new Dictionary<string, string> { { "username", "username5" }, { "password", "password5" } } },
