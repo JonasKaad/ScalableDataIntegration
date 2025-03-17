@@ -16,11 +16,11 @@ public partial class ProtocolPanel : ComponentBase, INotifyPropertyChanged
     private string _protoParserName = string.Empty;
     private string _secretName = string.Empty;
     private string? Protocol { get; set; }
-    public string? UrlValue { get; set; }
-    public int PollingValue { get; set; }
-    public string Username { get; set; } = string.Empty;
-    public string Password { get; set; } = string.Empty;
-    public string PlaceholderText { get; set; } = "No Secret Selected";
+    private string? UrlValue { get; set; }
+    private int PollingValue { get; set; }
+    private string Username { get; set; } = string.Empty;
+    private string Password { get; set; } = string.Empty;
+    private string PlaceholderText { get; set; } = "No Secret Selected";
     
     public event PropertyChangedEventHandler? PropertyChanged;
 
