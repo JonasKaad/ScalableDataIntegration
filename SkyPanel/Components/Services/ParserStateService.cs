@@ -22,6 +22,7 @@ public class ParserStateService
     }
     private void NotifyStateChanged() => OnChange?.Invoke();
 
+    public bool ParserIsNotSelected() => _parser == null;
     
     public Parser[] TestParsers =
     [
