@@ -42,7 +42,7 @@ public class BaseDownloader : IDownloader
         Console.WriteLine(parserName + "," + bytesAmount + "," + date);
     }
     
-    private async Task SendToParser(byte[] downloadedBytes)
+    protected async Task SendToParser(byte[] downloadedBytes)
     {
         using var channel = GrpcChannel.ForAddress(_parser);
         var client = new Parser.ParserClient(channel);

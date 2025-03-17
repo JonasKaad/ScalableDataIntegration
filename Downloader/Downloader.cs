@@ -13,11 +13,15 @@ var parsers = new Dictionary<string, string>()
 {
     { "1", "http://csharpparser.jonaskaad.com" },
     { "2", "https://pythonparser.jonaskaad.com" },
+    {"ausot-parser", "http://auotparser.jonaskaad.com" },
 };
 
 var combinedClient = new DisDownloaderClient("http://sdihttp.jonaskaad.com");
 var downloaderParser = parsers["1"];
 var downloader = new BaseDownloader(combinedClient, downloaderParser);
+var ausotClient = new DisDownloaderClient("https://www.airservicesaustralia.com/flextracks/text.asp?ver=1");
+var ausotDownloader = new AusotDownloader(ausotClient, "ausot-parser");
+await ausotDownloader.Download();
 
 while (true)
 {
