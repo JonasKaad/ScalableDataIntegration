@@ -8,6 +8,10 @@ public class DisFtpClient : IDownloaderClient
     
     public DisFtpClient(string host, string userName, string password)
     {
+        if (host.Length < "ftp://j.dk".Length)
+        {
+            throw new ArgumentException("Hostname is too short, did you forget the protocol?");
+        }
         int port = 21;
         if (host[5..].Contains(':'))
         {

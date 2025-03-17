@@ -2,17 +2,11 @@ using Downloader.Utils;
 using Source = Downloader.Utils.IDownloaderClient.Source;
 namespace Downloader.Utils;
 
-public class DisDownloaderClient
+public class DisDownloaderClient(string url = "", string token = "", string tokenName = "", Source source = Source.Http)
 {
-    IDownloaderClient _downloaderClient;
-    Source _currentSource;
-    
-    public DisDownloaderClient()
-    {
-        _downloaderClient = new DisHttpClient("");
-        _currentSource = Source.Http;
-    }
-    
+    private IDownloaderClient _downloaderClient = new DisHttpClient(url, token, tokenName);
+    private Source _currentSource = source;
+
     public void SwitchSource(Source source, string url, string tokenName = "", string  token = "")
     {
         if (_currentSource != source)
@@ -58,6 +52,14 @@ public class DisDownloaderClient
     
     public async Task<byte[]> FetchData()
     {
-        return await _downloaderClient.FetchData();
+        var bytes = await _downloaderClient.FetchData();
+        if (bytes.Length == 0)
+        {
+            throw new Exception($"Unable to fetch data from {_currentSource}");
+        }
+#if DEBUG
+        Console.WriteLine($"Downloaded {bytes.Length} bytes");
+#endif
+        return bytes;
     }
 }
