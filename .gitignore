@@ -932,3 +932,5 @@ $RECYCLE.BIN/
 # Additional files built by Visual Studio
 
 # End of https://www.toptal.com/developers/gitignore/api/dotnetcore,macos,csharp,rider,jetbrains+all,visualstudiocode,visualstudio,linux,windows,aspnetcore
+
+SkyPanel/.env
