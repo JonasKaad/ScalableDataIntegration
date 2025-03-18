@@ -248,7 +248,22 @@ public class BlobManagerService
         }
     }
     
-    public async Task<Stream> DownloadBlob(string containerName, string blobName)
+    /// <summary>
+    /// Refreshes the blob containers and data items from Azure Storage
+    /// </summary>
+    /// <returns>A list of updated BlobDataItems</returns>
+    public async Task<List<BlobDataItem>> RefreshBlobsAsync()
+    {
+        // Clear existing collections
+        _blobContainers.Clear();
+        _blobs.Clear();
+        _blobDataItems.Clear();
+    
+        // Reuse the existing functionality to get fresh data
+        return await SetupAndReturnBlobs();
+    }
+    
+    public async Task<Stream> DownloadBlob(string containerName, string? blobName)
     {
         var containerClient = ServiceClient.GetBlobContainerClient(containerName);
         var blobClient = containerClient.GetBlobClient(blobName);
