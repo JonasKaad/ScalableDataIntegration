@@ -1,6 +1,21 @@
 ﻿using Downloader.Downloaders;
 using Downloader.Utils;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Sdi.Parser.Models;
 using Source = Downloader.Utils.IDownloaderClient.Source;
+
+DotNetEnv.Env.TraversePath().Load();
+var connectionString = "Server=" + Environment.GetEnvironmentVariable("SERVER") + ";" + 
+                       "Database=" + Environment.GetEnvironmentVariable("DATABASE")+ ";"  + 
+                       "Username=" + Environment.GetEnvironmentVariable("USER")+ ";"  + 
+                       "Password=" + Environment.GetEnvironmentVariable("PASSWORD") + ";" ;
+
+Console.WriteLine($"Connecting to database with: {connectionString}");
+var dbContextFactory = new PooledDbContextFactory<StatisticsContext>(
+    new DbContextOptionsBuilder<StatisticsContext>()
+        .UseNpgsql(connectionString)
+        .Options);
 
 Dictionary<string, string> downloaders = new()
 {
@@ -18,10 +33,10 @@ var parsers = new Dictionary<string, string>()
 
 var combinedClient = new DisDownloaderClient("http://sdihttp.jonaskaad.com");
 var downloaderParser = parsers["1"];
-var downloader = new BaseDownloader(combinedClient, downloaderParser);
+var downloader = new BaseDownloader(combinedClient, downloaderParser, "test",dbContextFactory);
 var ausotClient = new DisDownloaderClient("https://www.airservicesaustralia.com/flextracks/text.asp?ver=1");
-var ausotDownloader = new BaseDownloader(ausotClient, parsers["AusotParser"], "AusotParser");
-await ausotDownloader.Download();
+var ausotDownloader = new BaseDownloader(ausotClient, parsers["AusotParser"], "AusotParser", dbContextFactory);
+//await ausotDownloader.Download();
 
 while (true)
 {

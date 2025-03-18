@@ -1,6 +1,9 @@
 using ApexCharts;
 using Microsoft.AspNetCore.Components;
+using Microsoft.EntityFrameworkCore;
 using MudBlazor;
+using SkyPanel.Components.Models;
+using SkyPanel.Components.Services;
 
 namespace SkyPanel.Components.Pages;
 
@@ -14,14 +17,15 @@ public partial class Graphs
     private List<string> _selected = [];
     private Dictionary<string, List<ParserData>> _parserData = new();
     private Dictionary<string, List<ParserData>> _rawParserData = new();
-    private readonly List<string> _parsers = ["parser", "2ndParser"];
+    private readonly List<string> _parsers = [];
     private DateRange Date { get; set; } = new(DateTime.Today, DateTime.Today);
     private TimeSpan? _fromTime = new TimeSpan(00, 00, 00);
     private TimeSpan? _toTime = new TimeSpan(23, 59, 59);
     private TimeSpan _groupSpan = new TimeSpan(1, 0, 0);
-    private Amount _yaxis = Amount.Mega;
+    private Amount _yaxis = Amount.Byte;
+    [Inject] private StatisticsDatabaseService context { get; set; } = null!;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         _options = new ApexChartOptions<ParserData>
         {
@@ -29,7 +33,11 @@ public partial class Graphs
             [
                 new()
                 {
-                    Title = new() { Text = "bytes" }
+                    Title = new() { Text = "bytes" },
+                    Labels = new YAxisLabels()
+                    {
+                        Formatter = "(value) => Math.round(value * 10000) / 10000"
+                    }
                 }
             ],
             Chart = new Chart()
@@ -60,70 +68,31 @@ public partial class Graphs
             }
         };
 
-        _rawParserData.Add(_parsers.First(), new() {
-            new(time: new DateTime(2025, 03, 13, 00, 00, 00, DateTimeKind.Utc), downloadedBytes: 456),
-            new(time: new DateTime(2025, 03, 13, 06, 00, 00, DateTimeKind.Utc), downloadedBytes: 789),
-            new(time: new DateTime(2025, 03, 13, 12, 00, 00, DateTimeKind.Utc), downloadedBytes: 234),
-            new(time: new DateTime(2025, 03, 13, 18, 00, 00, DateTimeKind.Utc), downloadedBytes: 567),
-            new(time: new DateTime(2025, 03, 14, 00, 00, 00, DateTimeKind.Utc), downloadedBytes: 890),
-            new(time: new DateTime(2025, 03, 14, 06, 00, 00, DateTimeKind.Utc), downloadedBytes: 123),
-            new(time: new DateTime(2025, 03, 14, 12, 00, 00, DateTimeKind.Utc), downloadedBytes: 678),
-            new(time: new DateTime(2025, 03, 14, 18, 00, 00, DateTimeKind.Utc), downloadedBytes: 345),
-            new(time: new DateTime(2025, 03, 15, 00, 00, 00, DateTimeKind.Utc), downloadedBytes: 901),
-            new(time: new DateTime(2025, 03, 15, 06, 00, 00, DateTimeKind.Utc), downloadedBytes: 234),
-            new(time: new DateTime(2025, 03, 15, 12, 00, 00, DateTimeKind.Utc), downloadedBytes: 567),
-            new(time: new DateTime(2025, 03, 15, 18, 00, 00, DateTimeKind.Utc), downloadedBytes: 890),
-            new(time: new DateTime(2025, 03, 16, 00, 00, 00, DateTimeKind.Utc), downloadedBytes: 123),
-            new(time: new DateTime(2025, 03, 16, 06, 00, 00, DateTimeKind.Utc), downloadedBytes: 456),
-            new(time: new DateTime(2025, 03, 16, 12, 00, 00, DateTimeKind.Utc), downloadedBytes: 789),
-            new(time: new DateTime(2025, 03, 16, 18, 00, 00, DateTimeKind.Utc), downloadedBytes: 234),
-            new(time: new DateTime(2025, 03, 17, 00, 00, 00, DateTimeKind.Utc), downloadedBytes: 567),
-            new(time: new DateTime(2025, 03, 17, 06, 00, 00, DateTimeKind.Utc), downloadedBytes: 890),
-            new(time: new DateTime(2025, 03, 17, 12, 00, 00, DateTimeKind.Utc), downloadedBytes: 123),
-            new(time: new DateTime(2025, 03, 17, 18, 00, 00, DateTimeKind.Utc), downloadedBytes: 456),
-            new(time: new DateTime(2025, 03, 18, 00, 00, 00, DateTimeKind.Utc), downloadedBytes: 789),
-            new(time: new DateTime(2025, 03, 18, 06, 00, 00, DateTimeKind.Utc), downloadedBytes: 234),
-            new(time: new DateTime(2025, 03, 18, 12, 00, 00, DateTimeKind.Utc), downloadedBytes: 567),
-            new(time: new DateTime(2025, 03, 18, 18, 00, 00, DateTimeKind.Utc), downloadedBytes: 890),
-            new(time: new DateTime(2025, 03, 19, 00, 00, 00, DateTimeKind.Utc), downloadedBytes: 123),
-            new(time: new DateTime(2025, 03, 19, 06, 00, 00, DateTimeKind.Utc), downloadedBytes: 456),
-            new(time: new DateTime(2025, 03, 19, 12, 00, 00, DateTimeKind.Utc), downloadedBytes: 789),
-            new(time: new DateTime(2025, 03, 19, 18, 00, 00, DateTimeKind.Utc), downloadedBytes: 234),
-        });
-
-        _rawParserData.Add(_parsers.Skip(1).First(), [
-            new(time: new DateTime(2025, 03, 13, 00, 00, 00, DateTimeKind.Utc), downloadedBytes: 321),
-            new(time: new DateTime(2025, 03, 13, 06, 00, 00, DateTimeKind.Utc), downloadedBytes: 654),
-            new(time: new DateTime(2025, 03, 13, 12, 00, 00, DateTimeKind.Utc), downloadedBytes: 187),
-            new(time: new DateTime(2025, 03, 13, 18, 00, 00, DateTimeKind.Utc), downloadedBytes: 923),
-            new(time: new DateTime(2025, 03, 14, 00, 00, 00, DateTimeKind.Utc), downloadedBytes: 546),
-            new(time: new DateTime(2025, 03, 14, 06, 00, 00, DateTimeKind.Utc), downloadedBytes: 789),
-            new(time: new DateTime(2025, 03, 14, 12, 00, 00, DateTimeKind.Utc), downloadedBytes: 432),
-            new(time: new DateTime(2025, 03, 14, 18, 00, 00, DateTimeKind.Utc), downloadedBytes: 101),
-            new(time: new DateTime(2025, 03, 15, 00, 00, 00, DateTimeKind.Utc), downloadedBytes: 876),
-            new(time: new DateTime(2025, 03, 15, 06, 00, 00, DateTimeKind.Utc), downloadedBytes: 543),
-            new(time: new DateTime(2025, 03, 15, 12, 00, 00, DateTimeKind.Utc), downloadedBytes: 210),
-            new(time: new DateTime(2025, 03, 15, 18, 00, 00, DateTimeKind.Utc), downloadedBytes: 765),
-            new(time: new DateTime(2025, 03, 16, 00, 00, 00, DateTimeKind.Utc), downloadedBytes: 398),
-            new(time: new DateTime(2025, 03, 16, 06, 00, 00, DateTimeKind.Utc), downloadedBytes: 621),
-            new(time: new DateTime(2025, 03, 16, 12, 00, 00, DateTimeKind.Utc), downloadedBytes: 954),
-            new(time: new DateTime(2025, 03, 16, 18, 00, 00, DateTimeKind.Utc), downloadedBytes: 287),
-            new(time: new DateTime(2025, 03, 17, 00, 00, 00, DateTimeKind.Utc), downloadedBytes: 732),
-            new(time: new DateTime(2025, 03, 17, 06, 00, 00, DateTimeKind.Utc), downloadedBytes: 165),
-            new(time: new DateTime(2025, 03, 17, 12, 00, 00, DateTimeKind.Utc), downloadedBytes: 890),
-            new(time: new DateTime(2025, 03, 17, 18, 00, 00, DateTimeKind.Utc), downloadedBytes: 543),
-            new(time: new DateTime(2025, 03, 18, 00, 00, 00, DateTimeKind.Utc), downloadedBytes: 276),
-            new(time: new DateTime(2025, 03, 18, 06, 00, 00, DateTimeKind.Utc), downloadedBytes: 709),
-            new(time: new DateTime(2025, 03, 18, 12, 00, 00, DateTimeKind.Utc), downloadedBytes: 132),
-            new(time: new DateTime(2025, 03, 18, 18, 00, 00, DateTimeKind.Utc), downloadedBytes: 865),
-            new(time: new DateTime(2025, 03, 19, 00, 00, 00, DateTimeKind.Utc), downloadedBytes: 498),
-            new(time: new DateTime(2025, 03, 19, 06, 00, 00, DateTimeKind.Utc), downloadedBytes: 321),
-            new(time: new DateTime(2025, 03, 19, 12, 00, 00, DateTimeKind.Utc), downloadedBytes: 654),
-            new(time: new DateTime(2025, 03, 19, 18, 00, 00, DateTimeKind.Utc), downloadedBytes: 987),
-        ]);
+        await LoadDataFromDb();
+        
         _loading = false;
         StateHasChanged();
     }
+
+    private async Task LoadDataFromDb()
+    {
+        var start = DateTime.UtcNow - TimeSpan.FromDays(14);
+        await FetchDataFromDb(start);
+
+    }
+
+    private async Task FetchDataFromDb(DateTime start)
+    {
+        var parsers = await context.Datasets.Where(d => d.Date > start).GroupBy(d => d.Parser).ToListAsync();
+        foreach (var parser in parsers)
+        {
+            var groupedData = parser.Select(dataset => new ParserData(dataset.Date, dataset.DownloadedAmount)).ToList();
+            _rawParserData[parser.Key] = groupedData;
+            if (!_parsers.Contains(parser.Key)) _parsers.Add(parser.Key);
+        }
+    }
+    
+    
 
     private async Task AddParser(IEnumerable<string> values)
     {
@@ -148,15 +117,19 @@ public partial class Graphs
             {
                 case Amount.Giga:
                     title.Text = "Gigabytes";
-                    ratio = 1000000;
+                    ratio = 1_000_000_000;
                     break;
                 case Amount.Kilo:
                     title.Text = "Kilobytes";
-                    ratio = 1;
+                    ratio = 1_000;
                     break;
                 case Amount.Mega:
                     title.Text = "Megabytes";
-                    ratio = 1000;
+                    ratio = 1_000_000;
+                    break;
+                case Amount.Byte:
+                    title.Text = "Bytes";
+                    ratio = 1;
                     break;
             }
 
@@ -198,6 +171,7 @@ public partial class Graphs
     {
         Kilo,
         Mega,
-        Giga
+        Giga,
+        Byte
     }
 }
