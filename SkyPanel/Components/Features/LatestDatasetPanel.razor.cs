@@ -1,3 +1,6 @@
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
+using DotNetEnv;
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
 using SkyPanel.Components.Models;
@@ -7,20 +10,22 @@ namespace SkyPanel.Components.Features;
 
 public partial class LatestDatasetPanel : ComponentBase
 {
-    private Dataset[]? _datasets;
+
+    private List<BlobDataItem>? _blobDataItems;
+    
+    
     [Inject] private StatisticsDatabaseService Db { get; set; } = default!;
 
+    [Inject] private BlobManagerService BlobService { get; set; } = default!;
+    
     protected override async Task OnInitializedAsync()
     {
-        // Simulate asynchronous loading to demonstrate a loading indicator
-        //wait Task.Delay(500);
+        BlobService.GetContainers();
+        await BlobService.GetAllBlobItems();
         
-        
-
-        Console.WriteLine("Querying for statistics");
-        
-        _datasets = await Db.Datasets
-            .OrderBy(b => b.Date)
-            .ToArrayAsync();
+        BlobService.CreateBlobDataItems();
+        BlobService.PrintDictionary();
+        BlobService.PrintBlobDataItems();
+        _blobDataItems = BlobService.GetBlobDataItems();
     }
 }
