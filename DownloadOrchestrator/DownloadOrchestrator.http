@@ -1,6 +1,6 @@
 @DownloadOrchestrator_HostAddress = http://localhost:5162
 
-GET {{DownloadOrchestrator_HostAddress}}/weatherforecast/
+GET {{DownloadOrchestrator_HostAddress}}/downloaders/
 Accept: application/json
 
 ###
