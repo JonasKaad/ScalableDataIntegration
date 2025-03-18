@@ -63,6 +63,36 @@ public class BlobManagerService
         }
     }
 
+
+    /// <summary>
+    /// Extracts a unique key from a blob name to match raw and parsed files
+    /// </summary>
+    /// <param name="containerName">The name of the container</param>
+    /// <param name="blobName">The path/name of the blob</param>
+    /// <returns>A key that uniquely identifies the dataset</returns>
+    private string ExtractKeyFromBlobName(string containerName, string blobName)
+    {
+        string timestamp = blobName;
+
+        if (blobName.Contains("_raw"))
+        {
+            timestamp = blobName.Substring(0, blobName.IndexOf("_raw", StringComparison.Ordinal));
+        }
+        if (blobName.Contains("-raw"))
+        {
+            timestamp = blobName.Substring(0, blobName.IndexOf("-raw", StringComparison.Ordinal));
+        }
+        if (blobName.Contains("_parsed"))
+        {
+            timestamp = blobName.Substring(0, blobName.IndexOf("_parsed", StringComparison.Ordinal));
+        }
+        if (blobName.Contains("-parsed"))
+        {
+            timestamp = blobName.Substring(0, blobName.IndexOf("-parsed", StringComparison.Ordinal));
+        }
+        return $"{containerName}_{timestamp}";
+    }
+
     public void PrintDictionary()
     {
         foreach (var (container, blob) in blobs)
