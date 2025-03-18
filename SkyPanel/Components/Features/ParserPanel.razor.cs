@@ -56,4 +56,20 @@ public partial class ParserPanel : ComponentBase
         var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.ExtraSmall, FullWidth = true };
         return DialogService.ShowAsync<BasicDialog>("Fetch and parse latest dataset", parameters, options);
     }
+    
+    private Task<IEnumerable<string>> Search(string value, CancellationToken token)
+    {
+        
+        // if text is null or empty, show complete list
+        if (string.IsNullOrEmpty(value))
+        { 
+            var temp = Task.FromResult<IEnumerable<Parser>>(GetParsers()); 
+            return Task.FromResult(temp.Result.Select(x => x.Name));
+        }
+        else
+        {
+            var temp = Task.FromResult<IEnumerable<Parser>>(GetParsers());
+            return Task.FromResult(temp.Result.Where(x => x.Name.Contains(value, StringComparison.InvariantCultureIgnoreCase)).Select(x => x.Name));
+        }
+    }
 }
