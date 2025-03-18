@@ -1,34 +1,42 @@
+using System.Globalization;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
-using DotNetEnv;
+using SkyPanel.Components.Models;
 
 namespace SkyPanel.Components.Services;
 
 public class BlobManagerService
 {
     private BlobServiceClient ServiceClient { get; }
-    private IList<BlobContainerItem> blobContainers;
-
-    private Dictionary<BlobContainerItem, List<BlobItem>> blobs = new Dictionary<BlobContainerItem, List<BlobItem>>();
+    private IList<BlobContainerItem> _blobContainers;
+    private List<BlobDataItem> _blobDataItems = new List<BlobDataItem>();
+    private Dictionary<BlobContainerItem, List<BlobItem>> _blobs;
 
     public BlobManagerService(string connectionString) 
     {
         ServiceClient = new BlobServiceClient(connectionString);
-        blobContainers = new List<BlobContainerItem>();
-        blobs = new Dictionary<BlobContainerItem, List<BlobItem>>();
+        _blobContainers = new List<BlobContainerItem>();
+        _blobs = new Dictionary<BlobContainerItem, List<BlobItem>>();
     }
 
 
     public void GetContainers()
     {
-        blobContainers.Clear();
-        blobs.Clear();
+        _blobContainers.Clear();
+        _blobs.Clear();
         
         foreach (var container in ServiceClient.GetBlobContainers())
         {
-            blobContainers.Add(container);
+            _blobContainers.Add(container);
         }
     } 
+    
+    /// <summary>
+    /// Fetches the names of the containers in Azure Blob Storage
+    /// </summary>
+    /// <returns>
+    /// A list of container names found in Azure Blob Storage
+    /// </returns>
     public List<string> GetContainerNames()
     {
         var containerNames = new List<string>();        
