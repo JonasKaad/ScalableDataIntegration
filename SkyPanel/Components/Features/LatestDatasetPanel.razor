@@ -7,31 +7,73 @@
 }
 else
 {
-    <MudTable Items="_blobDataItems" Hover="true" SortLabel="Sort By" Elevation="0" AllowUnsorted="false">
-        <HeaderContent>
-            <MudTh><MudTableSortLabel SortBy="new Func<Dataset, object>(x=>x.Parser!)">Parser</MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<BlobDataItem, object>(x=>x.Date)">Date</MudTableSortLabel></MudTh>
-            <MudTh/>
-            <MudTh/>
-            <MudTh/>
-        </HeaderContent>
-        <RowTemplate>
-            <MudTd DataLabel="Parser">@context.Parser</MudTd>
-            <MudTd DataLabel="Date">@context.Date.ToString("dd/MM/yyyy HH\\:mm")</MudTd>
-            <MudTd DataLabel="Download Raw">
-                <MudTooltip Text="Raw dataset not found" Disabled="@(!string.IsNullOrEmpty(context.RawPath))" Arrow="true">
-                    <MudButton StartIcon="@Icons.Material.Filled.Download" Variant="Variant.Outlined" Color="Color.Info" Disabled="@(string.IsNullOrEmpty(context.RawPath))" OnClick="@(() => Download(@context.Parser, @context.RawPath))">Raw</MudButton>
-                </MudTooltip>
-            </MudTd>
-            <MudTd DataLabel="Download Parsed">
-                <MudTooltip Text="Parsed dataset not found" Disabled="@(!string.IsNullOrEmpty(context.ParsedPath))" Arrow="true">
-                    <MudButton StartIcon="@Icons.Material.Filled.Download" Variant="Variant.Outlined" Color="Color.Primary" Disabled="@(string.IsNullOrEmpty(context.ParsedPath))" OnClick="@(() => Download(@context.Parser, @context.ParsedPath))">Parsed</MudButton>
-                </MudTooltip>
-            </MudTd>
-            <MudTd DataLabel="Delete Dataset"><MudButton StartIcon="@Icons.Material.Filled.Delete" Variant="Variant.Outlined" Color="Color.Error">Delete</MudButton></MudTd>
-        </RowTemplate>
+    <MudDataGrid Items="@_blobDataItems" Hover="true" Elevation="0" QuickFilter="@_quickFilter">
+        <ToolBarContent >
+            <MudGrid xs="10" sm="10" Style="align-content: end">
+                <MudItem xs="2" sm="2" Class="mb-2">
+                    <MudTextField @bind-Value="searchString" Label=" " Placeholder="Search" Clearable="true" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" />
+                </MudItem>
+                <MudItem xs="3" sm="3" Class="mb-2">
+                    <MudDateRangePicker PickerVariant="PickerVariant.Inline" Label="Date Range" Editable="true" @bind-DateRange="DateFilter" Placeholder="Select Date"/>
+                </MudItem>
+                <MudItem xs="4" sm="4">
+                    <MudGrid>
+                        <MudItem xs="5">
+                            <MudTimePicker Label="From hour:min" Editable="true" @bind-Time="_fromTime"/>
+                        </MudItem>
+                        <MudItem xs="5">
+                            <MudTimePicker Label="To hour:min" Editable="true" @bind-Time="_toTime"/>
+                        </MudItem>
+                    </MudGrid>
+                </MudItem>
+            </MudGrid>
+        </ToolBarContent>
+        <Columns>
+            <PropertyColumn Property="x => x.Parser" SortBy="new Func<BlobDataItem, object>(x => x.Parser!)"/>
+            @* <PropertyColumn Property=@{x => x.Date.ToString("dd/MM/yyyy HH\\:mm")} /> *@
+            <PropertyColumn Property="x => x.Date" />
+            <TemplateColumn CellClass=" justify-end">
+                <CellTemplate>
+                    <MudTooltip Text="Raw dataset not found" Disabled="@(!string.IsNullOrEmpty(@context.Item?.RawPath))" Arrow="true">
+                        <MudButton StartIcon="@Icons.Material.Filled.Download" Variant="Variant.Outlined" Color="Color.Info" Disabled="@(string.IsNullOrEmpty(@context.Item?.RawPath))" OnClick="@(() => Download(@context.Item?.Parser, @context.Item?.RawPath))">Raw</MudButton>
+                    </MudTooltip>
+                </CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn CellClass="justify-end">
+                <CellTemplate>
+                    <MudTooltip Text="Parsed dataset not found" Disabled="@(!string.IsNullOrEmpty(@context.Item?.ParsedPath))" Arrow="true">
+                        <MudButton StartIcon="@Icons.Material.Filled.Download" Variant="Variant.Outlined" Color="Color.Primary" Disabled="@(string.IsNullOrEmpty(@context.Item?.ParsedPath))" OnClick="@(() => Download(@context.Item?.Parser, @context.Item?.ParsedPath))">Parsed</MudButton>
+                    </MudTooltip>
+                </CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn CellClass="justify-end">
+                <CellTemplate>
+                    <MudButton StartIcon="@Icons.Material.Filled.Delete" Variant="Variant.Outlined" Color="Color.Error">Delete</MudButton>
+                </CellTemplate>
+            </TemplateColumn>
+        </Columns>
         <PagerContent>
-            <MudTablePager PageSizeOptions="new []{5, 10}" />
+            <MudDataGridPager PageSizeOptions="new[] { 5, 10 }"/>
         </PagerContent>
-    </MudTable>
+    </MudDataGrid>
+}
+
+@code {
+    private DateRange DateFilter { get; set; } = new(DateTime.Today, DateTime.Today);
+    private TimeSpan? _fromTime = new TimeSpan(00, 00, 00);
+    private TimeSpan? _toTime = new TimeSpan(23, 59, 59);
+    
+    private string searchString = "";
+    
+    // private bool FilterFunc1(BlobDataItem blobData) => FilterFunc(blobData, searchString1);
+
+    private Func<BlobDataItem, bool> _quickFilter => x =>
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (x.Parser.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    };
+
 }
