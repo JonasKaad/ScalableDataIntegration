@@ -19,8 +19,16 @@ public class BlobManagerService
         _blobs = new Dictionary<BlobContainerItem, List<BlobItem>>();
     }
 
+    public async Task<List<BlobDataItem>> SetupAndReturnBlobs()
+    {
+        await GetContainers();
+        await GetAllBlobItems();
+        
+        CreateBlobDataItems();
+        return GetBlobDataItems();;
+    }
 
-    public void GetContainers()
+    private async Task GetContainers()
     {
         _blobContainers.Clear();
         _blobs.Clear();
