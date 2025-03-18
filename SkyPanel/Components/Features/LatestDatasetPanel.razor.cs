@@ -3,6 +3,7 @@ using Azure.Storage.Blobs.Models;
 using DotNetEnv;
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.JSInterop;
 using SkyPanel.Components.Models;
 using SkyPanel.Components.Services;
 
@@ -20,12 +21,13 @@ public partial class LatestDatasetPanel : ComponentBase
     
     protected override async Task OnInitializedAsync()
     {
-        BlobService.GetContainers();
-        await BlobService.GetAllBlobItems();
-        
-        BlobService.CreateBlobDataItems();
-        BlobService.PrintDictionary();
-        BlobService.PrintBlobDataItems();
-        _blobDataItems = BlobService.GetBlobDataItems();
+        _blobDataItems = await BlobService.SetupAndReturnBlobs();
+    }
+
+    private async Task Download(string containerName, string blobName)
+    {
+        var stream = await BlobService.DownloadBlob(containerName, blobName);
+        using var st = new DotNetStreamReference(stream: stream, true);
+        await JS.InvokeVoidAsync("downloadFileFromStream", $"{containerName}_{blobName}", st);
     }
 }
