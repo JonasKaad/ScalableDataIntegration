@@ -247,4 +247,13 @@ public class BlobManagerService
             }
         }
     }
+    
+    public async Task<Stream> DownloadBlob(string containerName, string blobName)
+    {
+        var containerClient = ServiceClient.GetBlobContainerClient(containerName);
+        var blobClient = containerClient.GetBlobClient(blobName);
+        
+        var st = await blobClient.DownloadStreamingAsync();
+        return st.Value.Content;
+    }
 }
