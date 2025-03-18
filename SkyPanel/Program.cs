@@ -8,6 +8,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddMudServices();
 builder.Services.AddScoped<ParserStateService>();
 builder.Services.AddScoped<SecretCredentialsService>();
+builder.Services.AddScoped<BlobManagerService>(provider =>
+{
+    // Load environment variables
+    Env.Load();
+    var connectionString = Env.GetString("BLOB_CONNECTION_STRING");
+    return new BlobManagerService(connectionString);
+});
 //Database service setup
 builder.Services.AddDbContext<StatisticsDatabaseService>(options =>
 {
