@@ -8,21 +8,36 @@ namespace SkyPanel.Components.Features;
 
 public partial class ParserPanel : ComponentBase
 {
-    [Inject] private ParserStateService ParserState { get; set; } = default!;
+    [Inject] private ParserStateService ParserState { get; set; } = null!;
+    [Inject] private BlobManagerService BlobService { get; set; } = null!;
+    
+    private Parser[] _parsers =
+    [
+        new("1", "https://www.google.com", "Http", 24),
+        new("2",  "ftp://www.test.com", "Ftp", 37),
+        new("3",  "https://jsonplaceholder.typicode.com/todos/1", "Http", 12)
+    ];
 
-    private string ParserName
+    private void FetchParsers()
     {
-        get => ParserState.ParserName;
+        foreach (var (containerName, index) in BlobService.GetContainerNames().Select((x, i) => (x, i)))
+        {
+            _parsers[index].Name = containerName;
+        }
     }
 
-    class ParserWrapper
+    private Parser[] GetParsers()
     {
-       
+        FetchParsers();
+        return _parsers;
     }
+    
+    private string ParserName => ParserState.ParserName;
+    
     public string Parser
     {
         get => ParserState.ParserName;
-        set => ParserState.SetParser(ParserState.TestParsers.FirstOrDefault(x => x.Name == value));
+        set => ParserState.SetParser(GetParsers().FirstOrDefault(x => x.Name == value));
     }
     
     protected override void OnInitialized()
