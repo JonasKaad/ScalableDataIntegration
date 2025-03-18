@@ -93,23 +93,83 @@ public class BlobManagerService
         return $"{containerName}_{timestamp}";
     }
 
+    /// <summary>
+    /// Parses a blob path/name in format "yyyy/MM/dd/HHmm-xxx.txt" into a DateTime object
+    /// </summary>
+    /// <param name="blobName">The path/name of the blob</param>
+    /// <returns>A DateTime object representing the date and time in the blob path</returns>
+    private DateTime ParseBlobToDateTime(string blobName)
+    {
+        try
+        {
+            DateTime t;
+            
+            // yyyy/MM/dd/HHmm format
+            string datePortion = blobName.Substring(0, 15);
+            if (DateTime.TryParseExact(datePortion, "yyyy/MM/dd/HHmm", null, DateTimeStyles.AdjustToUniversal, out t))
+            {
+                return t;
+            }
+            
+            // yyyy/MM/dd/HH format
+            datePortion = blobName.Substring(0, 13);
+            if (DateTime.TryParseExact(datePortion, "yyyy/MM/dd/HH", null, DateTimeStyles.AdjustToUniversal, out t))
+            {
+                return t;
+            }
+            
+            // yyyy/MM/dd format
+            datePortion = blobName.Substring(0, 10);
+            if (DateTime.TryParseExact(datePortion, "yyyy/MM/dd", null, DateTimeStyles.AdjustToUniversal, out t))
+            {
+                return t;
+            }
+            
+            // yyyy/MM format
+            datePortion = blobName.Substring(0, 7);
+            if (DateTime.TryParseExact(datePortion, "yyyy/MM", null, DateTimeStyles.AdjustToUniversal, out t))
+            {
+                return t;
+            }
+            
+            // yyyy format
+            datePortion = blobName.Substring(0, 4);
+            if (DateTime.TryParseExact(datePortion, "yyyy", null, DateTimeStyles.AdjustToUniversal, out t))
+            {
+                return t;
+            }
+            
+            return DateTime.Now;
+
+        }
+        catch (Exception ex) when (ex is FormatException || ex is IndexOutOfRangeException)
+        {
+            Console.WriteLine($"Failed to parse blob path: {blobName}. Error: {ex.Message}");
+            throw new FormatException($"Could not parse blob path '{blobName}' into DateTime", ex);
+        }
+    }
+
+    public List<BlobDataItem> GetBlobDataItems()
+    {
+        return _blobDataItems;
+        
+    }
+
+    public void PrintBlobDataItems()
+    {
+        foreach (var blobDataItem in _blobDataItems)
+        {
+            Console.WriteLine(blobDataItem);
+        }
+    }
     public void PrintDictionary()
     {
-        foreach (var (container, blob) in blobs)
+        foreach (var (container, blob) in _blobs)
         {
             foreach (var blobItem in blob)
             {
                 Console.WriteLine(container.Name + " " + blobItem.Name);
             }
-        }
-    }
-    
-    public void GetBlobItems(string containerName)
-    {
-        var containerClient = ServiceClient.GetBlobContainerClient(containerName);
-        foreach (var blobItem in containerClient.GetBlobs())
-        {
-            Console.WriteLine("\t" + blobItem.Name);
         }
     }
 }
