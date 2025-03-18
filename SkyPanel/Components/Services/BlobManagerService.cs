@@ -32,8 +32,8 @@ public class BlobManagerService
     {
         _blobContainers.Clear();
         _blobs.Clear();
-        
-        foreach (var container in ServiceClient.GetBlobContainers())
+
+        await foreach (var container in ServiceClient.GetBlobContainersAsync())
         {
             _blobContainers.Add(container);
         }
@@ -56,12 +56,11 @@ public class BlobManagerService
         
         return containerNames;
     }
-    
-    public async Task GetAllBlobItems()
+
+    private async Task GetAllBlobItems()
     {
         foreach (var container in _blobContainers)
         {
-            Console.WriteLine(container.Name);
             var containerClient = ServiceClient.GetBlobContainerClient(container.Name);
             var blobItems = new List<BlobItem>();
             await foreach (var blob in containerClient.GetBlobsAsync())
@@ -75,7 +74,7 @@ public class BlobManagerService
     /// <summary> 
     /// Creates a list of BlobDataItems from the blobs in the dictionary by pairing raw and parsed files
     /// </summary>
-    public void CreateBlobDataItems()
+    private void CreateBlobDataItems()
     {
         _blobDataItems.Clear();
         // Dictionary to store raw and parsed file paths
@@ -138,8 +137,6 @@ public class BlobManagerService
                 ));
             }
         }
-        
-
     }
 
     /// <summary>
@@ -227,7 +224,7 @@ public class BlobManagerService
         }
     }
 
-    public List<BlobDataItem> GetBlobDataItems()
+    private List<BlobDataItem> GetBlobDataItems()
     {
         return _blobDataItems;
         
