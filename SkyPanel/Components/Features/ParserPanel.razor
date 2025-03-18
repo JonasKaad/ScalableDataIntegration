@@ -32,24 +32,3 @@
         </MudItem>
     </MudGrid>
 </MudStack>
-
-@code {
-
-    
-    
-    private Task<IEnumerable<string>> Search(string value, CancellationToken token)
-    {
-        
-        // if text is null or empty, show complete list
-        if (string.IsNullOrEmpty(value))
-        { 
-            var temp = Task.FromResult<IEnumerable<Parser>>(ParserState.TestParsers); 
-            return Task.FromResult(temp.Result.Select(x => x.Name));
-        }
-        else
-        {
-            var temp = Task.FromResult<IEnumerable<Parser>>(ParserState.TestParsers);
-            return Task.FromResult(temp.Result.Where(x => x.Name.Contains(value, StringComparison.InvariantCultureIgnoreCase)).Select(x => x.Name));
-        }
-    }
-}
