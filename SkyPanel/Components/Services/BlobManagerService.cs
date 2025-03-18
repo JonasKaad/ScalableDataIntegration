@@ -48,21 +48,91 @@ public class BlobManagerService
         
         return containerNames;
     }
-    public void GetAllBlobItems()
+    
+    public async Task GetAllBlobItems()
     {
-        foreach (var container in blobContainers)
+        foreach (var container in _blobContainers)
         {
             Console.WriteLine(container.Name);
             var containerClient = ServiceClient.GetBlobContainerClient(container.Name);
             var blobItems = new List<BlobItem>();
-            foreach (var blob in containerClient.GetBlobs())
+            await foreach (var blob in containerClient.GetBlobsAsync())
             {
                 blobItems.Add(blob);
             }
-            blobs.Add(container, blobItems);
+            _blobs.Add(container, blobItems);
         }
     }
+    
+    /// <summary> 
+    /// Creates a list of BlobDataItems from the blobs in the dictionary by pairing raw and parsed files
+    /// </summary>
+    public void CreateBlobDataItems()
+    {
+        _blobDataItems.Clear();
+        // Dictionary to store raw and parsed file paths
+        var rawFiles = new Dictionary<string, (string containerName, string blobPath)>();
+        var parsedFiles = new Dictionary<string, (string containerName, string blobPath)>();
 
+        
+        // Categorize blobs as raw or parsed based one if they contain "_raw" or "_parsed" in their name
+        foreach (var (container, blob) in _blobs)
+        {
+            foreach (var blobItem in blob)
+            {
+                string blobName = blobItem.Name;
+                string containerName = container.Name;
+                string key = ExtractKeyFromBlobName(containerName, blobName);
+
+                if (blobName.Contains("_raw") || blobName.Contains("-raw"))
+                {
+                    rawFiles[key] = (containerName, blobName);
+                }
+                else if (blobName.Contains("_parsed") || blobName.Contains("-parsed"))
+                {
+                    parsedFiles[key] = (containerName, blobName);
+                }
+            }
+        }
+
+        // Iterate through raw files and pair them with parsed files (if they exist)
+        foreach (var key in rawFiles.Keys)
+        {
+            string? parsedPath = null;
+            if (parsedFiles.TryGetValue(key, out var parsedInfo))
+            {
+                parsedPath = parsedInfo.blobPath;
+            }
+            
+            var rawInfo = rawFiles[key];
+            DateTime dateTime = ParseBlobToDateTime(rawInfo.blobPath);
+            
+            _blobDataItems.Add(new BlobDataItem(
+                rawInfo.containerName, 
+                dateTime,
+                rawInfo.blobPath, 
+                parsedPath));
+        }
+        
+        // Add any parsed files that don't have a raw counterpart
+        foreach (var key in parsedFiles.Keys)
+        {
+            if (!rawFiles.ContainsKey(key))
+            {
+                var parsedInfo = parsedFiles[key];
+                DateTime dateTime = ParseBlobToDateTime(parsedInfo.blobPath);
+            
+                _blobDataItems.Add(new BlobDataItem(
+                    parsedInfo.containerName,
+                    dateTime,
+                    null,
+                    parsedInfo.blobPath
+                ));
+            }
+        }
+        
+
+    }
 
     /// <summary>
     /// Extracts a unique key from a blob name to match raw and parsed files
