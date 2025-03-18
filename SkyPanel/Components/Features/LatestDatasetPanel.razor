@@ -17,8 +17,8 @@ else
         <RowTemplate>
             <MudTd DataLabel="Parser">@context.Parser</MudTd>
             <MudTd DataLabel="Date">@context.Date.ToString("dd/MM/yyyy HH\\:mm")</MudTd>
-            <MudTd DataLabel="Download Raw"><MudButton StartIcon="@Icons.Material.Filled.Download" Variant="Variant.Outlined" Color="Color.Info">Raw</MudButton></MudTd>
-            <MudTd DataLabel="Download Parsed"><MudButton StartIcon="@Icons.Material.Filled.Download" Variant="Variant.Outlined" Color="Color.Primary">Parsed</MudButton></MudTd>
+            <MudTd DataLabel="Download Raw"><MudButton StartIcon="@Icons.Material.Filled.Download" Variant="Variant.Outlined" Color="Color.Info"  OnClick="@(() => Download(@context.Parser, @context.RawPath))">Raw</MudButton></MudTd>
+            <MudTd DataLabel="Download Parsed"><MudButton StartIcon="@Icons.Material.Filled.Download" Variant="Variant.Outlined" Color="Color.Primary" OnClick="@(() => Download(@context.Parser, @context.ParsedPath))">Parsed</MudButton></MudTd>
             <MudTd DataLabel="Delete Dataset"><MudButton StartIcon="@Icons.Material.Filled.Delete" Variant="Variant.Outlined" Color="Color.Error">Delete</MudButton></MudTd>
         </RowTemplate>
         <PagerContent>
