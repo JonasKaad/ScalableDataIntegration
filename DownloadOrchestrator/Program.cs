@@ -3,9 +3,10 @@ using DotNetEnv.Configuration;
 using Downloader.Downloaders;
 using DownloadOrchestrator.Downloaders;
 using DownloadOrchestrator.Models;
+using DownloadOrchestrator.Services;
 using DownloadOrchestrator.Utils;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
+using Hangfire;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,22 +20,21 @@ var connectionString = "Server=" + Environment.GetEnvironmentVariable("SERVER") 
                        "Database=" + Environment.GetEnvironmentVariable("DATABASE")+ ";"  + 
                        "Username=" + Environment.GetEnvironmentVariable("USER")+ ";"  + 
                        "Password=" + Environment.GetEnvironmentVariable("PASSWORD") + ";" ;
-
-var dbContextFactory = new PooledDbContextFactory<StatisticsContext>(
-    new DbContextOptionsBuilder<StatisticsContext>()
-        .UseNpgsql(connectionString)
-        .Options);
-var downloaders = new List<IDownloader>
+var downloaders = new List<DownloaderData>
 {
-    CreateDownloader(
+    CreateDownloaderData(
         "https://www.airservicesaustralia.com/flextracks/text.asp?ver=1",
         "http://ausotparser.jonaskaad.com", 
-        "AusotParser",
-        dbContextFactory)
+        "AusotParser")
 };
-builder.Services.AddSingleton(downloaders);
-builder.Services.AddSingleton<PooledDbContextFactory<StatisticsContext>>(dbContextFactory);
-builder.Services.AddControllers();
+builder.Services.AddSingleton(downloaders)
+    .AddDbContextFactory<StatisticsContext>(options =>
+        options.UseNpgsql(connectionString))
+    .AddScoped<IDownloaderJob, BaseDownloaderJob>()
+    .AddScoped<IDownloaderService, DownloaderService>()
+    .AddHangfire(config => config.UseInMemoryStorage())
+    .AddHangfireServer()
+    .AddControllers();
 
 var app = builder.Build();
 
@@ -49,10 +49,15 @@ app.UseHttpsRedirection();
 
 app.MapControllers();
 
+app.UseHangfireDashboard();
+
 app.Run();
 
-IDownloader CreateDownloader(string url, string parserService, string name, PooledDbContextFactory<StatisticsContext> contextFactory)
+DownloaderData CreateDownloaderData(string url, string parserService, string name)
 {
-    var client = new DisDownloaderClient(url);
-    return new BaseDownloader(client, parserService, name, contextFactory);
+    return new DownloaderData{
+        DownloadUrl = url,
+        ParserUrl = parserService, 
+        Name = name
+    };
 }

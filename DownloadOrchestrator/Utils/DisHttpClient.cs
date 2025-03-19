@@ -15,7 +15,6 @@ public class DisHttpClient : IDownloaderClient
         SetTokenHeader(token, tokenName);
     }
 
-
     public async Task<byte[]> FetchData()
     {
         if (Client == null)
@@ -53,6 +52,11 @@ public class DisHttpClient : IDownloaderClient
     public void Dispose()
     {
         Client.Dispose();
+    }
+    
+    public override string ToString()
+    {
+        return $"Downloading using HTTP from {_url}";
     }
 
     void WriteRequestToConsole(HttpResponseMessage response)

@@ -59,6 +59,11 @@ public class DisDownloaderClient
         }
     }
 
+    public override string ToString()
+    {
+        return _downloaderClient.ToString();
+    }
+
     private static void CheckFtpCredentials(string tokenName, string token)
     {
         if (String.IsNullOrEmpty(token) || String.IsNullOrEmpty(tokenName))
