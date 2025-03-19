@@ -27,6 +27,11 @@ else
                         </MudItem>
                     </MudGrid>
                 </MudItem>
+                <MudItem xs="1" sm="1">
+                    <MudStack>
+                        <MudInputLabel/>
+                    <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="@(() => Reset())">Reset</MudButton></MudStack>
+                </MudItem>
             </MudGrid>
         </ToolBarContent>
         <Columns>
@@ -63,10 +68,18 @@ else
     private TimeSpan? _fromTime = new TimeSpan(00, 00, 00);
     private TimeSpan? _toTime = new TimeSpan(23, 59, 59);
     
-    private string searchString = "";
+    private void Reset()
+    {
+        DateFilter = new DateRange(DateTime.Now.Date.AddDays(-7), DateTime.Now.Date);
+        _fromTime = new TimeSpan(00, 00, 00);
+        _toTime = new TimeSpan(23, 59, 59);
+        searchString = "";
+    }
     
-    // private bool FilterFunc1(BlobDataItem blobData) => FilterFunc(blobData, searchString1);
+    private string searchString = "";
 
+    // private bool FilterFunc1(BlobDataItem blobData) => FilterFunc(blobData, searchString1);
+    
     private Func<BlobDataItem, bool> QuickFilter => x =>
     {
         if (!string.IsNullOrWhiteSpace(searchString) && 
@@ -97,3 +110,4 @@ else
         return true;
         
     };
+}
