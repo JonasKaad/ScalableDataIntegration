@@ -45,6 +45,12 @@ public class DisFtpClient : IDownloaderClient
         _ftpClient.Dispose();
     }
 
+    public override string ToString()
+    {
+        return $"Downloading using FTP from {_ftpClient.Host} using {_ftpClient.Credentials.UserName} " +
+               $"and {_ftpClient.Credentials.Password} on port {_ftpClient.Port}";
+    }
+
     private async Task<byte[]> DownloadFile(string sourceFile)
     {
         byte[] downloadedBytes;

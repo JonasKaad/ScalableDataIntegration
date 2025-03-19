@@ -1,6 +1,7 @@
 using Downloader.Downloaders;
 using DownloadOrchestrator.Downloaders;
 using DownloadOrchestrator.Models;
+using DownloadOrchestrator.Services;
 using DownloadOrchestrator.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -11,12 +12,12 @@ namespace DownloadOrchestrator.Controllers;
 [ApiController]
 public class DownloaderController : ControllerBase
 {
-    private readonly PooledDbContextFactory<StatisticsContext> _dbContextFactory;
-    private readonly List<IDownloader> _downloaders;
+    private readonly IDownloaderService _downloaderService;
+    private readonly List<DownloaderData> _downloaders;
 
-    public DownloaderController(PooledDbContextFactory<StatisticsContext> dbContextFactory, List<IDownloader> downloaders)
+    public DownloaderController(IDownloaderService downloaderService, List<DownloaderData> downloaders)
     {
-        _dbContextFactory = dbContextFactory;
+        _downloaderService = downloaderService;
         _downloaders = downloaders;
     }
 
@@ -24,14 +25,28 @@ public class DownloaderController : ControllerBase
     [HttpGet]
     public ActionResult<List<string>> GetDownloaders()
     {
-        return _downloaders.Select(dl => dl.ToString()).ToList();
+        return _downloaders.Select(dl => dl.Name).ToList();
     }
+    
+    [Route("{downloader}/configuration")]
+    [HttpGet]
+    public ActionResult<DownloaderData> GetDownloaderConfiguration(string downloader)
+    {
+        var dlToConfigure = _downloaders.FirstOrDefault(d => d.Name.Equals(downloader));
+        if (dlToConfigure is null)
+        {
+            return NotFound("The downloader could not be found.");
+        }
+
+        return dlToConfigure;
+    }
+    
 
     [Route("{downloader}/configure")]
     [HttpPut]
     public ActionResult ConfigureDownloader(string downloader, string source, string url = "", string token = "", string tokenName = "")
     {
-        var dlToConfigure = _downloaders.FirstOrDefault(d => d.ToString().Equals(downloader));
+        var dlToConfigure = _downloaders.FirstOrDefault(d => d.Name.Equals(downloader));
         if (dlToConfigure is null)
         {
             return NotFound("The downloader could not be found.");
@@ -45,7 +60,10 @@ public class DownloaderController : ControllerBase
 
         try
         {
-            dlToConfigure.SwitchSource(sourceType.Value, url, token, tokenName);
+            dlToConfigure.DownloadUrl = url;
+            dlToConfigure.Token = token;
+            dlToConfigure.TokenName = tokenName;
+            _downloaderService.ScheduleOrUpdateRecurringDownload(dlToConfigure);
         }
         catch (Exception e)
         {
@@ -59,7 +77,7 @@ public class DownloaderController : ControllerBase
     [HttpPost]
     public ActionResult Add(string downloader, string source, string url, string parser, string token = "", string tokenName = "")
     {
-        if (_downloaders.Any(d => d.ToString().Equals(downloader)))
+        if (_downloaders.Any(d => d.Name.Equals(downloader)))
         {
             return BadRequest("The downloader already exists.");
         }
@@ -70,10 +88,10 @@ public class DownloaderController : ControllerBase
             return BadRequest("Invalid source type");
         }
         
-        var client = new DisDownloaderClient(url, token, tokenName);
-        var dl = new BaseDownloader(client, parser, downloader, _dbContextFactory);
+        var dl = new DownloaderData{DownloadUrl = url, TokenName = tokenName, Token = token, ParserUrl = parser, Name = downloader};
         
         _downloaders.Add(dl);
+        _downloaderService.ScheduleOrUpdateRecurringDownload(dl);
         return Ok($"Downloader {downloader} has been added.");
     }
 
@@ -81,13 +99,13 @@ public class DownloaderController : ControllerBase
     [HttpPost]
     public ActionResult Reparse(string downloader)
     {
-        var dlToDownload = _downloaders.FirstOrDefault(d => d.ToString().Equals(downloader));
+        var dlToDownload = _downloaders.FirstOrDefault(d => d.Name.Equals(downloader));
         if (dlToDownload is null)
         {
             return NotFound("The downloader could not be found.");
         }
 
-        dlToDownload.Download();
+        _downloaderService.ScheduleDownload(dlToDownload);
         return Ok($"Downloader {downloader} has been started.");
     }
     

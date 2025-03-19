@@ -6,6 +6,8 @@ public interface IDownloaderClient
     public void SwitchHost(string host, string name, string password);
 
     public void Dispose();
+
+    public string ToString();
     
      public enum Source
     {
