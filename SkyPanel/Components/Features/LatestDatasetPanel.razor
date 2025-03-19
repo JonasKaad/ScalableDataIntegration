@@ -10,9 +10,9 @@ else
 {
     <MudDataGrid Items="@_blobDataItems" Hover="true" Elevation="0" QuickFilter="@QuickFilter">
         <ToolBarContent >
-            <MudGrid xs="10" sm="10" Style="align-content: end">
-                <MudItem xs="2" sm="2" Class="mb-2">
-                    <MudTextField @bind-Value="searchString" Label=" " Placeholder="Search" Clearable="true" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" />
+            <MudGrid xs="10" sm="10" >
+                <MudItem xs="3" sm="3" Class="mb-2">
+                    <MudTextField @bind-Value="searchString" Label=" " Placeholder="Search" Clearable="true" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium"/>
                 </MudItem>
                 <MudItem xs="3" sm="3" Class="mb-2">
                     <MudDateRangePicker PickerVariant="PickerVariant.Inline" Label="Date Range" Editable="true" @bind-DateRange="DateFilter" Placeholder="Select Date"/>
@@ -102,10 +102,15 @@ else
             DateTime dtEnd = new DateTime(endDate.Value.Year, endDate.Value.Month, endDate.Value.Day, 
                 _toTime.GetValueOrDefault().Hours, _toTime.GetValueOrDefault().Minutes, 0);
             
-            if (x.Date.Hour <= dtStart.Hour && x.Date.Minute < dtStart.Minute)
+            if (x.Date.Hour < dtStart.Hour)
                 return false;
-            if (x.Date.Hour >= dtEnd.Hour && x.Date.Minute > dtEnd.Minute)
+            if(x.Date.Minute < dtStart.Minute)
                 return false;
+            if (x.Date.Hour > dtEnd.Hour)
+                return false;
+            if(x.Date.Minute > dtEnd.Minute)
+                return false;
+
         
         return true;
         
