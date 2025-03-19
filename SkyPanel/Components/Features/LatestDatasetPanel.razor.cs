@@ -23,11 +23,13 @@ public partial class LatestDatasetPanel : ComponentBase
     protected override async Task OnInitializedAsync()
     {
         _blobDataItems = await BlobService.SetupAndReturnBlobs();
+        _blobDataItems = _blobDataItems.OrderByDescending(t => t.Date).ToList();
     }
     
     private async Task RefreshData()
     {
         _blobDataItems = await BlobService.RefreshBlobsAsync();
+        _blobDataItems = _blobDataItems.OrderByDescending(t => t.Date).ToList();
         StateHasChanged();
     }
 
