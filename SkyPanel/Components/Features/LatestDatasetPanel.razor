@@ -29,9 +29,8 @@ else
             </MudGrid>
         </ToolBarContent>
         <Columns>
-            <PropertyColumn Property="x => x.Parser" SortBy="new Func<BlobDataItem, object>(x => x.Parser!)"/>
-            @* <PropertyColumn Property=@{x => x.Date.ToString("dd/MM/yyyy HH\\:mm")} /> *@
-            <PropertyColumn Property="x => x.Date" />
+            <PropertyColumn Property="x => x.Parser" InitialDirection="SortDirection.None" SortBy="new Func<BlobDataItem, object>(x => x.Parser!)"/>
+            <PropertyColumn Property="x => x.Date" Format="dd/MM/yyyy HH\:mm" />
             <TemplateColumn CellClass=" justify-end">
                 <CellTemplate>
                     <MudTooltip Text="Raw dataset not found" Disabled="@(!string.IsNullOrEmpty(@context.Item?.RawPath))" Arrow="true">
