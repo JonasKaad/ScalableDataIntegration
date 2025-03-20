@@ -8,9 +8,9 @@
 }
 else
 {
-    <MudDataGrid Items="@_blobDataItems" Hover="true" Elevation="0" QuickFilter="@QuickFilter" Loading="_isLoading">
+    <MudDataGrid Items="@_blobDataItems" Hover="true" Elevation="0" QuickFilter="@QuickFilter" Loading="_isLoading" >
         <ToolBarContent >
-            <MudGrid xs="12" sm="12" Spacing="6">
+            <MudGrid xs="12" sm="12" Spacing="6"  Class="align-right">
                 <MudItem xs="3" sm="3" Class="mb-2">
                     <MudTextField @bind-Value="searchString" Label=" " Placeholder="Search" Clearable="true" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium"/>
                 </MudItem>
@@ -27,13 +27,12 @@ else
                         </MudItem>
                     </MudGrid>
                 </MudItem>
-                <MudItem xs="1" sm="1">
-                    <MudStack>
-                        <MudInputLabel/>
+                <MudItem xs="1" sm="1" Class="d-flex" Style="align-items:center;">
+                    <MudStack >
                         <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="@(() => Reset())">Reset</MudButton>
                     </MudStack>
                 </MudItem>
-                <MudItem >
+                <MudItem Class="d-flex"  Style="align-items:center;">
                     <MudIconButton Icon="@Icons.Material.Filled.Refresh" Disabled="@_isLoading" Size="Size.Medium" Color="Color.Primary" OnClick="@(() => RefreshData())"/>
                 </MudItem>
             </MudGrid>
