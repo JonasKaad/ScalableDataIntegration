@@ -88,7 +88,13 @@ else
         if (!string.IsNullOrWhiteSpace(_searchString) && x.Parser != null)
         {
             var parserSearch = _searchString.Split(',');
-            return parserSearch.Any(parser => x.Parser.Contains(parser));
+            foreach (var parser in parserSearch)
+            {
+                // If the "parser" after a comma is empty, we don't want to show all parsers
+                if (parserSearch.Length > 1 && string.IsNullOrEmpty(parser)) continue;
+                if (x.Parser.Contains(parser)) return true;
+            }
+            return false;
         }
 
 
