@@ -14,7 +14,7 @@ public partial class LatestDatasetPanel : ComponentBase
 {
 
     private List<BlobDataItem>? _blobDataItems;
-    
+    private bool _isLoading;
     
     [Inject] private StatisticsDatabaseService Db { get; set; } = default!;
 
@@ -22,14 +22,18 @@ public partial class LatestDatasetPanel : ComponentBase
     
     protected override async Task OnInitializedAsync()
     {
+        _isLoading = true;
         _blobDataItems = await BlobService.SetupAndReturnBlobs();
         _blobDataItems = _blobDataItems.OrderByDescending(t => t.Date).ToList();
+        _isLoading = false;
     }
     
     private async Task RefreshData()
     {
+        _isLoading = true;
         _blobDataItems = await BlobService.RefreshBlobsAsync();
         _blobDataItems = _blobDataItems.OrderByDescending(t => t.Date).ToList();
+        _isLoading = false;
         StateHasChanged();
     }
 
