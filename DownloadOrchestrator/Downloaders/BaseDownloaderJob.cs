@@ -20,7 +20,7 @@ public class BaseDownloaderJob : IDownloaderJob
         _context = context;
     }
 
-    public async Task Download(DownloaderData data)
+    public virtual async Task Download(DownloaderData data)
     {
         try
         {
@@ -35,7 +35,7 @@ public class BaseDownloaderJob : IDownloaderJob
         }
     }
 
-    public void Log(string parserName, int bytesAmount, DateTime date)
+    protected void Log(string parserName, int bytesAmount, DateTime date)
     {
         // Save to database
         Console.WriteLine(parserName + "," + bytesAmount + "," + date);
@@ -44,7 +44,7 @@ public class BaseDownloaderJob : IDownloaderJob
         _context.SaveChanges();
     }
 
-    protected async Task SendToParser(byte[] downloadedBytes, string parserUrl)
+    private async Task SendToParser(byte[] downloadedBytes, string parserUrl)
     {
         using var channel = GrpcChannel.ForAddress(parserUrl);
         var client = new Parser.ParserClient(channel);

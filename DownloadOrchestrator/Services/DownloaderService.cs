@@ -17,13 +17,20 @@ public class DownloaderService : IDownloaderService
     public string ScheduleDownload(DownloaderData data)
     {
         
-        var jobId = _backgroundJobClient.Enqueue<IDownloaderJob>(x => x.Download(data));
+        var jobId = _backgroundJobClient.Enqueue<DirectDownloadJob>(x => x.Download(data));
         return jobId;
     }
 
     public string ScheduleOrUpdateRecurringDownload(DownloaderData data)
     {
-        _recurringJobManager.AddOrUpdate<IDownloaderJob>(data.Name, x => x.Download(data), data.PollingRate);
+        if (string.IsNullOrEmpty(data.ParserUrl))
+        {
+            _recurringJobManager.AddOrUpdate<DirectDownloadJob>(data.Name, x => x.Download(data), data.PollingRate);
+        }
+        else
+        {
+            _recurringJobManager.AddOrUpdate<IDownloaderJob>(data.Name, x => x.Download(data), data.PollingRate);
+        }
         return data.Name;
     }
 }

@@ -72,7 +72,7 @@ public class DownloaderController : ControllerBase
 
     [Route("{downloader}/add")]
     [HttpPost]
-    public ActionResult Add(string downloader, string source, string url, string parser, string token = "", string tokenName = "", string pollingRate = "")
+    public ActionResult Add(string downloader, string source, string url, string parser = "", string token = "", string tokenName = "", string pollingRate = "")
     {
         if (_downloaders.Any(d => d.Name.Equals(downloader)))
         {
