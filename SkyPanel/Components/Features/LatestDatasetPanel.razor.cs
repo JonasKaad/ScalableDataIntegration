@@ -5,11 +5,12 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.JSInterop;
 using MudBlazor;
+using SkyPanel.Components.Dialogs;
 using SkyPanel.Components.Models;
 using SkyPanel.Components.Services;
 
 namespace SkyPanel.Components.Features;
-
+ 
 public partial class LatestDatasetPanel : ComponentBase
 {
 
@@ -19,6 +20,9 @@ public partial class LatestDatasetPanel : ComponentBase
     [Inject] private StatisticsDatabaseService Db { get; set; } = default!;
 
     [Inject] private BlobManagerService BlobService { get; set; } = default!;
+    
+    [Inject]
+    private IDialogService DialogService { get; set; } = default!;
     
     protected override async Task OnInitializedAsync()
     {
@@ -53,6 +57,51 @@ public partial class LatestDatasetPanel : ComponentBase
             Snackbar.Add("Failed to download file.\nRefreshing with latest data.", Severity.Error);
             await RefreshData();
             Console.WriteLine(e);
+        }
+    }
+    
+    private async Task OpenBlobDialogAsync(BlobDataItem blobDataItem)
+    {
+           
+        var parameters = new DialogParameters<BlobDeleteDialog>
+        {
+            { x => x.RawDataset, blobDataItem.RawPath},
+            { x => x.ParsedDataset, blobDataItem.ParsedPath},
+            { x => x.Parser, blobDataItem.Parser}
+            
+        };
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+        var dialogResult = await (await DialogService.ShowAsync<BlobDeleteDialog>("Delete confirmation", parameters, options)).Result;
+        var result = dialogResult?.Data as string ?? string.Empty;
+        
+        if (result == "delete")
+        {
+            var deletedDatasets = new List<string>();
+            if (blobDataItem.Parser != null)
+            {
+                if (!string.IsNullOrEmpty(blobDataItem.ParsedPath))
+                {
+                    await BlobService.DeleteBlob(blobDataItem.Parser, blobDataItem.ParsedPath);
+                    deletedDatasets.Add(blobDataItem.ParsedPath);
+                }
+
+                if (!string.IsNullOrEmpty(blobDataItem.RawPath))
+                {
+                    await BlobService.DeleteBlob(blobDataItem.Parser, blobDataItem.RawPath);
+                    deletedDatasets.Add(blobDataItem.RawPath);
+                }
+            }
+            switch (deletedDatasets.Count)
+            {
+                case 1:
+                    Snackbar.Add($"Deleted dataset: {deletedDatasets[0]}", Severity.Info);
+                    break;
+                case > 1:
+                    Snackbar.Add($"Deleted datasets: {string.Join(", ", deletedDatasets)}", Severity.Info);
+                    break;
+            }
+
+            await RefreshData();
         }
     }
 }
