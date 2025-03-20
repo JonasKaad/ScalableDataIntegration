@@ -270,4 +270,15 @@ public class BlobManagerService
         var st = await blobClient.DownloadStreamingAsync();
         return st.Value.Content;
     }
+
+    public async Task DeleteBlob(string containerName, string? blobName)
+    {
+        var containerClient = ServiceClient.GetBlobContainerClient(containerName);
+        
+        // Delete raw and parsed
+        var blobClient = containerClient.GetBlobClient(blobName);
+        
+        await blobClient.DeleteIfExistsAsync(DeleteSnapshotsOption.IncludeSnapshots);
+        await RefreshBlobsAsync();
+    }
 }
