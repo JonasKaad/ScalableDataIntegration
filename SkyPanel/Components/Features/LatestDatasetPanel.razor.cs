@@ -37,7 +37,7 @@ public partial class LatestDatasetPanel : ComponentBase
         StateHasChanged();
     }
 
-    private async Task Download(string containerName, string? blobName)
+    private async Task Download(string? containerName, string? blobName)
     {
         if (string.IsNullOrEmpty(blobName))
             return;

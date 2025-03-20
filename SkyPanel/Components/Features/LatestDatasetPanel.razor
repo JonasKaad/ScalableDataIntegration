@@ -12,7 +12,7 @@ else
         <ToolBarContent >
             <MudGrid xs="12" sm="12" Spacing="6"  Class="align-right">
                 <MudItem xs="3" sm="3" Class="mb-2">
-                    <MudTextField @bind-Value="searchString" Label=" " Placeholder="Search" Clearable="true" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium"/>
+                    <MudTextField @bind-Value="_searchString" Label=" " Placeholder="Search" Clearable="true" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium"/>
                 </MudItem>
                 <MudItem xs="3" sm="3" Class="mb-2">
                     <MudDateRangePicker PickerVariant="PickerVariant.Inline" Label="Date Range" Editable="true" @bind-DateRange="DateFilter" Placeholder="Select Date"/>
@@ -38,7 +38,7 @@ else
             </MudGrid>
         </ToolBarContent>
         <Columns>
-            <PropertyColumn Property="x => x.Parser" InitialDirection="SortDirection.None" SortBy="new Func<BlobDataItem, object>(x => x.Parser!)"/>
+            <PropertyColumn Property="x => x.Parser" InitialDirection="SortDirection.None" SortBy="new Func<BlobDataItem, object?>(x => x.Parser!)"/>
             <PropertyColumn Property="x => x.Date" Format="dd/MM/yyyy HH\:mm" />
             <TemplateColumn CellClass=" justify-end">
                 <CellTemplate>
@@ -76,17 +76,18 @@ else
         DateFilter = new DateRange(DateTime.Now.Date.AddDays(-7), DateTime.Now.Date);
         _fromTime = new TimeSpan(00, 00, 00);
         _toTime = new TimeSpan(23, 59, 59);
-        searchString = "";
+        _searchString = "";
     }
     
-    private string searchString = "";
+    private string _searchString = "";
 
     // private bool FilterFunc1(BlobDataItem blobData) => FilterFunc(blobData, searchString1);
     
     private Func<BlobDataItem, bool> QuickFilter => x =>
     {
-        if (!string.IsNullOrWhiteSpace(searchString) && 
-            !x.Parser.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        if (!string.IsNullOrWhiteSpace(_searchString) &&
+            x.Parser != null &&
+            !x.Parser.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
             return false;
 
 
