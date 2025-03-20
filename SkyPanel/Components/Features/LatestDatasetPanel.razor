@@ -32,7 +32,7 @@ else
                         <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="@(() => Reset())">Reset</MudButton>
                     </MudStack>
                 </MudItem>
-                <MudItem Class="d-flex"  Style="align-items:center;">
+                <MudItem xs="1" sm="1" Class="d-flex"  Style="align-items:center;">
                     <MudIconButton Icon="@Icons.Material.Filled.Refresh" Disabled="@_isLoading" Size="Size.Medium" Color="Color.Primary" OnClick="@(() => RefreshData())"/>
                 </MudItem>
             </MudGrid>
@@ -56,7 +56,7 @@ else
             </TemplateColumn>
             <TemplateColumn CellClass="justify-end">
                 <CellTemplate>
-                    <MudButton StartIcon="@Icons.Material.Filled.Delete" Variant="Variant.Outlined" Color="Color.Error">Delete</MudButton>
+                    <MudButton StartIcon="@Icons.Material.Filled.Delete" Variant="Variant.Outlined" Color="Color.Error" OnClick="@(() => OpenBlobDialogAsync(@context.Item))">Delete</MudButton>
                 </CellTemplate>
             </TemplateColumn>
         </Columns>
