@@ -78,8 +78,8 @@ public class BlobManagerService
     {
         _blobDataItems.Clear();
         // Dictionary to store raw and parsed file paths
-        var rawFiles = new Dictionary<string, (string containerName, string blobPath)>();
-        var parsedFiles = new Dictionary<string, (string containerName, string blobPath)>();
+        var rawFiles = new Dictionary<string, (string? containerName, string blobPath)>();
+        var parsedFiles = new Dictionary<string, (string? containerName, string blobPath)>();
 
         
         // Categorize blobs as raw or parsed based one if they contain "_raw" or "_parsed" in their name
@@ -178,7 +178,6 @@ public class BlobManagerService
         try
         {
             DateTime t;
-            
             // yyyy/MM/dd/HHmm format
             string datePortion = blobName.Substring(0, 15);
             if (DateTime.TryParseExact(datePortion, "yyyy/MM/dd/HHmm", null, DateTimeStyles.AdjustToUniversal, out t))
@@ -263,7 +262,7 @@ public class BlobManagerService
         return await SetupAndReturnBlobs();
     }
     
-    public async Task<Stream> DownloadBlob(string containerName, string? blobName)
+    public async Task<Stream> DownloadBlob(string? containerName, string? blobName)
     {
         var containerClient = ServiceClient.GetBlobContainerClient(containerName);
         var blobClient = containerClient.GetBlobClient(blobName);

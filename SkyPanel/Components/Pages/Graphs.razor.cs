@@ -11,7 +11,7 @@ public partial class Graphs
 {
     private bool _loading = true;
     private ApexChart<ParserData> Chart { get; set; } = new();
-    private ApexChartOptions<ParserData> _options;
+    private ApexChartOptions<ParserData>? _options;
     [CascadingParameter] private bool IsDarkMode { get; set; }
     private IEnumerable<string> _selectedParsers = [];
     private List<string> _selected = [];
