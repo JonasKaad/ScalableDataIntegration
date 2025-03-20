@@ -18,15 +18,23 @@ public partial class LatestDatasetPanel : ComponentBase
     private bool _isLoading;
     
     [Inject] private StatisticsDatabaseService Db { get; set; } = default!;
-
+    [Inject] private ParserStateService ParserState { get; set; } = default!;
     [Inject] private BlobManagerService BlobService { get; set; } = default!;
     
     [Inject]
     private IDialogService DialogService { get; set; } = default!;
     
+    private void OnParserStateChanged()
+    {
+        _searchString = ParserState.ParserName;
+        StateHasChanged();
+    }
+    
     protected override async Task OnInitializedAsync()
     {
         _isLoading = true;
+        ParserState.OnChange += OnParserStateChanged;
+        _searchString = ParserState.ParserName;
         _blobDataItems = await BlobService.SetupAndReturnBlobs();
         _blobDataItems = _blobDataItems.OrderByDescending(t => t.Date).ToList();
         _isLoading = false;
