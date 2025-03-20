@@ -23,7 +23,7 @@ public class DownloaderService : IDownloaderService
 
     public string ScheduleOrUpdateRecurringDownload(DownloaderData data)
     {
-        _recurringJobManager.AddOrUpdate<IDownloaderJob>(data.Name, x => x.Download(data), Cron.Minutely);
+        _recurringJobManager.AddOrUpdate<IDownloaderJob>(data.Name, x => x.Download(data), data.PollingRate);
         return data.Name;
     }
 }
