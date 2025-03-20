@@ -20,8 +20,13 @@ public class DirectDownloadJob : BaseDownloaderJob
     {
         try
         {
-            var client = new DisDownloaderClient(data.DownloadUrl, data.Token, data.TokenName);
-            var bytes = await client.FetchData();
+            var bytes = await base.FetchBytes(data.DownloadUrl, data.TokenName, data.Token) 
+                        ?? await base.FetchBytes(data.BackUpUrl, data.TokenName, data.Token);
+            if (bytes is null)
+            {
+                Console.WriteLine("Download Failed");
+                return;
+            }
             Log(data.Name, bytes.Length, DateTime.UtcNow);
             await SendToParser(bytes, data.Name);
         }

@@ -40,7 +40,7 @@ public class BaseDownloaderJob : IDownloaderJob
         }
     }
 
-    private async Task<byte[]?> FetchBytes(string url, string tokenName = "", string token = "")
+    protected async Task<byte[]?> FetchBytes(string url, string tokenName = "", string token = "")
     {
         if(string.IsNullOrEmpty(url)) return null;
         try
