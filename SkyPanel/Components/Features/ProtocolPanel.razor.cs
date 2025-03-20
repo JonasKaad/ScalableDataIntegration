@@ -17,6 +17,7 @@ public partial class ProtocolPanel : ComponentBase
     private string _secretName = string.Empty;
     private string? Protocol { get; set; }
     private string? UrlValue { get; set; }
+    private string? BackupUrlValue { get; set; }
     private int PollingValue { get; set; }
     private string Username { get; set; } = string.Empty;
     private string Password { get; set; } = string.Empty;
