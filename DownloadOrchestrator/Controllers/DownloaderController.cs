@@ -70,7 +70,7 @@ public class DownloaderController : ControllerBase
             return BadRequest("Invalid source type");
         }
         
-        var client = new DisDownloaderClient(url, token, tokenName, sourceType.Value);
+        var client = new DisDownloaderClient(url, token, tokenName);
         var dl = new BaseDownloader(client, parser, downloader, _dbContextFactory);
         
         _downloaders.Add(dl);
