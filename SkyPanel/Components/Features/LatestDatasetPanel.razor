@@ -85,10 +85,11 @@ else
     
     private Func<BlobDataItem, bool> QuickFilter => x =>
     {
-        if (!string.IsNullOrWhiteSpace(_searchString) &&
-            x.Parser != null &&
-            !x.Parser.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
-            return false;
+        if (!string.IsNullOrWhiteSpace(_searchString) && x.Parser != null)
+        {
+            var parserSearch = _searchString.Split(',');
+            return parserSearch.Any(parser => x.Parser.Contains(parser));
+        }
 
 
         if (DateFilter is { Start: not null, End: not null } && (x.Date < DateFilter.Start.Value.Date || x.Date.Date > DateFilter.End.Value.Date))
