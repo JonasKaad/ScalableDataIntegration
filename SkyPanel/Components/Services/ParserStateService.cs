@@ -9,6 +9,7 @@ public class ParserStateService
     public string ParserName => _parser?.Name ?? string.Empty;
     
     public string Url => _parser?.Url ?? string.Empty;
+    public string BackupUrl => _parser?.BackupUrl ?? string.Empty;
     
     public int Polling => _parser?.Polling ?? 0;
     
