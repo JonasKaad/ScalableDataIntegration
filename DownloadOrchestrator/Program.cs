@@ -22,6 +22,7 @@ var connectionString = "Server=" + Environment.GetEnvironmentVariable("SERVER") 
 var downloaders = new List<DownloaderData>
 {
     CreateDownloaderData(
+        "https://www.airservicesausralia.com/flextracks/text.asp?ver=1",
         "https://www.airservicesaustralia.com/flextracks/text.asp?ver=1",
         "http://ausotparser.jonaskaad.com", 
         "AusotParser",
@@ -50,10 +51,11 @@ app.UseHangfireDashboard();
 
 app.Run();
 
-DownloaderData CreateDownloaderData(string url, string parserService, string name, string pollingRate)
+DownloaderData CreateDownloaderData(string url, string backup, string parserService, string name, string pollingRate)
 {
     return new DownloaderData{
         DownloadUrl = url,
+        BackUpUrl = backup,
         ParserUrl = parserService, 
         Name = name,
         PollingRate = pollingRate

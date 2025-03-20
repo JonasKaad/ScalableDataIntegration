@@ -33,7 +33,7 @@ public class DisHttpClient : IDownloaderClient
         catch (HttpRequestException e)
         {
             //TODO: handle exception
-            Console.WriteLine(e);
+            throw;
         }
 
         return jsonResponse;

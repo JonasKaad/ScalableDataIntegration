@@ -24,8 +24,13 @@ public class BaseDownloaderJob : IDownloaderJob
     {
         try
         {
-            var client = new DisDownloaderClient(data.DownloadUrl, data.Token, data.TokenName);
-            var bytes = await client.FetchData();
+            var bytes = await FetchBytes(data.DownloadUrl, data.TokenName, data.Token) 
+                        ?? await FetchBytes(data.BackUpUrl, data.TokenName, data.Token);
+            if (bytes is null)
+            {
+                Console.WriteLine("Download Failed");
+                return;
+            }
             Log(data.Name, bytes.Length, DateTime.UtcNow);
             await SendToParser(bytes, data.ParserUrl);
         }
@@ -35,6 +40,22 @@ public class BaseDownloaderJob : IDownloaderJob
         }
     }
 
+    private async Task<byte[]?> FetchBytes(string url, string tokenName = "", string token = "")
+    {
+        if(string.IsNullOrEmpty(url)) return null;
+        try
+        {
+            var client = new DisDownloaderClient(url, token, tokenName);
+            var bytes = await client.FetchData();
+            return bytes;
+        }
+        catch (HttpRequestException e)
+        {
+            Console.WriteLine($"Failed to download from {url}");
+            return null;
+        }
+    }
+    
     protected void Log(string parserName, int bytesAmount, DateTime date)
     {
         // Save to database

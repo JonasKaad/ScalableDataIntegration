@@ -78,7 +78,7 @@ public class DisDownloaderClient
         var bytes = await _downloaderClient.FetchData();
         if (bytes.Length == 0)
         {
-            throw new Exception($"Unable to fetch data from {_currentSource}");
+            throw new HttpRequestException($"Unable to fetch data from {_currentSource}");
         }
 #if DEBUG
         Console.WriteLine($"Downloaded {bytes.Length} bytes");
