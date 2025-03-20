@@ -1,10 +1,6 @@
-using Downloader.Downloaders;
-using DownloadOrchestrator.Downloaders;
 using DownloadOrchestrator.Models;
 using DownloadOrchestrator.Services;
-using DownloadOrchestrator.Utils;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using static DownloadOrchestrator.Utils.IDownloaderClient;
 
 namespace DownloadOrchestrator.Controllers;
@@ -44,7 +40,7 @@ public class DownloaderController : ControllerBase
 
     [Route("{downloader}/configure")]
     [HttpPut]
-    public ActionResult ConfigureDownloader(string downloader, string source, string url = "", string token = "", string tokenName = "")
+    public ActionResult ConfigureDownloader(string downloader, string source = "", string url = "", string token = "", string tokenName = "", string pollingRate = "")
     {
         var dlToConfigure = _downloaders.FirstOrDefault(d => d.Name.Equals(downloader));
         if (dlToConfigure is null)
@@ -60,9 +56,10 @@ public class DownloaderController : ControllerBase
 
         try
         {
-            dlToConfigure.DownloadUrl = url;
-            dlToConfigure.Token = token;
-            dlToConfigure.TokenName = tokenName;
+            dlToConfigure.DownloadUrl = string.IsNullOrEmpty(url) ? dlToConfigure.DownloadUrl : url;
+            dlToConfigure.Token = string.IsNullOrEmpty(token) ? dlToConfigure.Token : token;
+            dlToConfigure.TokenName = string.IsNullOrEmpty(tokenName) ? dlToConfigure.TokenName : tokenName;
+            dlToConfigure.PollingRate = string.IsNullOrEmpty(pollingRate) ? dlToConfigure.PollingRate : pollingRate;
             _downloaderService.ScheduleOrUpdateRecurringDownload(dlToConfigure);
         }
         catch (Exception e)
@@ -75,7 +72,7 @@ public class DownloaderController : ControllerBase
 
     [Route("{downloader}/add")]
     [HttpPost]
-    public ActionResult Add(string downloader, string source, string url, string parser, string token = "", string tokenName = "")
+    public ActionResult Add(string downloader, string source, string url, string parser, string token = "", string tokenName = "", string pollingRate = "")
     {
         if (_downloaders.Any(d => d.Name.Equals(downloader)))
         {
@@ -88,7 +85,7 @@ public class DownloaderController : ControllerBase
             return BadRequest("Invalid source type");
         }
         
-        var dl = new DownloaderData{DownloadUrl = url, TokenName = tokenName, Token = token, ParserUrl = parser, Name = downloader};
+        var dl = new DownloaderData{DownloadUrl = url, TokenName = tokenName, Token = token, ParserUrl = parser, Name = downloader, PollingRate = pollingRate};
         
         _downloaders.Add(dl);
         _downloaderService.ScheduleOrUpdateRecurringDownload(dl);

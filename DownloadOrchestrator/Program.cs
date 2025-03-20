@@ -4,7 +4,6 @@ using Downloader.Downloaders;
 using DownloadOrchestrator.Downloaders;
 using DownloadOrchestrator.Models;
 using DownloadOrchestrator.Services;
-using DownloadOrchestrator.Utils;
 using Microsoft.EntityFrameworkCore;
 using Hangfire;
 
@@ -25,7 +24,8 @@ var downloaders = new List<DownloaderData>
     CreateDownloaderData(
         "https://www.airservicesaustralia.com/flextracks/text.asp?ver=1",
         "http://ausotparser.jonaskaad.com", 
-        "AusotParser")
+        "AusotParser",
+        "*/10 * * * *")
 };
 builder.Services.AddSingleton(downloaders)
     .AddDbContextFactory<StatisticsContext>(options =>
@@ -45,19 +45,17 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-
 app.MapControllers();
-
 app.UseHangfireDashboard();
 
 app.Run();
 
-DownloaderData CreateDownloaderData(string url, string parserService, string name)
+DownloaderData CreateDownloaderData(string url, string parserService, string name, string pollingRate)
 {
     return new DownloaderData{
         DownloadUrl = url,
         ParserUrl = parserService, 
-        Name = name
+        Name = name,
+        PollingRate = pollingRate
     };
 }
