@@ -10,16 +10,16 @@ else
 {
     <MudDataGrid Items="@_blobDataItems" Hover="true" Elevation="0" QuickFilter="@QuickFilter" Loading="_isLoading" >
         <ToolBarContent >
-            <MudGrid xs="12" sm="12" Spacing="6"  Class="align-right">
-                <MudItem xs="3" sm="3" Class="mb-2">
-                    <MudTextField @bind-Value="_searchString" Label=" " Placeholder="Search" Clearable="true" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium"/>
+            <MudGrid xs="12" sm="12" Spacing="6" Class="align-right">
+                <MudItem xs="4" sm="4">
+                    <MudTextField @bind-Value="_searchString" Label=" " HelperText="Separate multiple parser names with commas" HelperTextOnFocus="true" Immediate="true" Placeholder="Search parsers" Clearable="true" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium"/>
                 </MudItem>
-                <MudItem xs="3" sm="3" Class="mb-2">
+                <MudItem xs="3" sm="3">
                     <MudDateRangePicker PickerVariant="PickerVariant.Inline" Label="Date Range" Editable="true" @bind-DateRange="DateFilter" Placeholder="Select Date"/>
                 </MudItem>
-                <MudItem xs="4" sm="4">
+                <MudItem xs="3" sm="3">
                     <MudGrid>
-                        <MudItem  xs="6" sm="6">
+                        <MudItem xs="6" sm="6">
                             <MudTimePicker Label="From hour:min" Editable="true" TimeFormat="HH\:mm" AmPm="false" Elevation="12" @bind-Time="_fromTime"/>
                         </MudItem>
                         <MudItem xs="6" sm="6">
@@ -27,13 +27,11 @@ else
                         </MudItem>
                     </MudGrid>
                 </MudItem>
-                <MudItem xs="1" sm="1" Class="d-flex" Style="align-items:center;">
-                    <MudStack >
+                <MudItem xs="1" sm="1" Class="d-flex" Style="align-items: center">
                         <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="@(() => Reset())">Reset</MudButton>
-                    </MudStack>
                 </MudItem>
-                <MudItem xs="1" sm="1" Class="d-flex"  Style="align-items:center;">
-                    <MudIconButton Icon="@Icons.Material.Filled.Refresh" Disabled="@_isLoading" Size="Size.Medium" Color="Color.Primary" OnClick="@(() => RefreshData())"/>
+                <MudItem xs="1" sm="1" Class="d-flex" Style="align-items: center">
+                        <MudIconButton Icon="@Icons.Material.Filled.Refresh" Disabled="@_isLoading" Size="Size.Medium" Color="Color.Primary" OnClick="@(() => RefreshData())" />
                 </MudItem>
             </MudGrid>
         </ToolBarContent>
