@@ -13,16 +13,39 @@ public partial class ParserPanel : ComponentBase
     
     private Parser[] _parsers =
     [
-        new("1", "https://www.google.com", "Http", 24),
+        new("1", "https://www.google.com", "Http", 24, "https://www.google.dk"),
         new("2",  "ftp://www.test.com", "Ftp", 37),
-        new("3",  "https://jsonplaceholder.typicode.com/todos/1", "Http", 12)
     ];
 
+    //TODO: Currently just a placeholder method, will be replaced with actual parser fetching
     private void FetchParsers()
     {
-        foreach (var (containerName, index) in BlobService.GetContainerNames().Select((x, i) => (x, i)))
+        var containerNames = BlobService.GetContainerNames().ToArray();
+    
+        // Resize array if needed to accommodate all containers
+        if (_parsers.Length < containerNames.Length)
         {
-            _parsers[index].Name = containerName;
+            Array.Resize(ref _parsers, containerNames.Length);
+        }
+
+        // Update parsers with container names
+        for (int i = 0; i < containerNames.Length; i++)
+        {
+            string containerName = containerNames[i];
+        
+            // If parser at this index is null, create a new one
+            if (_parsers[i] == null)
+            {
+                _parsers[i] = new Parser(i.ToString(), "https://jsonplaceholder.typicode.com/todos/1", "Http", 13)
+                {
+                    Name = containerName
+                };
+            }
+            else
+            {
+                // Update existing parser name
+                _parsers[i].Name = containerName;
+            }
         }
     }
 

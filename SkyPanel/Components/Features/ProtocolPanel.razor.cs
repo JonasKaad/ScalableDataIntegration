@@ -56,6 +56,7 @@ public partial class ProtocolPanel : ComponentBase
         // Update UI components with values from ParserState
         Protocol = ParserState.Protocol;
         UrlValue = ParserState.Url;
+        BackupUrlValue = ParserState.BackupUrl;
         PollingValue = ParserState.Polling;
         ProtoParserName = ParserState.ParserName;
         CheckForCredentials(ProtoParserName);
