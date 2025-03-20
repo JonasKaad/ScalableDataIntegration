@@ -57,8 +57,6 @@ public class DownloaderController : ControllerBase
         try
         {
             dlToConfigure.DownloadUrl = string.IsNullOrEmpty(url) ? dlToConfigure.DownloadUrl : url;
-            dlToConfigure.Token = string.IsNullOrEmpty(token) ? dlToConfigure.Token : token;
-            dlToConfigure.TokenName = string.IsNullOrEmpty(tokenName) ? dlToConfigure.TokenName : tokenName;
             dlToConfigure.PollingRate = string.IsNullOrEmpty(pollingRate) ? dlToConfigure.PollingRate : pollingRate;
             _downloaderService.ScheduleOrUpdateRecurringDownload(dlToConfigure);
         }
@@ -85,7 +83,7 @@ public class DownloaderController : ControllerBase
             return BadRequest("Invalid source type");
         }
         
-        var dl = new DownloaderData{DownloadUrl = url, TokenName = tokenName, Token = token, ParserUrl = parser, Name = downloader, PollingRate = pollingRate};
+        var dl = new DownloaderData{DownloadUrl = url, ParserUrl = parser, Name = downloader, PollingRate = pollingRate};
         
         _downloaders.Add(dl);
         _downloaderService.ScheduleOrUpdateRecurringDownload(dl);
