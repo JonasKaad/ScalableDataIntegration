@@ -8,9 +8,9 @@
 }
 else
 {
-    <MudDataGrid Items="@_blobDataItems" Hover="true" Elevation="0" QuickFilter="@QuickFilter">
+    <MudDataGrid Items="@_blobDataItems" Hover="true" Elevation="0" QuickFilter="@QuickFilter" Loading="_isLoading">
         <ToolBarContent >
-            <MudGrid xs="10" sm="10" >
+            <MudGrid xs="12" sm="12" Spacing="6">
                 <MudItem xs="3" sm="3" Class="mb-2">
                     <MudTextField @bind-Value="searchString" Label=" " Placeholder="Search" Clearable="true" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium"/>
                 </MudItem>
@@ -19,18 +19,22 @@ else
                 </MudItem>
                 <MudItem xs="4" sm="4">
                     <MudGrid>
-                        <MudItem xs="5">
-                            <MudTimePicker Label="From hour:min" Editable="true" @bind-Time="_fromTime"/>
+                        <MudItem  xs="6" sm="6">
+                            <MudTimePicker Label="From hour:min" Editable="true" TimeFormat="HH\:mm" AmPm="false" Elevation="12" @bind-Time="_fromTime"/>
                         </MudItem>
-                        <MudItem xs="5">
-                            <MudTimePicker Label="To hour:min" Editable="true" @bind-Time="_toTime"/>
+                        <MudItem xs="6" sm="6">
+                            <MudTimePicker Label="To hour:min" Editable="true" TimeFormat="HH\:mm" AmPm="false" Elevation="12" @bind-Time="_toTime"/>
                         </MudItem>
                     </MudGrid>
                 </MudItem>
                 <MudItem xs="1" sm="1">
                     <MudStack>
                         <MudInputLabel/>
-                    <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="@(() => Reset())">Reset</MudButton></MudStack>
+                        <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="@(() => Reset())">Reset</MudButton>
+                    </MudStack>
+                </MudItem>
+                <MudItem >
+                    <MudIconButton Icon="@Icons.Material.Filled.Refresh" Disabled="@_isLoading" Size="Size.Medium" Color="Color.Primary" OnClick="@(() => RefreshData())"/>
                 </MudItem>
             </MudGrid>
         </ToolBarContent>
@@ -58,7 +62,7 @@ else
             </TemplateColumn>
         </Columns>
         <PagerContent>
-            <MudDataGridPager PageSizeOptions="new[] { 5, 10 }"/>
+            <MudDataGridPager PageSizeOptions="new[] { 10, 20 }"/>
         </PagerContent>
     </MudDataGrid>
 }
