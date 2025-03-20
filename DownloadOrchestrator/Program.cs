@@ -1,3 +1,5 @@
+using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
 using DotNetEnv;
 using DotNetEnv.Configuration;
 using Downloader.Downloaders;
@@ -28,9 +30,16 @@ var downloaders = new List<DownloaderData>
         "AusotParser",
         "*/10 * * * *")
 };
+
+string keyVaultName = Environment.GetEnvironmentVariable("KEY_VAULT_NAME");
+var kvUri = "https://" + keyVaultName + ".vault.azure.net";
+
+var client = new SecretClient(new Uri(kvUri), new DefaultAzureCredential(true));
+
 builder.Services.AddSingleton(downloaders)
     .AddDbContextFactory<StatisticsContext>(options =>
         options.UseNpgsql(connectionString))
+    .AddScoped<SecretService>(s => new SecretService(client))
     .AddScoped<IDownloaderJob, BaseDownloaderJob>()
     .AddScoped<IDownloaderService, DownloaderService>()
     .AddHangfire(config => config.UseInMemoryStorage())

@@ -1,18 +1,21 @@
+using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
 using Azure.Storage.Blobs;
 using Downloader.Downloaders;
 using DownloadOrchestrator.Models;
-using DownloadOrchestrator.Utils;
+using DownloadOrchestrator.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace DownloadOrchestrator.Downloaders;
 
 public class DirectDownloadJob : BaseDownloaderJob
 {
-    public DirectDownloadJob() : base(new StatisticsContext(new DbContextOptionsBuilder<StatisticsContext>().Options))
+    public DirectDownloadJob() : base(new StatisticsContext(new DbContextOptionsBuilder<StatisticsContext>().Options), 
+        new SecretService(new SecretClient(new Uri("uri"), new EnvironmentCredential())))
     {
     }
 
-    public DirectDownloadJob(StatisticsContext statisticsContext) : base(statisticsContext)
+    public DirectDownloadJob(StatisticsContext statisticsContext, SecretService secretService) : base(statisticsContext, secretService)
     {
     }
 
@@ -20,8 +23,11 @@ public class DirectDownloadJob : BaseDownloaderJob
     {
         try
         {
-            var bytes = await base.FetchBytes(data.DownloadUrl, data.TokenName, data.Token) 
-                        ?? await base.FetchBytes(data.BackUpUrl, data.TokenName, data.Token);
+            var downloaderSecret = await SecretService.GetSecretAsync(data.Name);
+            var tokenName = downloaderSecret.TokenName;
+            var token = downloaderSecret.Token;
+            var bytes = await FetchBytes(data.DownloadUrl, tokenName, token) 
+                        ?? await FetchBytes(data.BackUpUrl, tokenName, token);
             if (bytes is null)
             {
                 Console.WriteLine("Download Failed");

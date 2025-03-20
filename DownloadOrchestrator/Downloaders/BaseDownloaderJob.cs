@@ -1,5 +1,8 @@
+using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
 using DownloadOrchestrator.Downloaders;
 using DownloadOrchestrator.Models;
+using DownloadOrchestrator.Services;
 using DownloadOrchestrator.Utils;
 using Google.Protobuf;
 using Grpc.Net.Client;
@@ -11,21 +14,27 @@ namespace Downloader.Downloaders;
 public class BaseDownloaderJob : IDownloaderJob
 {
     private readonly StatisticsContext _context;
+    protected readonly SecretService SecretService;
     
-    public BaseDownloaderJob() : this(new StatisticsContext(new DbContextOptionsBuilder<StatisticsContext>().Options))
+    public BaseDownloaderJob() : this(new StatisticsContext(new DbContextOptionsBuilder<StatisticsContext>().Options), 
+        new SecretService(new SecretClient(new Uri("uri"), new EnvironmentCredential())))
     {
     }
-    public BaseDownloaderJob(StatisticsContext context)
+    public BaseDownloaderJob(StatisticsContext context, SecretService secretService)
     {
-        _context = context;
+        _context = context; 
+        SecretService = secretService;
     }
 
     public virtual async Task Download(DownloaderData data)
     {
         try
         {
-            var bytes = await FetchBytes(data.DownloadUrl, data.TokenName, data.Token) 
-                        ?? await FetchBytes(data.BackUpUrl, data.TokenName, data.Token);
+            var downloaderSecret = await SecretService.GetSecretAsync(data.Name);
+            var tokenName = downloaderSecret.TokenName;
+            var token = downloaderSecret.Token;
+            var bytes = await FetchBytes(data.DownloadUrl, tokenName, token) 
+                        ?? await FetchBytes(data.BackUpUrl, tokenName, token);
             if (bytes is null)
             {
                 Console.WriteLine("Download Failed");
