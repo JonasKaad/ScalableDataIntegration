@@ -32,6 +32,7 @@ var downloaders = new List<DownloaderData>
         "*/10 * * * *")
 };
 
+builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton(downloaders)
     .AddDbContextFactory<StatisticsContext>(options =>
         options.UseNpgsql(connectionString))
@@ -62,6 +63,8 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
