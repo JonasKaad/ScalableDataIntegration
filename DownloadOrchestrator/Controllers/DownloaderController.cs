@@ -40,20 +40,14 @@ public class DownloaderController : ControllerBase
 
     [Route("{downloader}/configure")]
     [HttpPut]
-    public ActionResult ConfigureDownloader(string downloader, string source = "", string url = "", string token = "", string tokenName = "", string pollingRate = "")
+    public ActionResult ConfigureDownloader(string downloader, string url = "", string token = "", string tokenName = "", string pollingRate = "")
     {
         var dlToConfigure = _downloaders.FirstOrDefault(d => d.Name.Equals(downloader));
         if (dlToConfigure is null)
         {
             return NotFound("The downloader could not be found.");
         }
-
-        var sourceType = GetSourceType(source);
-        if (sourceType is null)
-        {
-            return BadRequest("Invalid source type");
-        }
-
+        
         try
         {
             dlToConfigure.DownloadUrl = string.IsNullOrEmpty(url) ? dlToConfigure.DownloadUrl : url;
@@ -70,17 +64,11 @@ public class DownloaderController : ControllerBase
 
     [Route("{downloader}/add")]
     [HttpPost]
-    public ActionResult Add(string downloader, string source, string url, string parser = "", string token = "", string tokenName = "", string pollingRate = "")
+    public ActionResult Add(string downloader, string url, string parser = "", string token = "", string tokenName = "", string pollingRate = "")
     {
         if (_downloaders.Any(d => d.Name.Equals(downloader)))
         {
             return BadRequest("The downloader already exists.");
-        }
-        
-        var sourceType = GetSourceType(source);
-        if (sourceType is null)
-        {
-            return BadRequest("Invalid source type");
         }
         
         var dl = new DownloaderData{DownloadUrl = url, ParserUrl = parser, Name = downloader, PollingRate = pollingRate};
@@ -102,17 +90,6 @@ public class DownloaderController : ControllerBase
 
         _downloaderService.ScheduleDownload(dlToDownload);
         return Ok($"Downloader {downloader} has been started.");
-    }
-    
-
-    private Source? GetSourceType(string source)
-    {
-        return source.ToUpper() switch
-        {
-            "HTTP" => Source.Http,
-            "FTP" => Source.Ftp,
-            _ => null
-        };
     }
     
 }
