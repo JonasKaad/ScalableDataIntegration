@@ -51,9 +51,9 @@ public class DownloaderController : ControllerBase
         try
         {
             dlToConfigure.DownloadUrl = string.IsNullOrEmpty(url) ? dlToConfigure.DownloadUrl : url;
-            dlToConfigure.BackUpUrl = string.IsNullOrEmpty(url) ? dlToConfigure.BackUpUrl : backupUrl;
+            dlToConfigure.BackUpUrl = string.IsNullOrEmpty(backupUrl) ? dlToConfigure.BackUpUrl : backupUrl;
             dlToConfigure.PollingRate = string.IsNullOrEmpty(pollingRate) ? dlToConfigure.PollingRate : pollingRate;
-            dlToConfigure.SecretName = string.IsNullOrEmpty(pollingRate) ? dlToConfigure.SecretName : secretName;
+            dlToConfigure.SecretName = string.IsNullOrEmpty(secretName) ? dlToConfigure.SecretName : secretName;
             _downloaderService.ScheduleOrUpdateRecurringDownload(dlToConfigure);
         }
         catch (Exception e)
