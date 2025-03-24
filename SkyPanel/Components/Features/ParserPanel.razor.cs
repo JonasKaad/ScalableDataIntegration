@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using SkyPanel.Components.Dialogs;
-using SkyPanel.Components.Models;
 using SkyPanel.Components.Services;
 
 namespace SkyPanel.Components.Features;
@@ -15,7 +14,7 @@ public partial class ParserPanel : ComponentBase
     [
         new("1", "https://www.google.com", "Http", "24", "https://www.google.dk"),
         new("2",  "ftp://www.test.com", "Ftp", "37"),
-    ];
+        get => ParserState.ParserName;
 
     //TODO: Currently just a placeholder method, will be replaced with actual parser fetching
     private void FetchParsers()
@@ -55,7 +54,6 @@ public partial class ParserPanel : ComponentBase
         return _parsers;
     }
     
-    private string ParserName => ParserState.ParserName;
     
     public string Parser
     {
@@ -72,7 +70,7 @@ public partial class ParserPanel : ComponentBase
     {
         var parameters = new DialogParameters<FileDialogParser>
         {
-            { x => x.ParserName, ParserName },
+            { x => x.ParserName, ParserState.ParserName },
             
         };
         var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small, FullWidth = true };
@@ -86,8 +84,8 @@ public partial class ParserPanel : ComponentBase
         {
             { x => x.ContentText, "Do you want to fetch and parse the latest dataset for:" },
             { x => x.ConfirmationButtonText, "Confirm" },
-            { x => x.EmphasizedCenterText, ParserName },
-            { x => x.SnackbarMessage, $"Started fetching and parsing latest dataset for {ParserName}"},
+            { x => x.EmphasizedCenterText, ParserState.ParserName },
+            { x => x.SnackbarMessage, $"Started fetching and parsing latest dataset for {ParserState.ParserName}"},
             { x => x.SnackbarSeverity, Severity.Info },
         };
         
