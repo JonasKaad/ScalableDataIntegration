@@ -7,5 +7,6 @@ public class DownloaderData
     public string ParserUrl { get; set; }
     public string Name { get; set; }
     public string PollingRate { get; set; }
+    public string SecretName { get; set; }
 
 }
