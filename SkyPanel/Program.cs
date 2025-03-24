@@ -3,23 +3,23 @@ using MudBlazor.Services;
 using SkyPanel.Components;
 using SkyPanel.Components.Services;
 using DotNetEnv;
+using DotNetEnv.Configuration;
+
 var builder = WebApplication.CreateBuilder(args);
 
+// Load env variables
+builder.Configuration.AddDotNetEnv(".env", LoadOptions.TraversePath());
 builder.Services.AddMudServices();
 builder.Services.AddScoped<ParserStateService>();
 builder.Services.AddScoped<SecretCredentialsService>();
 builder.Services.AddScoped<BlobManagerService>(provider =>
 {
-    // Load environment variables
-    Env.Load();
     var connectionString = Env.GetString("BLOB_CONNECTION_STRING");
     return new BlobManagerService(connectionString);
 });
 //Database service setup
 builder.Services.AddDbContext<StatisticsDatabaseService>(options =>
 {
-    // Load environment variables
-    Env.Load();
     // Npgsql formatted connection string
     var connectionString = "Server=" + Env.GetString("SERVER") + ";" + 
                            "Database=" + Env.GetString("DATABASE")+ ";"  + 
