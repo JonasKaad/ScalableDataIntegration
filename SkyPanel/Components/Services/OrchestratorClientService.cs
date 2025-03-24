@@ -21,15 +21,21 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
         return [];
     }
 
-namespace SkyPanel.Components.Services;
-
-public sealed class OrchestratorClientService(IHttpClientFactory httpClientFactory, string baseUrl)
-{
-    public async Task<List<string>> GetDownloaders()
+    public async Task<Parser> GetDownloaderConfiguration(string downloader)
     {
         var client = httpClientFactory.CreateClient();
-        var response = await client.GetAsync($"{baseUrl}downloaders");
-        var elements = await response.Content.ReadFromJsonAsync<List<string>>();
-        return elements;
+        
+        try
+        {
+            var response = await client.GetAsync($"{baseUrl}/{downloader}/configuration");
+            var parser = await response.Content.ReadFromJsonAsync<Parser>();
+            Console.WriteLine(parser);
+            return parser ?? new Parser("", "", "", "", "", "");
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+        return new Parser("", "", "", "", "", "");
     }
 }
