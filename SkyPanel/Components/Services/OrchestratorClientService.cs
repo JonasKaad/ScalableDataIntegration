@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.Json;
 using SkyPanel.Components.Models;
 
@@ -37,5 +38,28 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
             Console.WriteLine(e);
         }
         return new Parser("", "", "", "", "", "");
+    }
+
+    public async Task ConfigureDownloader(string parser, string _url, string _backupUrl, string _secretName, string _pollingRate)
+    {
+        var client = httpClientFactory.CreateClient();
+
+        using StringContent jsonContent = new(
+            JsonSerializer.Serialize(new 
+            {
+                downloader = parser,
+                url = _url,
+                backupUrl = _backupUrl,
+                secretName = _secretName,
+                pollingRate = _pollingRate,
+            }),
+            Encoding.UTF8,
+            "application/json");
+        
+        using HttpResponseMessage response  = await client.PutAsync($"{baseUrl}/{parser}/configure", jsonContent);
+        Console.WriteLine(response.EnsureSuccessStatusCode());
+        
+        var jsonResponse = await response.Content.ReadAsStringAsync();
+        Console.WriteLine($"{jsonResponse}\n");
     }
 }
