@@ -40,7 +40,7 @@ public class DownloaderController : ControllerBase
 
     [Route("{downloader}/configure")]
     [HttpPut]
-    public ActionResult ConfigureDownloader(string downloader, string url = "", string token = "", string tokenName = "", string pollingRate = "")
+    public ActionResult ConfigureDownloader(string downloader, string url = "", string backupUrl = "", string token = "", string tokenName = "", string pollingRate = "")
     {
         var dlToConfigure = _downloaders.FirstOrDefault(d => d.Name.Equals(downloader));
         if (dlToConfigure is null)
@@ -51,6 +51,7 @@ public class DownloaderController : ControllerBase
         try
         {
             dlToConfigure.DownloadUrl = string.IsNullOrEmpty(url) ? dlToConfigure.DownloadUrl : url;
+            dlToConfigure.BackUpUrl = string.IsNullOrEmpty(url) ? dlToConfigure.BackUpUrl : url;
             dlToConfigure.PollingRate = string.IsNullOrEmpty(pollingRate) ? dlToConfigure.PollingRate : pollingRate;
             _downloaderService.ScheduleOrUpdateRecurringDownload(dlToConfigure);
         }
@@ -64,14 +65,14 @@ public class DownloaderController : ControllerBase
 
     [Route("{downloader}/add")]
     [HttpPost]
-    public ActionResult Add(string downloader, string url, string parser = "", string token = "", string tokenName = "", string pollingRate = "")
+    public ActionResult Add(string downloader, string url, string backupUrl = "", string parser = "", string token = "", string tokenName = "", string pollingRate = "")
     {
         if (_downloaders.Any(d => d.Name.Equals(downloader)))
         {
             return BadRequest("The downloader already exists.");
         }
         
-        var dl = new DownloaderData{DownloadUrl = url, ParserUrl = parser, Name = downloader, PollingRate = pollingRate};
+        var dl = new DownloaderData{DownloadUrl = url, BackUpUrl = backupUrl , ParserUrl = parser, Name = downloader, PollingRate = pollingRate};
         
         _downloaders.Add(dl);
         _downloaderService.ScheduleOrUpdateRecurringDownload(dl);
