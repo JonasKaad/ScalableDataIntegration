@@ -1,3 +1,4 @@
+using Azure.Core;
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 using DotNetEnv;
@@ -36,10 +37,17 @@ builder.Services.AddSingleton(downloaders)
         options.UseNpgsql(connectionString))
     .AddScoped<SecretService>(s =>
     {
+        var userAssignedClientId = new ResourceIdentifier(Environment.GetEnvironmentVariable("AZURE_CLIENT_ID"));
+
+        var credential = new DefaultAzureCredential(
+            new DefaultAzureCredentialOptions
+            {
+                ManagedIdentityClientId = userAssignedClientId
+            });
         var keyVaultName = Environment.GetEnvironmentVariable("KEY_VAULT_NAME");
         var kvUri = "https://" + keyVaultName + ".vault.azure.net";
 
-        var client = new SecretClient(new Uri(kvUri), new DefaultAzureCredential(true));
+        var client = new SecretClient(new Uri(kvUri), credential);
         return new SecretService(client);
     })
     .AddScoped<IDownloaderJob, BaseDownloaderJob>()
