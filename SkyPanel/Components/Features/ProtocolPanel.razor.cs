@@ -18,7 +18,7 @@ public partial class ProtocolPanel : ComponentBase
     private string? Protocol { get; set; }
     private string? UrlValue { get; set; }
     private string? BackupUrlValue { get; set; }
-    private int PollingValue { get; set; }
+    private string? PollingValue { get; set; }
     private string Username { get; set; } = string.Empty;
     private string Password { get; set; } = string.Empty;
     private string PlaceholderText { get; set; } = "No Secret Selected";
@@ -54,8 +54,8 @@ public partial class ProtocolPanel : ComponentBase
     private void UpdateFromParserState()
     {
         // Update UI components with values from ParserState
-        Protocol = ParserState.Protocol;
-        UrlValue = ParserState.Url;
+        Protocol = ParserState.ParserUrl;
+        UrlValue = ParserState.DownloadUrl;
         BackupUrlValue = ParserState.BackupUrl;
         PollingValue = ParserState.Polling;
         ProtoParserName = ParserState.ParserName;
