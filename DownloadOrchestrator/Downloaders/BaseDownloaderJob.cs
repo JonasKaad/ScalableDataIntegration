@@ -30,7 +30,8 @@ public class BaseDownloaderJob : IDownloaderJob
     {
         try
         {
-            var downloaderSecret = await SecretService.GetSecretAsync(data.Name);
+            var secret = string.IsNullOrEmpty(data.SecretName) ? data.Name : data.SecretName;
+            var downloaderSecret = await SecretService.GetSecretAsync(secret);
             var tokenName = downloaderSecret.TokenName;
             var token = downloaderSecret.Token;
             var bytes = await FetchBytes(data.DownloadUrl, tokenName, token) 
