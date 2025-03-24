@@ -5,18 +5,20 @@ namespace SkyPanel.Components.Models;
 public class Parser
 {
     public string Name { get; set; }
-    public string Url { get; set; }
+    public string DownloadUrl { get; set; }
     public string BackupUrl { get; set; }
-    public string Protocol { get; set; }
-    public int Polling { get; set; }
+    public string PollingRate { get; set; }
+    public string ParserUrl { get; set; }
+    public string SecretName { get; set; }
     
     
-    public Parser(string name, string url, string protocol, int polling, string backupUrl = "")
+    public Parser(string name, string downloadUrl, string parserUrl, string pollingRate, string backupUrl = "", string secretName = "")
     {
         Name = name;
-        Url = url;
+        DownloadUrl = downloadUrl;
         BackupUrl = backupUrl;
-        Protocol = protocol;
-        Polling = polling;
+        ParserUrl = parserUrl;
+        PollingRate = pollingRate;
+        SecretName = secretName;
     }
 }
