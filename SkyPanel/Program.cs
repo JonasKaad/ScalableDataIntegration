@@ -10,6 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Load env variables
 builder.Configuration.AddDotNetEnv(".env", LoadOptions.TraversePath());
 builder.Services.AddMudServices();
+builder.Services.AddHttpClient();
 builder.Services.AddScoped<ParserStateService>();
 builder.Services.AddScoped<SecretCredentialsService>();
 builder.Services.AddScoped<BlobManagerService>(provider =>
