@@ -13,6 +13,12 @@ builder.Services.AddMudServices();
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<ParserStateService>();
 builder.Services.AddScoped<SecretCredentialsService>();
+builder.Services.AddScoped<OrchestratorClientService>(provider =>
+{
+    var httpClientFactory = provider.GetRequiredService<IHttpClientFactory>();
+    var baseUrl = Env.GetString("DOWNLOAD_ORCHESTRATOR_URL");
+    return new OrchestratorClientService(httpClientFactory, baseUrl);
+});
 builder.Services.AddScoped<BlobManagerService>(provider =>
 {
     var connectionString = Env.GetString("BLOB_CONNECTION_STRING");
