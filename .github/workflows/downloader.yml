@@ -1,10 +1,10 @@
-name: Ausot Parser build and push
+name: DownloadOrchestrator build and push
 
 on:
   push:
     branches: [ master ]
     paths: 
-      - 'Parsers/AusotParser/*'
+      - 'DownloadOrchestrator'
   workflow_dispatch:
 
 jobs:
@@ -25,11 +25,11 @@ jobs:
       uses: docker/build-push-action@v6.15.0
       with:
         context: .
-        file: ./Parsers/AusotParser/Dockerfile
+        file: ./DownloadOrchestrator/Dockerfile
         push: true
-        tags: parsers.azurecr.io/ausotparser:${{ github.sha }}
+        tags: parsers.azurecr.io/download_orchestrator:${{ github.sha }}
     - name: Add command to summary
       run: |
         echo "-----------------" >> $GITHUB_STEP_SUMMARY
-        echo "**Image pushed!** Run this in the terminal to deploy the new image: \`az containerapp update --name newdis-parser --resource-group ScalableDataIntegration --image parsers.azurecr.io/ausotparser:${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "**Image pushed!** Run this in the terminal to deploy the new image: \`az containerapp update --name newdis-parser --resource-group ScalableDataIntegration --image parsers.azurecr.io/download_orchestrator:${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
         echo "-----------------" >> $GITHUB_STEP_SUMMARY
