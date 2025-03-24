@@ -10,55 +10,31 @@ public partial class ParserPanel : ComponentBase
     [Inject] private ParserStateService ParserState { get; set; } = null!;
     [Inject] private BlobManagerService BlobService { get; set; } = null!;
     
-    private Parser[] _parsers =
-    [
-        new("1", "https://www.google.com", "Http", "24", "https://www.google.dk"),
-        new("2",  "ftp://www.test.com", "Ftp", "37"),
-        get => ParserState.ParserName;
-
-    //TODO: Currently just a placeholder method, will be replaced with actual parser fetching
-    private void FetchParsers()
-    {
-        var containerNames = BlobService.GetContainerNames().ToArray();
-    
-        // Resize array if needed to accommodate all containers
-        if (_parsers.Length < containerNames.Length)
-        {
-            Array.Resize(ref _parsers, containerNames.Length);
-        }
-
-        // Update parsers with container names
-        for (int i = 0; i < containerNames.Length; i++)
-        {
-            string containerName = containerNames[i];
-        
-            // If parser at this index is null, create a new one
-            if (_parsers[i] == null)
-            {
-                _parsers[i] = new Parser(i.ToString(), "https://jsonplaceholder.typicode.com/todos/1", "Http", "13")
-                {
-                    Name = containerName
-                };
-            }
-            else
-            {
-                // Update existing parser name
-                _parsers[i].Name = containerName;
-            }
-        }
-    }
-
-    private Parser[] GetParsers()
-    {
-        FetchParsers();
-        return _parsers;
-    }
-    
+    [Inject] private OrchestratorClientService OrchestratorClient { get; set; } = null!;
     
     public string Parser
     {
         get => ParserState.ParserName;
-        set => ParserState.SetParser(GetParsers().FirstOrDefault(x => x.Name == value));
+        set
+        {
+        _ = InvokeAsync(async () => 
+        {
+        await GetDownloaderConfiguration(value);
+        StateHasChanged(); // Ensure UI updates after async completion
+    });
+         }
+    }
+    private async Task GetDownloaderConfiguration(string parserName)
+    {
+        if (string.IsNullOrEmpty(parserName))
+        {
+            ParserState.SetParser(null);
+            return;
+        }
+        
+        // Get the full parser configuration and store it
+        var parserConfig = await OrchestratorClient.GetDownloaderConfiguration(parserName);
+        ParserState.SetParser(parserConfig);
     }
     
     protected override void OnInitialized()

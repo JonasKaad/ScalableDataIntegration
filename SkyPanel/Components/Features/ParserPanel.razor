@@ -7,7 +7,9 @@
 <MudStack>
     <MudGrid>
         <MudItem xs="12">
-                    <MudAutocomplete @bind-Value=Parser
+            <MudAutocomplete 
+                T="string"
+                @bind-Value=Parser
                                      Clearable="true"
                                      SearchFunc="@Search"
                                      Variant="Variant.Outlined"
