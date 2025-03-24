@@ -6,7 +6,7 @@ using SkyPanel.Components.Services;
 
 namespace SkyPanel.Components.Features;
 
-public partial class ProtocolPanel : ComponentBase
+public partial class ConfigurationPanel : ComponentBase
 {
     [Inject] private ParserStateService ParserState { get; set; } = default!;
     
