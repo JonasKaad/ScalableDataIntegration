@@ -78,8 +78,6 @@ else
     }
     
     private string _searchString = "";
-
-    // private bool FilterFunc1(BlobDataItem blobData) => FilterFunc(blobData, searchString1);
     
     private Func<BlobDataItem, bool> QuickFilter => x =>
     {
