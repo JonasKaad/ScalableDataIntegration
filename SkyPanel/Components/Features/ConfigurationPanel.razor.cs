@@ -11,6 +11,8 @@ public partial class ConfigurationPanel : ComponentBase
     [Inject] private ParserStateService ParserState { get; set; } = default!;
     
     [Inject] private SecretCredentialsService CredentialsService { get; set; } = default!;
+    
+    [Inject] private OrchestratorClientService OrchestratorClientService { get; set; } = default!;
 
     private bool _awsUsernamePasswordDebug = false;
     private string _protoParserName = string.Empty;
@@ -117,6 +119,15 @@ public partial class ConfigurationPanel : ComponentBase
             .Where(key => key.Contains(value, StringComparison.InvariantCultureIgnoreCase));
         
         return Task.FromResult(filteredParsers);
+    }
+    
+    private async Task UpdateParserConfiguration()
+    {
+        if (string.IsNullOrEmpty(ParserState.ParserName))
+        {
+            return;
+        }
+        await OrchestratorClientService.ConfigureDownloader(ParserState.ParserName, UrlValue, BackupUrlValue, "testing", PollingValue);
     }
 
     private void OnParserChanged()
