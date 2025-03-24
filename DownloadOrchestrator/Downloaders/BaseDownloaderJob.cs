@@ -75,7 +75,7 @@ public class BaseDownloaderJob : IDownloaderJob
         _context.SaveChanges();
     }
 
-    private async Task SendToParser(byte[] downloadedBytes, string parserUrl)
+    public static async Task SendToParser(byte[] downloadedBytes, string parserUrl)
     {
         using var channel = GrpcChannel.ForAddress(parserUrl);
         var client = new Parser.ParserClient(channel);

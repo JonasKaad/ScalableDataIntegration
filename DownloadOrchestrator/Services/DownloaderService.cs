@@ -1,3 +1,4 @@
+using Downloader.Downloaders;
 using DownloadOrchestrator.Downloaders;
 using DownloadOrchestrator.Models;
 using Hangfire;
@@ -16,8 +17,9 @@ public class DownloaderService : IDownloaderService
     }
     public string ScheduleDownload(DownloaderData data)
     {
-        
-        var jobId = _backgroundJobClient.Enqueue<DirectDownloadJob>(x => x.Download(data));
+        var jobId = string.IsNullOrEmpty(data.ParserUrl) ? 
+            _backgroundJobClient.Enqueue<DirectDownloadJob>(x => x.Download(data)) :
+            _backgroundJobClient.Enqueue<BaseDownloaderJob>(x => x.Download(data));
         return jobId;
     }
 
@@ -29,7 +31,7 @@ public class DownloaderService : IDownloaderService
         }
         else
         {
-            _recurringJobManager.AddOrUpdate<IDownloaderJob>(data.Name, x => x.Download(data), data.PollingRate);
+            _recurringJobManager.AddOrUpdate<BaseDownloaderJob>(data.Name, x => x.Download(data), data.PollingRate);
         }
         return data.Name;
     }

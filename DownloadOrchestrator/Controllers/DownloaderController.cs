@@ -1,3 +1,5 @@
+using System.Text;
+using Downloader.Downloaders;
 using DownloadOrchestrator.Models;
 using DownloadOrchestrator.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -92,7 +94,7 @@ public class DownloaderController : ControllerBase
     [HttpPost]
     public ActionResult Reparse(string downloader)
     {
-        var dlToDownload = _downloaders.FirstOrDefault(d => d.Name.Equals(downloader));
+        var dlToDownload = GetDownloader(downloader);
         if (dlToDownload is null)
         {
             return NotFound("The downloader could not be found.");
@@ -101,5 +103,29 @@ public class DownloaderController : ControllerBase
         _downloaderService.ScheduleDownload(dlToDownload);
         return Ok($"Downloader {downloader} has been started.");
     }
-    
+
+    [Route("{downloader}/parse")]
+    [HttpPost]
+    public async Task<ActionResult> Parse(string downloader, List<IFormFile> formFiles)
+    {
+        var dl = GetDownloader(downloader);
+        if (dl is null)
+        {
+            return NotFound("The downloader could not be found.");
+        }
+        List<byte> totalBytes = new List<byte>();
+        foreach (var file in formFiles)
+        {
+            await using var sr = file.OpenReadStream();
+            byte[] bytes = new byte[sr.Length];
+            await sr.ReadExactlyAsync(bytes, 0, bytes.Length);
+            totalBytes.AddRange(bytes);
+            totalBytes.AddRange("magic"u8.ToArray());
+        }
+        await BaseDownloaderJob.SendToParser(totalBytes.ToArray(), dl.ParserUrl);
+        return Ok($"Parsing for {downloader} has been started with uploaded data.");
+    }
+
+
+    private DownloaderData? GetDownloader(string downloader) =>  _downloaders.FirstOrDefault(d => d.Name.Equals(downloader));
 }
