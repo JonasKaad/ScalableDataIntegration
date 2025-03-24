@@ -81,45 +81,54 @@ else
     
     private Func<BlobDataItem, bool> QuickFilter => x =>
     {
+        bool parserMatch = true;
+        bool dateMatch = true;
+        
         if (!string.IsNullOrWhiteSpace(_searchString) && x.Parser != null)
         {
+            parserMatch = false;
             var parserSearch = _searchString.Split(',');
             foreach (var parser in parserSearch)
             {
                 // If the "parser" after a comma is empty, we don't want to show all parsers
                 if (parserSearch.Length > 1 && string.IsNullOrEmpty(parser)) continue;
-                if (x.Parser.Contains(parser)) return true;
+                if (x.Parser.Contains(parser))
+                {
+                    parserMatch = true;
+                    break;
+                }
             }
-            return false;
         }
 
 
-        if (DateFilter is { Start: not null, End: not null } && (x.Date < DateFilter.Start.Value.Date || x.Date.Date > DateFilter.End.Value.Date))
+        if (DateFilter is { Start: not null, End: not null })
         {
-            return false;
+            if (x.Date < DateFilter.Start.Value.Date || x.Date.Date > DateFilter.End.Value.Date) 
+            { 
+                dateMatch =  false; 
+            }
+            else
+            {
+                var startDate = DateFilter.Start.Value;
+                DateTime dtStart = new DateTime(
+                    startDate.Year, startDate.Month, startDate.Day, 
+                    _fromTime.GetValueOrDefault().Hours, _fromTime.GetValueOrDefault().Minutes, 0);
+                
+                var endDate = DateFilter.End.Value;
+                DateTime dtEnd = new DateTime(
+                    endDate.Year, endDate.Month, endDate.Day, 
+                    _toTime.GetValueOrDefault().Hours, _toTime.GetValueOrDefault().Minutes, 0);
+                
+                if (x.Date.Hour < dtStart.Hour)
+                    dateMatch = false;
+                if(x.Date.Minute < dtStart.Minute)
+                    dateMatch = false;
+                if (x.Date.Hour > dtEnd.Hour)
+                    dateMatch = false;
+                if(x.Date.Minute > dtEnd.Minute)
+                    dateMatch = false;
+            }
         }
-            // Handle Start Date + Time
-            if (!DateFilter.Start.HasValue) return false;
-            var startDate = DateFilter.Start;
-            DateTime dtStart = new DateTime(startDate.Value.Year, startDate.Value.Month, startDate.Value.Day, 
-                _fromTime.GetValueOrDefault().Hours, _fromTime.GetValueOrDefault().Minutes, 0);
-            
-            if (!DateFilter.End.HasValue) return false;
-            var endDate = DateFilter.End;
-            DateTime dtEnd = new DateTime(endDate.Value.Year, endDate.Value.Month, endDate.Value.Day, 
-                _toTime.GetValueOrDefault().Hours, _toTime.GetValueOrDefault().Minutes, 0);
-            
-            if (x.Date.Hour < dtStart.Hour)
-                return false;
-            if(x.Date.Minute < dtStart.Minute)
-                return false;
-            if (x.Date.Hour > dtEnd.Hour)
-                return false;
-            if(x.Date.Minute > dtEnd.Minute)
-                return false;
-
-        
-        return true;
-        
+        return parserMatch && dateMatch;
     };
 }
