@@ -75,7 +75,7 @@ public partial class LatestDatasetPanel : ComponentBase
         {
             { x => x.RawDataset, blobDataItem.RawPath},
             { x => x.ParsedDataset, blobDataItem.ParsedPath},
-            { x => x.Parser, blobDataItem.Parser}
+            { x => x.Parser, blobDataItem.ParserName}
             
         };
         var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small, FullWidth = true };
@@ -85,17 +85,17 @@ public partial class LatestDatasetPanel : ComponentBase
         if (result == "delete")
         {
             var deletedDatasets = new List<string>();
-            if (blobDataItem.Parser != null)
+            if (blobDataItem.ParserName != null)
             {
                 if (!string.IsNullOrEmpty(blobDataItem.ParsedPath))
                 {
-                    await BlobService.DeleteBlob(blobDataItem.Parser, blobDataItem.ParsedPath);
+                    await BlobService.DeleteBlob(blobDataItem.ParserName, blobDataItem.ParsedPath);
                     deletedDatasets.Add(blobDataItem.ParsedPath);
                 }
 
                 if (!string.IsNullOrEmpty(blobDataItem.RawPath))
                 {
-                    await BlobService.DeleteBlob(blobDataItem.Parser, blobDataItem.RawPath);
+                    await BlobService.DeleteBlob(blobDataItem.ParserName, blobDataItem.RawPath);
                     deletedDatasets.Add(blobDataItem.RawPath);
                 }
             }

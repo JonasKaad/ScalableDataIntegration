@@ -2,15 +2,15 @@ namespace SkyPanel.Components.Models;
 
 public class BlobDataItem
 {
-    public string? Parser { get; set; }
+    public string? ParserName { get; set; }
     public DateTime Date { get; set; }
     
     public string? RawPath { get; set; }
     public string? ParsedPath { get; set; }
     
-    public BlobDataItem(string? parser, DateTime date, string? rawPath = null, string? parsedPath = null)
+    public BlobDataItem(string? parserName, DateTime date, string? rawPath = null, string? parsedPath = null)
     {
-        Parser = parser;
+        ParserName = parserName;
         Date = date;
         RawPath = rawPath;
         ParsedPath = parsedPath;
@@ -18,6 +18,6 @@ public class BlobDataItem
 
     public override string ToString()
     {
-        return $"{Parser} - {Date} - {RawPath} - {ParsedPath}";
+        return $"{ParserName} - {Date} - {RawPath} - {ParsedPath}";
     }
 }

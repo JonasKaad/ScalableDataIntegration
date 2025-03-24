@@ -13,8 +13,8 @@ public partial class ParserPanel : ComponentBase
     
     private Parser[] _parsers =
     [
-        new("1", "https://www.google.com", "Http", 24, "https://www.google.dk"),
-        new("2",  "ftp://www.test.com", "Ftp", 37),
+        new("1", "https://www.google.com", "Http", "24", "https://www.google.dk"),
+        new("2",  "ftp://www.test.com", "Ftp", "37"),
     ];
 
     //TODO: Currently just a placeholder method, will be replaced with actual parser fetching
@@ -36,7 +36,7 @@ public partial class ParserPanel : ComponentBase
             // If parser at this index is null, create a new one
             if (_parsers[i] == null)
             {
-                _parsers[i] = new Parser(i.ToString(), "https://jsonplaceholder.typicode.com/todos/1", "Http", 13)
+                _parsers[i] = new Parser(i.ToString(), "https://jsonplaceholder.typicode.com/todos/1", "Http", "13")
                 {
                     Name = containerName
                 };

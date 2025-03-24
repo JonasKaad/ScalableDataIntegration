@@ -36,19 +36,19 @@ else
             </MudGrid>
         </ToolBarContent>
         <Columns>
-            <PropertyColumn Property="x => x.Parser" InitialDirection="SortDirection.None" SortBy="new Func<BlobDataItem, object?>(x => x.Parser!)"/>
+            <PropertyColumn Property="x => x.ParserName" InitialDirection="SortDirection.None" SortBy="new Func<BlobDataItem, object?>(x => x.ParserName!)"/>
             <PropertyColumn Property="x => x.Date" Format="dd/MM/yyyy HH\:mm" />
             <TemplateColumn CellClass=" justify-end">
                 <CellTemplate>
                     <MudTooltip Text="Raw dataset not found" Disabled="@(!string.IsNullOrEmpty(@context.Item?.RawPath))" Arrow="true">
-                        <MudButton StartIcon="@Icons.Material.Filled.Download" Variant="Variant.Outlined" Color="Color.Info" Disabled="@(string.IsNullOrEmpty(@context.Item?.RawPath))" OnClick="@(() => Download(@context.Item?.Parser, @context.Item?.RawPath))">Raw</MudButton>
+                        <MudButton StartIcon="@Icons.Material.Filled.Download" Variant="Variant.Outlined" Color="Color.Info" Disabled="@(string.IsNullOrEmpty(@context.Item?.RawPath))" OnClick="@(() => Download(@context.Item?.ParserName, @context.Item?.RawPath))">Raw</MudButton>
                     </MudTooltip>
                 </CellTemplate>
             </TemplateColumn>
             <TemplateColumn CellClass="justify-end">
                 <CellTemplate>
                     <MudTooltip Text="Parsed dataset not found" Disabled="@(!string.IsNullOrEmpty(@context.Item?.ParsedPath))" Arrow="true">
-                        <MudButton StartIcon="@Icons.Material.Filled.Download" Variant="Variant.Outlined" Color="Color.Primary" Disabled="@(string.IsNullOrEmpty(@context.Item?.ParsedPath))" OnClick="@(() => Download(@context.Item?.Parser, @context.Item?.ParsedPath))">Parsed</MudButton>
+                        <MudButton StartIcon="@Icons.Material.Filled.Download" Variant="Variant.Outlined" Color="Color.Primary" Disabled="@(string.IsNullOrEmpty(@context.Item?.ParsedPath))" OnClick="@(() => Download(@context.Item?.ParserName, @context.Item?.ParsedPath))">Parsed</MudButton>
                     </MudTooltip>
                 </CellTemplate>
             </TemplateColumn>
@@ -84,7 +84,7 @@ else
         bool parserMatch = true;
         bool dateMatch = true;
         
-        if (!string.IsNullOrWhiteSpace(_searchString) && x.Parser != null)
+        if (!string.IsNullOrWhiteSpace(_searchString) && x.ParserName != null)
         {
             parserMatch = false;
             var parserSearch = _searchString.Split(',');
@@ -92,7 +92,7 @@ else
             {
                 // If the "parser" after a comma is empty, we don't want to show all parsers
                 if (parserSearch.Length > 1 && string.IsNullOrEmpty(parser)) continue;
-                if (x.Parser.Contains(parser))
+                if (x.ParserName.Contains(parser))
                 {
                     parserMatch = true;
                     break;

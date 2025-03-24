@@ -8,12 +8,13 @@ public class ParserStateService
     private Parser? _parser;
     public string ParserName => _parser?.Name ?? string.Empty;
     
-    public string Url => _parser?.Url ?? string.Empty;
+    public string DownloadUrl => _parser?.DownloadUrl ?? string.Empty;
     public string BackupUrl => _parser?.BackupUrl ?? string.Empty;
     
-    public int Polling => _parser?.Polling ?? 0;
+    public string Polling => _parser?.PollingRate ?? string.Empty;
     
-    public string Protocol => _parser?.Protocol ?? string.Empty;
+    public string ParserUrl => _parser?.ParserUrl ?? string.Empty;
+    public string SecretName => _parser?.SecretName ?? string.Empty;
 
     public event Action? OnChange;
     
