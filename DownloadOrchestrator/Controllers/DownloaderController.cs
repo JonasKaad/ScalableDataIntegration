@@ -141,18 +141,47 @@ public class DownloaderController : ControllerBase
 
     [Route("/test")]
     [HttpPost]
-    public async Task<ActionResult<List<bool>>> TestConnection(DownloaderData downloader)
+    public async Task<ActionResult<List<bool>>> TestConnection([FromBody]DownloaderData downloader)
     {
         var secret = new DisSecret();
         if (!string.IsNullOrWhiteSpace(downloader.SecretName))
         {
             secret = await _secretService.GetSecretAsync(downloader.SecretName);
         }
-        var client = new DisDownloaderClient(downloader.DownloadUrl, secret.Token, secret.TokenName);
-        var mainResult = await client.CanConnect();
-        if (string.IsNullOrWhiteSpace(downloader.BackUpUrl)) return new List<bool> {mainResult};
-        client.SwitchSource(downloader.BackUpUrl, secret.TokenName, secret.Token);
-        var backUpResult = await client.CanConnect();
+        var mainResult = false;
+        var backUpResult = false;
+        DisDownloaderClient? client = null;
+        try
+        {
+            client = new DisDownloaderClient(downloader.DownloadUrl, secret.Token, secret.TokenName);
+            mainResult = await client.CanConnect();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+
+        try
+        {
+            if (string.IsNullOrWhiteSpace(downloader.BackUpUrl))
+            {
+                return new List<bool>{mainResult};
+            }
+            if (client is null)
+            {
+                client = new DisDownloaderClient(downloader.BackUpUrl, secret.Token, secret.TokenName);
+            }
+            else
+            {
+                client.SwitchSource(downloader.BackUpUrl, secret.TokenName, secret.Token);
+            }
+
+            backUpResult = await client.CanConnect();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
         return new List<bool> {mainResult, backUpResult};
     }
 }
