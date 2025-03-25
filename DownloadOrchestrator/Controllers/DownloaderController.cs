@@ -3,7 +3,6 @@ using Downloader.Downloaders;
 using DownloadOrchestrator.Models;
 using DownloadOrchestrator.Services;
 using Microsoft.AspNetCore.Mvc;
-using static DownloadOrchestrator.Utils.IDownloaderClient;
 
 namespace DownloadOrchestrator.Controllers;
 
@@ -42,7 +41,7 @@ public class DownloaderController : ControllerBase
 
     [Route("{downloader}/configure")]
     [HttpPut]
-    public ActionResult ConfigureDownloader(string downloader, string url = "", string backupUrl = "", string secretName = "", string pollingRate = "")
+    public ActionResult ConfigureDownloader(string downloader, [FromBody] DownloaderData dlConfiguration)
     {
         var dlToConfigure = _downloaders.FirstOrDefault(d => d.Name.Equals(downloader));
         if (dlToConfigure is null)
@@ -52,10 +51,11 @@ public class DownloaderController : ControllerBase
         
         try
         {
-            dlToConfigure.DownloadUrl = string.IsNullOrEmpty(url) ? dlToConfigure.DownloadUrl : url;
-            dlToConfigure.BackUpUrl = string.IsNullOrEmpty(backupUrl) ? dlToConfigure.BackUpUrl : backupUrl;
-            dlToConfigure.PollingRate = string.IsNullOrEmpty(pollingRate) ? dlToConfigure.PollingRate : pollingRate;
-            dlToConfigure.SecretName = string.IsNullOrEmpty(secretName) ? dlToConfigure.SecretName : secretName;
+            dlToConfigure.ParserUrl = string.IsNullOrEmpty(dlConfiguration.ParserUrl) ? dlToConfigure.ParserUrl : dlConfiguration.ParserUrl;
+            dlToConfigure.DownloadUrl = string.IsNullOrEmpty(dlConfiguration.DownloadUrl) ? dlToConfigure.DownloadUrl : dlConfiguration.DownloadUrl;
+            dlToConfigure.BackUpUrl = string.IsNullOrEmpty(dlConfiguration.BackUpUrl) ? dlToConfigure.BackUpUrl : dlConfiguration.BackUpUrl;
+            dlToConfigure.PollingRate = string.IsNullOrEmpty(dlConfiguration.PollingRate) ? dlToConfigure.PollingRate : dlConfiguration.PollingRate;
+            dlToConfigure.SecretName = string.IsNullOrEmpty(dlConfiguration.SecretName) ? dlToConfigure.SecretName : dlConfiguration.SecretName;
             _downloaderService.ScheduleOrUpdateRecurringDownload(dlToConfigure);
         }
         catch (Exception e)
@@ -68,25 +68,27 @@ public class DownloaderController : ControllerBase
 
     [Route("{downloader}/add")]
     [HttpPost]
-    public ActionResult Add(string downloader, string url, string backupUrl = "", string parser = "", string secretName = "", string pollingRate = "")
+    public ActionResult Add(string downloader, [FromBody] DownloaderData newDl)
     {
+        if (string.IsNullOrEmpty(newDl.Name))
+        {
+            return BadRequest("The downloader must have a name.");
+        }
         if (_downloaders.Any(d => d.Name.Equals(downloader)))
         {
             return BadRequest("The downloader already exists.");
         }
-        
-        var dl = new DownloaderData
+        if(string.IsNullOrEmpty(newDl.DownloadUrl) && string.IsNullOrEmpty(newDl.BackUpUrl))
         {
-            DownloadUrl = url,
-            BackUpUrl = backupUrl,
-            ParserUrl = parser,
-            Name = downloader,
-            PollingRate = pollingRate,
-            SecretName = secretName
-        };
+            return BadRequest("The downloader must have a download url or a backup rate.");
+        }
+        if (string.IsNullOrEmpty(newDl.PollingRate))
+        {
+            return BadRequest("The downloader must have a polling rate.");
+        }
         
-        _downloaders.Add(dl);
-        _downloaderService.ScheduleOrUpdateRecurringDownload(dl);
+        _downloaders.Add(newDl);
+        _downloaderService.ScheduleOrUpdateRecurringDownload(newDl);
         return Ok($"Downloader {downloader} has been added.");
     }
 
