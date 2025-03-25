@@ -49,8 +49,8 @@ public class SecretCredentialsService
     {
         return new Dictionary<string, IDictionary<string, string>>
         {
-            { "WeatherParser", new Dictionary<string, string> { { "username", "username1" }, { "password", "password1" } } },
-            { "MetarParser", new Dictionary<string, string> { { "username", "username2" }, { "password", "password2" } } },
+            { "AusotParser", new Dictionary<string, string> { { "username", "username1" }, { "password", "password1" } } },
+            { "testing", new Dictionary<string, string> { { "username", "username2" }, { "password", "password2" } } },
             { "SigmetParser", new Dictionary<string, string> { { "username", "username3" }, { "password", "password3" } } },
             { "BufrrrrParser", new Dictionary<string, string> { { "username", "jonas" }, { "password", "1233334" } } },
             { "NatTrackParser", new Dictionary<string, string> { { "username", "victor" }, { "password", "4321" } } },
