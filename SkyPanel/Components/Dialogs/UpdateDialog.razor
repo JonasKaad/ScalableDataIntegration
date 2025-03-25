@@ -2,17 +2,20 @@
     <DialogContent>
         <MudText Typo="Typo.body1">
             This action will permanently delete the following 
-            @(!string.IsNullOrEmpty(RawDataset) && !string.IsNullOrEmpty(ParsedDataset) ? "datasets:" : "dataset:")
+            @(!string.IsNullOrEmpty(Url) && !string.IsNullOrEmpty(BackupUrl) && 
+              !string.IsNullOrEmpty(SecretName) && !string.IsNullOrEmpty(PollingRate) ? "parameters:" : "parameter:")
         </MudText>
         <MudList T="string" CheckedIcon="true" ReadOnly="true">
-            @foreach (var dataset in new[] {
-                          new { Name = RawDataset, Valid = !string.IsNullOrEmpty(RawDataset) },
-                          new { Name = ParsedDataset, Valid = !string.IsNullOrEmpty(ParsedDataset) }
+            @foreach (var parameter in new[] {
+                          new { Name = Url, Valid = !string.IsNullOrEmpty(Url) },
+                          new { Name = BackupUrl, Valid = !string.IsNullOrEmpty(BackupUrl) },
+                          new { Name = SecretName, Valid = !string.IsNullOrEmpty(SecretName) },
+                          new { Name = PollingRate, Valid = !string.IsNullOrEmpty(PollingRate) }
                       })
             {
-                @if (dataset.Valid)
+                @if (parameter.Valid)
                 {
-                    <MudListItem Text="@(dataset.Name)" Icon="@Icons.Material.Outlined.Description" />
+                    <MudListItem Text="@(parameter.Name)" Icon="@Icons.Material.Outlined.Description" />
                 }
             }
         </MudList>
@@ -21,6 +24,7 @@
     <DialogActions>
         <MudButton OnClick="@DialogCancel" Variant="Variant.Filled">Cancel</MudButton>
         <MudSpacer/>
+        <MudButton Size="Size.Large" StartIcon="@Icons.Material.Filled.PublishedWithChanges" Disabled="true" Variant="Variant.Filled" Color="Color.Info">Test Connection</MudButton>
         <MudButton Color="@Color.Error" OnClick="@DialogSubmit" Variant="Variant.Filled">Delete</MudButton>
     </DialogActions>
 </MudDialog>
