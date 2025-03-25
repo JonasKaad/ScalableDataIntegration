@@ -1,0 +1,26 @@
+<MudDialog>
+    <DialogContent>
+        <MudText Typo="Typo.body1">
+            This action will permanently delete the following 
+            @(!string.IsNullOrEmpty(RawDataset) && !string.IsNullOrEmpty(ParsedDataset) ? "datasets:" : "dataset:")
+        </MudText>
+        <MudList T="string" CheckedIcon="true" ReadOnly="true">
+            @foreach (var dataset in new[] {
+                          new { Name = RawDataset, Valid = !string.IsNullOrEmpty(RawDataset) },
+                          new { Name = ParsedDataset, Valid = !string.IsNullOrEmpty(ParsedDataset) }
+                      })
+            {
+                @if (dataset.Valid)
+                {
+                    <MudListItem Text="@(dataset.Name)" Icon="@Icons.Material.Outlined.Description" />
+                }
+            }
+        </MudList>
+
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@DialogCancel" Variant="Variant.Filled">Cancel</MudButton>
+        <MudSpacer/>
+        <MudButton Color="@Color.Error" OnClick="@DialogSubmit" Variant="Variant.Filled">Delete</MudButton>
+    </DialogActions>
+</MudDialog>
