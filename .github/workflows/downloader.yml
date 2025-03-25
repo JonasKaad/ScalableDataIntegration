@@ -4,7 +4,7 @@ on:
   push:
     branches: [ master ]
     paths: 
-      - 'DownloadOrchestrator'
+      - 'DownloadOrchestrator/*'
   workflow_dispatch:
 
 jobs:
