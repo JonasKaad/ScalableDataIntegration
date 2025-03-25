@@ -1,30 +1,68 @@
 <MudDialog>
     <DialogContent>
-        <MudText Typo="Typo.body1">
-            This action will permanently delete the following 
-            @(!string.IsNullOrEmpty(Url) && !string.IsNullOrEmpty(BackupUrl) && 
-              !string.IsNullOrEmpty(SecretName) && !string.IsNullOrEmpty(PollingRate) ? "parameters:" : "parameter:")
-        </MudText>
-        <MudList T="string" CheckedIcon="true" ReadOnly="true">
-            @foreach (var parameter in new[] {
-                          new { Name = Url, Valid = !string.IsNullOrEmpty(Url) },
-                          new { Name = BackupUrl, Valid = !string.IsNullOrEmpty(BackupUrl) },
-                          new { Name = SecretName, Valid = !string.IsNullOrEmpty(SecretName) },
-                          new { Name = PollingRate, Valid = !string.IsNullOrEmpty(PollingRate) }
-                      })
+        @{
+            var parameters = new[] {
+                new { Label = "URL", Name = Url, State = ParserState.DownloadUrl, Unchanged = (String.Compare(Url, ParserState.DownloadUrl, StringComparison.Ordinal) == 0), Valid = !string.IsNullOrEmpty(Url) },
+                new { Label = "BackupURL", Name = BackupUrl, State = ParserState.BackupUrl, Unchanged = (String.Compare(BackupUrl, ParserState.BackupUrl, StringComparison.Ordinal) == 0), Valid = !string.IsNullOrEmpty(BackupUrl) },
+                new { Label = "Secret", Name = SecretName, State = ParserState.SecretName, Unchanged = (String.Compare(SecretName, ParserState.SecretName, StringComparison.Ordinal) == 0), Valid = !string.IsNullOrEmpty(SecretName) },
+                new { Label = "Polling Rate", Name = PollingRate, State = ParserState.Polling, Unchanged = (String.Compare(PollingRate, ParserState.Polling, StringComparison.Ordinal) == 0), Valid = !string.IsNullOrEmpty(PollingRate) }
+            };
+            var changedParams = parameters.Where(p => p.Valid && !p.Unchanged).ToList();
+            var unchangedParams = parameters.Where(p => p.Valid && p.Unchanged).ToList();
+            HasChanges = changedParams.Count > 0;
+            Console.WriteLine(HasChanges);
+        }
+            @if (HasChanges)
             {
-                @if (parameter.Valid)
-                {
-                    <MudListItem Text="@(parameter.Name)" Icon="@Icons.Material.Outlined.Description" />
-                }
+                <MudText Typo="Typo.body2">
+                    This action will update the following
+                    @(changedParams.Count > 1 ? "parameters:" : "parameter:")
+                </MudText>
             }
+            else
+            {
+                <MudText Typo="Typo.body2">No changes will be made as all parameters remain unchanged.</MudText>
+            }
+        <MudList T="string" CheckedIcon="true" ReadOnly="true">
+            @foreach (var parameter in changedParams)
+                {
+                    <MudListItem>
+                        <div class="d-flex flex-column">
+                            <MudText Typo="Typo.subtitle1">@parameter.Label</MudText>
+                            @if (string.IsNullOrEmpty(parameter.State))
+                            {
+                                <MudText Typo="Typo.body2">From: None</MudText>
+                            }
+                            else
+                            {
+                                <MudText Typo="Typo.body2">From: @((MarkupString)HighlightRemovedContent(parameter.State, parameter.Name))</MudText>
+                            }
+                            <MudText Typo="Typo.body2">To: @((MarkupString)HighlightAddedContent(parameter.State, parameter.Name))</MudText>
+                        </div>
+                    </MudListItem>
+                }
+
+                @if (changedParams.Count > 0 && unchangedParams.Count > 0)
+                {
+                    <MudDivider Class="my-2"/>
+                }
+
+                @foreach (var parameter in unchangedParams)
+                {
+                    <MudListItem>
+                        <div class="d-flex flex-column">
+                            <MudText Typo="Typo.subtitle1">@parameter.Label</MudText>
+                            <MudText Typo="Typo.body2" Style="font-style: italic">Unchanged</MudText>
+                        </div>
+                    </MudListItem>
+                }
         </MudList>
 
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="@DialogCancel" Variant="Variant.Filled">Cancel</MudButton>
         <MudSpacer/>
-        <MudButton Size="Size.Large" StartIcon="@Icons.Material.Filled.PublishedWithChanges" Disabled="true" Variant="Variant.Filled" Color="Color.Info">Test Connection</MudButton>
-        <MudButton Color="@Color.Error" OnClick="@DialogSubmit" Variant="Variant.Filled">Delete</MudButton>
+        <MudButton StartIcon="@Icons.Material.Filled.PublishedWithChanges" Disabled="true" Variant="Variant.Filled" Color="Color.Primary">Test Connection</MudButton>
+        <MudButton Color="@Color.Success" OnClick="@DialogSubmit" Disabled="@(!HasChanges)" Variant="Variant.Filled">Confirm</MudButton>
     </DialogActions>
 </MudDialog>
