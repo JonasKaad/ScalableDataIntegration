@@ -12,17 +12,20 @@ public partial class ParserPanel : ComponentBase
     
     [Inject] private OrchestratorClientService OrchestratorClient { get; set; } = null!;
     
+    private string _selectedParser = string.Empty;
+    
     public string Parser
     {
-        get => ParserState.ParserName;
+        get => _selectedParser;
         set
         {
-        _ = InvokeAsync(async () => 
-        {
-        await GetDownloaderConfiguration(value);
-        StateHasChanged(); // Ensure UI updates after async completion
-    });
-         }
+            _ = InvokeAsync(async () => 
+            {
+                _selectedParser = value;
+                await GetDownloaderConfiguration(value);
+                StateHasChanged();
+            });
+        }
     }
     private async Task GetDownloaderConfiguration(string parserName)
     {
