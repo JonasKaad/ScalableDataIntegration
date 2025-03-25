@@ -104,7 +104,7 @@ public class DownloaderController : ControllerBase
         return Ok($"Downloader {downloader} has been started.");
     }
 
-    [Route("{downloader}/parse")]
+    [Route("{downloader}/upload")]
     [HttpPost]
     public async Task<ActionResult> Parse(string downloader, List<IFormFile> formFiles)
     {
