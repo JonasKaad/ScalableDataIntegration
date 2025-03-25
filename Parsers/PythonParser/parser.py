@@ -63,7 +63,6 @@ class ParserServicer(parser_pb2_grpc.ParserServicer):
         # Get data from the request
         raw_data = request.raw_data
         format_type = request.format
-        print(f"{format_type == "str"}")
         if(format_type == "str"):
             data = raw_data.decode("utf-8").split("\n")
 
