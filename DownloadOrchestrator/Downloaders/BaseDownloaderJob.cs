@@ -32,8 +32,8 @@ public class BaseDownloaderJob : IDownloaderJob
         {
             var secret = string.IsNullOrEmpty(data.SecretName) ? data.Name : data.SecretName;
             var downloaderSecret = await SecretService.GetSecretAsync(secret);
-            var tokenName = downloaderSecret.TokenName;
-            var token = downloaderSecret.Token;
+            var tokenName = downloaderSecret?.TokenName ?? "";
+            var token = downloaderSecret?.Token ?? "";
             var bytes = await FetchBytes(data.DownloadUrl, tokenName, token) 
                         ?? await FetchBytes(data.BackUpUrl, tokenName, token);
             if (bytes is null)
@@ -80,7 +80,7 @@ public class BaseDownloaderJob : IDownloaderJob
         using var channel = GrpcChannel.ForAddress(parserUrl);
         var client = new Parser.ParserClient(channel);
 
-        var reply = await client.ParseCallAsync(new (){ RawData = ByteString.CopyFrom(downloadedBytes) });
+        var reply = await client.ParseCallAsync(new (){ RawData = ByteString.CopyFrom(downloadedBytes), Format = "str"});
         Console.WriteLine($"Success: {reply.Success}. Msg: {reply.ErrMsg}");
     }
 }
