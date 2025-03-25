@@ -62,4 +62,39 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
         var jsonResponse = await response.Content.ReadAsStringAsync();
         Console.WriteLine($"{jsonResponse}\n");
     }
+    
+    public async Task<List<bool>> TestConnection(string _parser, string _url, string _backupUrl, string _secretName, string _pollingRate)
+    {
+        Console.WriteLine($"Testing connection to {_parser} with URL: {_url} and backup URL: {_backupUrl}");
+        var client = httpClientFactory.CreateClient();
+
+        using StringContent jsonContent = new(
+            JsonSerializer.Serialize(new 
+            {
+                name = _parser,
+                downloadUrl = _url,
+                parserUrl = "",
+                backupUrl = _backupUrl,
+                secretName = _secretName,
+                pollingRate = _pollingRate,
+            }),
+            Encoding.UTF8,
+            "application/json");
+        using HttpResponseMessage response  = await client.PostAsync($"{baseUrl}/test", jsonContent);
+        Console.WriteLine(response.StatusCode);
+        
+        var jsonResponse = await response.Content.ReadFromJsonAsync<List<bool>>();
+        if (jsonResponse is null)
+        {
+            Console.WriteLine("No response from the server");
+            return [];
+        }
+
+        Console.WriteLine(jsonResponse.Count);
+        Console.WriteLine(!string.IsNullOrEmpty(_backupUrl)
+            ? $"Main URL: {jsonResponse.FirstOrDefault()} and Backup URL {jsonResponse.LastOrDefault()}\n"
+            : $"Response: {jsonResponse.FirstOrDefault()}\n");
+
+        return jsonResponse;
+    }
 }
