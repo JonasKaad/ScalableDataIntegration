@@ -78,9 +78,8 @@ public partial class ConfigurationPanel : ComponentBase
         return string.Empty;
     }
 
-    // Parse a polling value string like "30m", "2h", "1d" to set the proper tab and value
-        private void ParsePollingValue(string pollingValue)
-        {
+    private void ParsePollingValue(string pollingValue)
+    {
         if (string.IsNullOrEmpty(pollingValue))
         {
             _activeTabIndex = 0; 
@@ -175,7 +174,8 @@ public partial class ConfigurationPanel : ComponentBase
             PollingValue = "* * * * *";
         }
     }
-    public string PollingValue { get; set; } = string.Empty;
+
+    private string PollingValue { get; set; } = string.Empty;
     
     public string SecretName
     {
