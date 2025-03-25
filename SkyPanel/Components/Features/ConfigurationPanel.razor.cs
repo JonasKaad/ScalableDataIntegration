@@ -92,6 +92,27 @@ public partial class ConfigurationPanel : ComponentBase
         return DialogService.ShowAsync<CredentialsDialog>("Secret Management", parameters, options);
     }
     
+    private async Task UpdateDialogAsync()
+    {
+           
+        var parameters = new DialogParameters<UpdateDialog>
+        {
+            { x => x.Parser, ParserState.ParserName},
+            { x => x.Url, UrlValue},
+            { x => x.BackupUrl, BackupUrlValue},
+            { x => x.SecretName, SecretName},
+            { x => x.PollingRate, PollingValue}
+        };
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+        var dialogResult = await (await DialogService.ShowAsync<UpdateDialog>("Update confirmation", parameters, options)).Result;
+        var result = dialogResult?.Data as string ?? string.Empty;
+        
+        if (result == "update")
+        {
+            // Send request to endpoint
+        }
+    }
+    
     private Task<IEnumerable<string>> Search(string value, CancellationToken token)
     {
         var allParserNames = CredentialsService.GetParserSecretNames();
