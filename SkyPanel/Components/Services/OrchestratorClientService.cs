@@ -40,24 +40,24 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
         return new Parser("", "", "", "", "", "");
     }
 
-    public async Task ConfigureDownloader(string parser, string _url, string _backupUrl, string _secretName, string _pollingRate)
+    public async Task ConfigureDownloader(string parser, string url, string backupUrl, string secretName, string pollingRate)
     {
         var client = httpClientFactory.CreateClient();
 
         using StringContent jsonContent = new(
             JsonSerializer.Serialize(new 
             {
-                downloader = parser,
-                url = _url,
-                backupUrl = _backupUrl,
-                secretName = _secretName,
-                pollingRate = _pollingRate,
+                name = parser,
+                downloadUrl = url ?? " ",
+                parserUrl = " ",
+                backupUrl = backupUrl ?? " ",
+                secretName = secretName ?? " ",
+                pollingRate = pollingRate ?? " ",
             }),
             Encoding.UTF8,
             "application/json");
-        
         using HttpResponseMessage response  = await client.PutAsync($"{baseUrl}/{parser}/configure", jsonContent);
-        Console.WriteLine(response.EnsureSuccessStatusCode());
+        Console.WriteLine(response.StatusCode);
         
         var jsonResponse = await response.Content.ReadAsStringAsync();
         Console.WriteLine($"{jsonResponse}\n");
