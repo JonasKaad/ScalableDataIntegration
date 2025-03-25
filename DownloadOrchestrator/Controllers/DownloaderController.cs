@@ -70,7 +70,7 @@ public class DownloaderController : ControllerBase
 
     private static string HandleConfiguration(string oldValue, string newValue)
     {
-        var url = string.IsNullOrEmpty(newValue) ? oldValue : newValue.Trim();
+        var url = string.IsNullOrWhiteSpace(newValue) ? oldValue : newValue.Trim();
         return url;
     }
 
