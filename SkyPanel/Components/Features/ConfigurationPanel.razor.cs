@@ -334,13 +334,17 @@ public partial class ConfigurationPanel : ComponentBase
         if (string.IsNullOrEmpty(ParserState.ParserName)) return;
         if (!CredentialsService.GetParserSecretNames().Contains(ParserState.SecretName))
         {
-            Console.WriteLine(ParserState.ParserName +" "+ "" + ParserState.SecretName);
             PlaceholderText = "No Secret Found!";
         }
         else
         {
-            Console.WriteLine(ParserState.ParserName +" "+ "" + ParserState.SecretName);
             PlaceholderText = "No Secret Selected";
         }
+    }
+    
+    private void SnackPop(string urlType, string url, Severity severity, string message)
+    {
+        Snackbar.Configuration.ShowCloseIcon = true;
+        Snackbar.Add(new MarkupString($"<div><h3><strong>{urlType}: </strong></h3><h4>[ {url} ] - {message}</h4></div>"),severity);
     }
 }
