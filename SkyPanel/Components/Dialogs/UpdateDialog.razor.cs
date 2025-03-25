@@ -18,6 +18,19 @@ public partial class UpdateDialog : ComponentBase
     [Parameter]
     public string PollingRate { get; set; } = string.Empty;
     
+    private bool _hasChanges;
+    private bool HasChanges 
+    {
+        get => _hasChanges; 
+        set 
+        {
+            if (_hasChanges != value)
+            {
+                _hasChanges = value;
+                StateHasChanged();
+            }
+        }
+    }
     [Inject] private ParserStateService ParserState { get; set; } = null!;
     
     [CascadingParameter] IMudDialogInstance? MudDialog { get; set; }
