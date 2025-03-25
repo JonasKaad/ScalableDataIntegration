@@ -50,6 +50,14 @@ public class DisFtpClient : IDownloaderClient
         return $"Downloading using FTP from {_ftpClient.Host} using {_ftpClient.Credentials.UserName} " +
                $"and {_ftpClient.Credentials.Password} on port {_ftpClient.Port}";
     }
+    
+    public async Task<bool> CanConnect()
+    {
+        await _ftpClient.Connect();
+        var canConnect = _ftpClient.IsConnected;
+        await _ftpClient.Disconnect();
+        return canConnect;
+    }
 
     private async Task<byte[]> DownloadFile(string sourceFile)
     {

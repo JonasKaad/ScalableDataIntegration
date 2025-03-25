@@ -3,7 +3,6 @@ using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 using DotNetEnv;
 using DotNetEnv.Configuration;
-using Downloader.Downloaders;
 using DownloadOrchestrator.Downloaders;
 using DownloadOrchestrator.Models;
 using DownloadOrchestrator.Services;

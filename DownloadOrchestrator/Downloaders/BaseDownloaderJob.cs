@@ -1,6 +1,5 @@
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
-using DownloadOrchestrator.Downloaders;
 using DownloadOrchestrator.Models;
 using DownloadOrchestrator.Services;
 using DownloadOrchestrator.Utils;
@@ -9,7 +8,7 @@ using Grpc.Net.Client;
 using Microsoft.EntityFrameworkCore;
 using Sdi.Parser;
 
-namespace Downloader.Downloaders;
+namespace DownloadOrchestrator.Downloaders;
 
 public class BaseDownloaderJob : IDownloaderJob
 {
