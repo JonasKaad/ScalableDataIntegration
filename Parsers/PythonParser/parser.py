@@ -1,7 +1,6 @@
 import asyncio
 import datetime
 import json
-
 import grpc
 import sys
 import os
@@ -79,7 +78,7 @@ class ParserServicer(parser_pb2_grpc.ParserServicer):
         tafs = []
         for taf in tafstrings:
             tafs.append(TAFParser().parse(taf))
-        print(f"parsed {len(tafs)} TAF strings")
+        print(f"parsed TAF strings")
 
         if len(tafs) != len(tafstrings):
             response = parser_pb2.ParseResponse(success=False, err_msg="Error parsing all TAFs")
@@ -98,7 +97,7 @@ class ParserServicer(parser_pb2_grpc.ParserServicer):
             await container_client.create_container()
         print("Got container client")
 
-        now = datetime.datetime.now(datetime.UTC)
+        now = datetime.datetime.now(datetime.timezone.utc)
         raw_file_name = f"{now.year}/{now.strftime('%m')}/{now.day}/{now.strftime('%H%M')}-raw.txt"
         parsed_file_name = f"{now.year}/{now.strftime('%m')}/{now.day}/{now.strftime('%H%M')}-parsed.txt"
 
