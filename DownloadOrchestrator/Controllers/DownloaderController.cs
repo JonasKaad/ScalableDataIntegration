@@ -29,7 +29,7 @@ public class DownloaderController : ControllerBase
     [HttpGet]
     public ActionResult<DownloaderData> GetDownloaderConfiguration(string downloader)
     {
-        var dlToConfigure = _downloaders.FirstOrDefault(d => d.Name.Equals(downloader));
+        var dlToConfigure = GetDownloader(downloader);
         if (dlToConfigure is null)
         {
             return NotFound("The downloader could not be found.");
@@ -43,7 +43,7 @@ public class DownloaderController : ControllerBase
     [HttpPut]
     public ActionResult ConfigureDownloader(string downloader, [FromBody] DownloaderData dlConfiguration)
     {
-        var dlToConfigure = _downloaders.FirstOrDefault(d => d.Name.Equals(downloader));
+        var dlToConfigure = GetDownloader(downloader);
         if (dlToConfigure is null)
         {
             return NotFound("The downloader could not be found.");
