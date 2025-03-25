@@ -29,22 +29,24 @@ public class SecretService
         _lastUpdated = DateTime.UtcNow;
     }
 
-    public async Task<DisSecret> GetSecretAsync(string secretName)
+    public async Task<DisSecret?> GetSecretAsync(string secretName)
     {
         if (DateTime.UtcNow - _lastUpdated > TimeSpan.FromMinutes(5))
         {
             await CheckSecrets();
         }
-        return _secrets.Secrets[secretName];
+        var found = _secrets.Secrets.TryGetValue(secretName, out var secret);
+        return found ? secret : null;
     }
 
-    public DisSecret GetSecret(string secretName)
+    public DisSecret? GetSecret(string secretName)
     {
         if (DateTime.UtcNow - _lastUpdated > TimeSpan.FromMinutes(1))
         {
             CheckSecrets().Wait();
         }
-        return _secrets.Secrets[secretName];
+        var found = _secrets.Secrets.TryGetValue(secretName, out var secret);
+        return found ? secret : null;
     }
 
     private async Task CheckSecrets()
