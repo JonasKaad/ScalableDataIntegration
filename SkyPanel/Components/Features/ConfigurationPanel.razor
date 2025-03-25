@@ -1,4 +1,5 @@
 @inject IDialogService DialogService
+@inject ISnackbar Snackbar
 
 <MudGrid Spacing="4">
     <MudItem xs="12" sm="6">
@@ -116,9 +117,8 @@
 }
 <MudGrid Class="d-flex justify-center" Style="margin-top: 0.3em">
     <MudItem>
-        <MudButton Size="Size.Large" StartIcon="@Icons.Material.Filled.PublishedWithChanges" Disabled="ParserState.ParserIsNotSelected()" Variant="Variant.Filled" Color="Color.Primary">Test Connection</MudButton>
+        <MudButton Size="Size.Large" StartIcon="@Icons.Material.Filled.PublishedWithChanges" Disabled="ParserState.ParserIsNotSelected()" OnClick="@(() => TestConnection())" Variant="Variant.Filled" Color="Color.Primary">Test Connection</MudButton>
     </MudItem><MudItem>
         <MudButton Size="Size.Large" Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!_success)" OnClick="@(() => UpdateDialogAsync())" >Update</MudButton>
     </MudItem>
 </MudGrid>
-@code {}
