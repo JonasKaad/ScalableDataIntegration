@@ -1,9 +1,8 @@
-using System.Text;
-using Downloader.Downloaders;
+using DownloadOrchestrator.Downloaders;
 using DownloadOrchestrator.Models;
 using DownloadOrchestrator.Services;
+using DownloadOrchestrator.Utils;
 using Microsoft.AspNetCore.Mvc;
-using static DownloadOrchestrator.Utils.IDownloaderClient;
 
 namespace DownloadOrchestrator.Controllers;
 
@@ -12,11 +11,13 @@ public class DownloaderController : ControllerBase
 {
     private readonly IDownloaderService _downloaderService;
     private readonly List<DownloaderData> _downloaders;
+    private readonly SecretService _secretService;
 
-    public DownloaderController(IDownloaderService downloaderService, List<DownloaderData> downloaders)
+    public DownloaderController(IDownloaderService downloaderService, List<DownloaderData> downloaders, SecretService secretService)
     {
         _downloaderService = downloaderService;
         _downloaders = downloaders;
+        _secretService = secretService;
     }
 
     [Route("downloaders")]
@@ -128,4 +129,21 @@ public class DownloaderController : ControllerBase
 
 
     private DownloaderData? GetDownloader(string downloader) =>  _downloaders.FirstOrDefault(d => d.Name.Equals(downloader));
+
+    [Route("/test")]
+    [HttpPost]
+    public async Task<ActionResult<List<bool>>> TestConnection(DownloaderData downloader)
+    {
+        var secret = new DisSecret();
+        if (!string.IsNullOrWhiteSpace(downloader.SecretName))
+        {
+            secret = await _secretService.GetSecretAsync(downloader.SecretName);
+        }
+        var client = new DisDownloaderClient(downloader.DownloadUrl, secret.Token, secret.TokenName);
+        var mainResult = await client.CanConnect();
+        if (string.IsNullOrWhiteSpace(downloader.BackUpUrl)) return new List<bool> {mainResult};
+        client.SwitchSource(downloader.BackUpUrl, secret.TokenName, secret.Token);
+        var backUpResult = await client.CanConnect();
+        return new List<bool> {mainResult, backUpResult};
+    }
 }

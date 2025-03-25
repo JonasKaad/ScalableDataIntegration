@@ -8,40 +8,31 @@ public class DisDownloaderClient
 
     public DisDownloaderClient(string url = "", string token = "", string tokenName = "")
     {
-        if (url[..3].Equals("ftp", StringComparison.OrdinalIgnoreCase))
-        {
-            CheckFtpCredentials(tokenName, token);
-            _downloaderClient = new DisFtpClient(url, tokenName, token);
-            _currentSource = Source.Ftp;
-        }
-        else if(url[..4].Equals("http", StringComparison.OrdinalIgnoreCase))
-        {
-            _downloaderClient = new DisHttpClient(url, token, tokenName);
-            _currentSource = Source.Http;
-        }
-        else
-        {
-            throw new ArgumentException("Invalid URL. Are you missing the protocol?");
-        }
+        _currentSource = GetSourceFromUrl(url);
+        SetNewClient(url, tokenName, token, _currentSource);
     }
 
-    public void SwitchSource(Source source, string url, string tokenName = "", string  token = "")
+    private Source GetSourceFromUrl(string url)
     {
+        if (url[..3].Equals("ftp", StringComparison.OrdinalIgnoreCase))
+        { 
+            return Source.Ftp;
+        }
+        if(url[..4].Equals("http", StringComparison.OrdinalIgnoreCase))
+        {
+            return Source.Http;
+        }
+        throw new ArgumentException("Invalid URL. Are you missing the protocol?");
+    }
+
+    public void SwitchSource(string url, string tokenName = "", string  token = "")
+    {
+        var source = GetSourceFromUrl(url);
         if (_currentSource != source)
         {
             _currentSource = source;
             _downloaderClient.Dispose();
-            switch (source)
-            {
-                case Source.Ftp:
-                    CheckFtpCredentials(tokenName, token);
-                    _downloaderClient = new DisFtpClient(url, tokenName, token);
-                    break;
-                
-                case Source.Http:
-                    _downloaderClient = new DisHttpClient(url, tokenName, token);
-                    break;
-            }
+            SetNewClient(url, tokenName, token, source);
         }
         else
         {
@@ -56,6 +47,20 @@ public class DisDownloaderClient
                     _downloaderClient.SwitchHost(url, tokenName, token);
                     break;
             }
+        }
+    }
+
+    private void SetNewClient(string url, string tokenName, string token, Source source)
+    {
+        switch (source)
+        {
+            case Source.Ftp:
+                CheckFtpCredentials(tokenName, token);
+                _downloaderClient = new DisFtpClient(url, tokenName, token);
+                break;
+            case Source.Http:
+                _downloaderClient = new DisHttpClient(url, tokenName, token);
+                break;
         }
     }
 
@@ -72,7 +77,12 @@ public class DisDownloaderClient
             throw new ArgumentNullException(tokenName, "No credentials provided for FTP");
         }
     }
-    
+
+    public async Task<bool> CanConnect()
+    {
+        return await _downloaderClient.CanConnect();
+    }
+
     public async Task<byte[]> FetchData()
     {
         var bytes = await _downloaderClient.FetchData();

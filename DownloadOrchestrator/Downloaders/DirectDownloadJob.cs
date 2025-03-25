@@ -1,7 +1,6 @@
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 using Azure.Storage.Blobs;
-using Downloader.Downloaders;
 using DownloadOrchestrator.Models;
 using DownloadOrchestrator.Services;
 using Microsoft.EntityFrameworkCore;

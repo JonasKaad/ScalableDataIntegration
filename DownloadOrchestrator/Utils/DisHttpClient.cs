@@ -66,6 +66,12 @@ public class DisHttpClient : IDownloaderClient
         Console.Write($"{request?.RequestUri} ");
         Console.WriteLine($"HTTP/{request?.Version}");
     }
+
+    public async Task<bool> CanConnect()
+    {
+        using var response = await Client.GetAsync(_url);
+        return response.IsSuccessStatusCode;
+    }
     
     private void SetTokenHeader(string token, string tokenName)
     {
