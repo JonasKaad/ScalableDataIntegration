@@ -51,11 +51,11 @@ public class DownloaderController : ControllerBase
         
         try
         {
-            dlToConfigure.ParserUrl = string.IsNullOrEmpty(dlConfiguration.ParserUrl) ? dlToConfigure.ParserUrl : dlConfiguration.ParserUrl;
-            dlToConfigure.DownloadUrl = string.IsNullOrEmpty(dlConfiguration.DownloadUrl) ? dlToConfigure.DownloadUrl : dlConfiguration.DownloadUrl;
-            dlToConfigure.BackUpUrl = string.IsNullOrEmpty(dlConfiguration.BackUpUrl) ? dlToConfigure.BackUpUrl : dlConfiguration.BackUpUrl;
-            dlToConfigure.PollingRate = string.IsNullOrEmpty(dlConfiguration.PollingRate) ? dlToConfigure.PollingRate : dlConfiguration.PollingRate;
-            dlToConfigure.SecretName = string.IsNullOrEmpty(dlConfiguration.SecretName) ? dlToConfigure.SecretName : dlConfiguration.SecretName;
+            dlToConfigure.ParserUrl = HandleConfiguration(dlToConfigure.ParserUrl, dlConfiguration.ParserUrl);
+            dlToConfigure.DownloadUrl = HandleConfiguration(dlToConfigure.DownloadUrl, dlConfiguration.DownloadUrl);
+            dlToConfigure.BackUpUrl = HandleConfiguration(dlToConfigure.BackUpUrl, dlConfiguration.BackUpUrl);
+            dlToConfigure.PollingRate = HandleConfiguration(dlToConfigure.PollingRate, dlConfiguration.PollingRate);
+            dlToConfigure.SecretName = HandleConfiguration(dlToConfigure.SecretName, dlConfiguration.SecretName);
             _downloaderService.ScheduleOrUpdateRecurringDownload(dlToConfigure);
         }
         catch (Exception e)
@@ -64,6 +64,12 @@ public class DownloaderController : ControllerBase
             return BadRequest("An error occured while configuring the downloader.");
         }
         return Ok("Downloader has been updated.");
+    }
+
+    private static string HandleConfiguration(string oldValue, string newValue)
+    {
+        var url = string.IsNullOrEmpty(newValue) ? oldValue : newValue.Trim();
+        return url;
     }
 
     [Route("{downloader}/add")]
