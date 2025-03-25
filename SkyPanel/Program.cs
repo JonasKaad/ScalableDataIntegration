@@ -4,12 +4,16 @@ using SkyPanel.Components;
 using SkyPanel.Components.Services;
 using DotNetEnv;
 using DotNetEnv.Configuration;
+using MudBlazor;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Load env variables
 builder.Configuration.AddDotNetEnv(".env", LoadOptions.TraversePath());
-builder.Services.AddMudServices();
+builder.Services.AddMudServices(config =>
+    {
+    config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomRight;
+});
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<ParserStateService>();
 builder.Services.AddScoped<SecretCredentialsService>();
