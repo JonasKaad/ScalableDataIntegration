@@ -63,8 +63,10 @@ class ParserServicer(parser_pb2_grpc.ParserServicer):
         # Get data from the request
         raw_data = request.raw_data
         format_type = request.format
+        print("Received data")
         if(format_type == "str"):
             data = raw_data.decode("utf-8").split("\n")
+        print("Decoded bytes")
 
         # Log the request (for debugging)
         tafstrings = []
@@ -72,10 +74,12 @@ class ParserServicer(parser_pb2_grpc.ParserServicer):
             if(d == "" or d == "magic"):
                 continue
             tafstrings.append("TAF " + d)
+        print(f"{len(tafstrings)} TAF strings")
 
         tafs = []
         for taf in tafstrings:
             tafs.append(TAFParser().parse(taf))
+        print(f"parsed {len(tafs)} TAF strings")
 
         if len(tafs) != len(tafstrings):
             response = parser_pb2.ParseResponse(success=False, err_msg="Error parsing all TAFs")
@@ -84,19 +88,25 @@ class ParserServicer(parser_pb2_grpc.ParserServicer):
 
         # If there was an error, it can be set like:
         # response = parser_pb2.ParseResponse(success=False, err_msg="Failed to parse data")
+        print("Checking azure creds")
         client = self.azure_cred_checker();
+        print("Got azure creds")
         container_name = "python-taf"
+        print("Getting container client")
         container_client = client.get_container_client(container_name)
         if not await container_client.exists():
             await container_client.create_container()
+        print("Got container client")
 
         now = datetime.datetime.now(datetime.UTC)
         raw_file_name = f"{now.year}/{now.strftime('%m')}/{now.day}/{now.strftime('%H%M')}-raw.txt"
         parsed_file_name = f"{now.year}/{now.strftime('%m')}/{now.day}/{now.strftime('%H%M')}-parsed.txt"
 
         taf_json = json.dumps(tafs, cls=TAFEncoder)
+        print("Saving blobs")
         await container_client.upload_blob(name=raw_file_name, data=raw_data.decode('utf-8'))
         await container_client.upload_blob(name=parsed_file_name, data=taf_json)
+        print("Saved blobs")
 
         await client.close()
         return response
