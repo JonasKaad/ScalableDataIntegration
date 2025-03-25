@@ -15,9 +15,7 @@ public partial class ConfigurationPanel : ComponentBase
     [Inject] private OrchestratorClientService OrchestratorClientService { get; set; } = default!;
 
     private bool _awsUsernamePasswordDebug = false;
-    private string _protoParserName = string.Empty;
     private string _secretName = string.Empty;
-    private string? Protocol { get; set; }
     private string? UrlValue { get; set; }
     private string? BackupUrlValue { get; set; }
     private string? PollingValue { get; set; }
@@ -43,36 +41,34 @@ public partial class ConfigurationPanel : ComponentBase
     protected override void OnInitialized()
     {
         ParserState.OnChange += OnParserStateChanged;
-        _protoParserName = ParserState.ParserName;
         UpdateFromParserState();
     }
     
     private void OnParserStateChanged()
     {
         UpdateFromParserState();
+        OnParserChanged();
         StateHasChanged();
     }
     
     private void UpdateFromParserState()
     {
         // Update UI components with values from ParserState
-        Protocol = ParserState.ParserUrl;
         UrlValue = ParserState.DownloadUrl;
         BackupUrlValue = ParserState.BackupUrl;
         PollingValue = ParserState.Polling;
-        ProtoParserName = ParserState.ParserName;
-        CheckForCredentials(ProtoParserName);
+        CheckForCredentials(ParserState.SecretName);
     }
     
     private string _parserNameSelection = string.Empty;
     
-    private void CheckForCredentials(string parserName)
+    private void CheckForCredentials(string parserSecret)
     {
-        if (CredentialsService.GetParserSecretNames().Contains(parserName))
+        if (CredentialsService.GetParserSecretNames().Contains(parserSecret))
         {
-            _secretName = parserName;
-            Username = CredentialsService.GetUsername(parserName);
-            Password = CredentialsService.GetPassword(parserName);
+            _secretName = parserSecret;
+            Username = CredentialsService.GetUsername(parserSecret);
+            Password = CredentialsService.GetPassword(parserSecret);
         }
         else
         {
@@ -81,16 +77,6 @@ public partial class ConfigurationPanel : ComponentBase
             Password = string.Empty;
         }
         
-    }
-
-    private string ProtoParserName
-    {
-        get => _protoParserName;
-        set
-        {
-            _protoParserName = value;
-            OnParserChanged();
-        } 
     }
     
     private Task OpenSecretManagementDialog()
@@ -132,13 +118,15 @@ public partial class ConfigurationPanel : ComponentBase
 
     private void OnParserChanged()
     {
-        if (string.IsNullOrEmpty(_protoParserName)) return;
-        if (!CredentialsService.GetParserSecretNames().Contains(_protoParserName))
+        if (string.IsNullOrEmpty(ParserState.ParserName)) return;
+        if (!CredentialsService.GetParserSecretNames().Contains(ParserState.SecretName))
         {
+            Console.WriteLine(ParserState.ParserName +" "+ "" + ParserState.SecretName);
             PlaceholderText = "No Secret Found!";
         }
         else
         {
+            Console.WriteLine(ParserState.ParserName +" "+ "" + ParserState.SecretName);
             PlaceholderText = "No Secret Selected";
         }
     }
