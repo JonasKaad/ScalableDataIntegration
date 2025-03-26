@@ -1,3 +1,4 @@
+using System.Net;
 using System.Text;
 using System.Text.Json;
 using SkyPanel.Components.Models;
@@ -39,50 +40,62 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
         return new Parser("", "", "", "", "", "");
     }
 
-    public async Task ConfigureDownloader(string parser, string url, string backupUrl, string secretName, string pollingRate)
+    public async Task<bool> ConfigureDownloader(string parser, string url, string backupUrl, string secretName, string pollingRate)
     {
+        
         var client = httpClientFactory.CreateClient();
-
-        using StringContent jsonContent = new(
-            JsonSerializer.Serialize(new 
-            {
-                name = parser,
-                downloadUrl = url ?? " ",
-                parserUrl = " ",
-                backupUrl = backupUrl ?? " ",
-                secretName = secretName ?? " ",
-                pollingRate = pollingRate ?? " ",
-            }),
-            Encoding.UTF8,
-            "application/json");
-        using HttpResponseMessage response  = await client.PutAsync($"{baseUrl}/{parser}/configure", jsonContent);
-        var jsonResponse = await response.Content.ReadAsStringAsync();
+        
+        try
+        {
+            using StringContent jsonContent = new(
+                JsonSerializer.Serialize(new
+                {
+                    name = parser,
+                    downloadUrl = url ?? "",
+                    parserUrl = "",
+                    backupUrl = backupUrl ?? "",
+                    secretName = secretName ?? "",
+                    pollingRate = pollingRate ?? "",
+                }),
+                Encoding.UTF8,
+                "application/json");
+            using HttpResponseMessage response = await client.PutAsync($"{baseUrl}/{parser}/configure", jsonContent);
+            var returnStatusCode = response.StatusCode;
+            return returnStatusCode == HttpStatusCode.OK;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+        return false;
     }
     
     public async Task<List<bool>> TestConnection(string _parser, string _url, string _backupUrl, string _secretName, string _pollingRate)
     {
         var client = httpClientFactory.CreateClient();
-
-        using StringContent jsonContent = new(
-            JsonSerializer.Serialize(new 
-            {
-                name = _parser,
-                downloadUrl = _url,
-                parserUrl = "",
-                backupUrl = _backupUrl,
-                secretName = _secretName,
-                pollingRate = _pollingRate,
-            }),
-            Encoding.UTF8,
-            "application/json");
-        using HttpResponseMessage response  = await client.PostAsync($"{baseUrl}/test", jsonContent);
-        
-        var jsonResponse = await response.Content.ReadFromJsonAsync<List<bool>>();
-        if (jsonResponse is null)
+        try
         {
-            return [];
+            using StringContent jsonContent = new(
+                JsonSerializer.Serialize(new 
+                {
+                    name = _parser,
+                    downloadUrl = _url,
+                    parserUrl = "",
+                    backupUrl = _backupUrl,
+                    secretName = _secretName,
+                    pollingRate = _pollingRate,
+                }),
+                Encoding.UTF8,
+                "application/json");
+            using HttpResponseMessage response  = await client.PostAsync($"{baseUrl}/test", jsonContent);
+            
+            var jsonResponse = await response.Content.ReadFromJsonAsync<List<bool>>();
+            return jsonResponse ?? [];
         }
-
-        return jsonResponse;
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+        return [];
     }
 }
