@@ -30,7 +30,6 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
         {
             var response = await client.GetAsync($"{baseUrl}/{downloader}/configuration");
             var parser = await response.Content.ReadFromJsonAsync<Parser>();
-            Console.WriteLine(parser);
             return parser ?? new Parser("", "", "", "", "", "");
         }
         catch (Exception e)
