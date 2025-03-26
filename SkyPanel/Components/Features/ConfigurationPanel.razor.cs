@@ -304,28 +304,40 @@ public partial class ConfigurationPanel : ComponentBase
             return;
         }
 
-        var urlValueToSend = " ";
-        var backupUrlValueToSend = " ";
-        var secretNameToSend = " ";
-        var pollingRateToSend = " ";
+        var urlValueToSend = "";
+        var backupUrlValueToSend = "";
+        var secretNameToSend = "";
+        var pollingRateToSend = "";
         
         // Check if parser values have changed. If not send a string with a space: " "
-        if (UrlValue != null)
+        if (string.IsNullOrEmpty(UrlValue))
         {
-            urlValueToSend = string.Compare(ParserState.DownloadUrl, UrlValue, StringComparison.OrdinalIgnoreCase) == 0 ? " " : UrlValue;
-        }
-        
-        if (BackupUrlValue != null)
+            urlValueToSend = " ";
+        } else urlValueToSend = string.Compare(ParserState.DownloadUrl, UrlValue, StringComparison.OrdinalIgnoreCase) == 0 ? "" : UrlValue;
+
+           
+        if (string.IsNullOrEmpty(BackupUrlValue))
         {
-            backupUrlValueToSend = string.Compare(ParserState.BackupUrl, BackupUrlValue, StringComparison.OrdinalIgnoreCase) == 0 ? " " : BackupUrlValue;
-        }
+            backupUrlValueToSend = " ";
+        } else  backupUrlValueToSend = string.Compare(ParserState.BackupUrl, BackupUrlValue, StringComparison.OrdinalIgnoreCase) == 0 ? "" : BackupUrlValue;
+
+        if (string.IsNullOrEmpty(SecretName))
+        {
+            secretNameToSend = " ";
+        } else secretNameToSend = string.Compare(ParserState.SecretName, SecretName, StringComparison.OrdinalIgnoreCase) == 0 ? "" : SecretName;
         
-        secretNameToSend = string.Compare(ParserState.SecretName, SecretName, StringComparison.OrdinalIgnoreCase) == 0 ? " " : SecretName;
+        pollingRateToSend = PollingValue;
         
-        pollingRateToSend = PollingValue; //string.Compare(ParserState.Polling, PollingValue, StringComparison.OrdinalIgnoreCase) == 0 ? " " : PollingValue;
-        
-        await OrchestratorClientService.ConfigureDownloader(ParserState.ParserName, 
+        var response = await OrchestratorClientService.ConfigureDownloader(ParserState.ParserName, 
             urlValueToSend, backupUrlValueToSend, secretNameToSend, pollingRateToSend);
+        if (response)
+        {
+            Snackbar.Add("Successfully updated configuration", Severity.Success);
+        }
+        else
+        {
+            Snackbar.Add("Failed updating configuration", Severity.Error);
+        }
     }
 
     private async Task TestConnection()
@@ -335,12 +347,12 @@ public partial class ConfigurationPanel : ComponentBase
             return;
         }
 
-        var urlValueToSend = " ";
-        var backupUrlValueToSend = " ";
-        var secretNameToSend = " ";
-        var pollingRateToSend = " ";
+        var urlValueToSend = "";
+        var backupUrlValueToSend = "";
+        var secretNameToSend = "";
+        var pollingRateToSend = "";
         
-        // Check if parser values have changed. If not send a string with a space: " "
+        // Check if parser values have changed. If not send a string without a space: ""
         if (UrlValue != null)
         {
             urlValueToSend = UrlValue;
