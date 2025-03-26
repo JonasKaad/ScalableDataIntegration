@@ -210,7 +210,6 @@ public partial class ConfigurationPanel : ComponentBase
         // Update UI components with values from ParserState
         UrlValue = ParserState.DownloadUrl;
         BackupUrlValue = ParserState.BackupUrl;
-        //PollingValue = ParserState.Polling;
         if (ParserState.ParserIsNotSelected())
         {
             // Reset to default values when no parser is selected
