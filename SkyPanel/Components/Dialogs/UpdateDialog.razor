@@ -10,7 +10,6 @@
             var changedParams = parameters.Where(p => p.Valid && !p.Unchanged).ToList();
             var unchangedParams = parameters.Where(p => p.Valid && p.Unchanged).ToList();
             HasChanges = changedParams.Count > 0;
-            Console.WriteLine(HasChanges);
         }
             @if (HasChanges)
             {
