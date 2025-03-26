@@ -2,13 +2,13 @@
     <DialogContent>
         @{
             var parameters = new[] {
-                new { Label = "URL", Name = Url, State = ParserState.DownloadUrl, Unchanged = (String.Compare(Url, ParserState.DownloadUrl, StringComparison.Ordinal) == 0), Valid = !string.IsNullOrEmpty(Url) },
-                new { Label = "BackupURL", Name = BackupUrl, State = ParserState.BackupUrl, Unchanged = (String.Compare(BackupUrl, ParserState.BackupUrl, StringComparison.Ordinal) == 0), Valid = !string.IsNullOrEmpty(BackupUrl) },
-                new { Label = "Secret", Name = SecretName, State = ParserState.SecretName, Unchanged = (String.Compare(SecretName, ParserState.SecretName, StringComparison.Ordinal) == 0), Valid = !string.IsNullOrEmpty(SecretName) },
-                new { Label = "Polling Rate", Name = PollingRate, State = ParserState.Polling, Unchanged = (String.Compare(PollingRate, ParserState.Polling, StringComparison.Ordinal) == 0), Valid = !string.IsNullOrEmpty(PollingRate) }
+                new { Label = "URL", Name = Url, State = ParserState.DownloadUrl, Unchanged = (String.Compare(Url, ParserState.DownloadUrl, StringComparison.Ordinal) == 0)},
+                new { Label = "BackupURL", Name = BackupUrl, State = ParserState.BackupUrl, Unchanged = (String.Compare(BackupUrl, ParserState.BackupUrl, StringComparison.Ordinal) == 0) },
+                new { Label = "Secret", Name = SecretName, State = ParserState.SecretName, Unchanged = (String.Compare(SecretName, ParserState.SecretName, StringComparison.Ordinal) == 0) },
+                new { Label = "Polling Rate", Name = PollingRate, State = ParserState.Polling, Unchanged = (String.Compare(PollingRate, ParserState.Polling, StringComparison.Ordinal) == 0) }
             };
-            var changedParams = parameters.Where(p => p.Valid && !p.Unchanged).ToList();
-            var unchangedParams = parameters.Where(p => p.Valid && p.Unchanged).ToList();
+            var changedParams = parameters.Where(p => !p.Unchanged).ToList();
+            var unchangedParams = parameters.Where(p => p.Unchanged).ToList();
             HasChanges = changedParams.Count > 0;
         }
             @if (HasChanges)
@@ -34,9 +34,9 @@
                             }
                             else
                             {
-                                <MudText Typo="Typo.body2">From: @((MarkupString)HighlightRemovedContent(parameter.State, parameter.Name))</MudText>
+                                <MudText Typo="Typo.body2">From: @((MarkupString)HighlightChangedContent(parameter.State, parameter.Name,  "#ffcccc"))</MudText>
                             }
-                            <MudText Typo="Typo.body2">To: @((MarkupString)HighlightAddedContent(parameter.State, parameter.Name))</MudText>
+                            <MudText Typo="Typo.body2">To: @((MarkupString)HighlightChangedContent( parameter.Name,parameter.State, "#d0f0c0"))</MudText>
                         </div>
                     </MudListItem>
                 }
