@@ -39,45 +39,15 @@ public partial class UpdateDialog : ComponentBase
 
     private void DialogCancel() => MudDialog?.Cancel();
     
-    private string HighlightAddedContent(string? oldValue, string? newValue)
+    private string HighlightChangedContent(string? oldValue, string? newValue, string color)
     {
-        if (string.IsNullOrEmpty(newValue))
-        {
-            return string.Empty;
-        }
-    
-        // If old value is empty, highlight the entire new value as added
-        if (string.IsNullOrEmpty(oldValue))
-        {
-            return $"<span style=\"background-color: #d0f0c0; font-weight: bold;\">{newValue}</span>";
-        }
-
-        if (oldValue == newValue)
-        {
-            return newValue;
-        }
         
-        var (prefix, changed, suffix) = FindDiff(newValue, oldValue);
-
-
-        return $"{prefix}<span style=\"background-color: #d0f0c0; font-weight: bold;\">{changed}</span>{suffix}";
-    }
-
-    private string HighlightRemovedContent(string? oldValue, string? newValue)
-    {
-        if (string.IsNullOrEmpty(oldValue) || string.IsNullOrEmpty(newValue))
-        {
-            return oldValue ?? string.Empty;
-        }
-
         if (oldValue == newValue)
         {
             return oldValue;
         }
-
         var (prefix, changed, suffix) = FindDiff(oldValue, newValue);
-
-        return $"{prefix}<span style=\"background-color: #ffcccc; font-weight: bold;\">{changed}</span>{suffix}";
+        return $"{prefix}<span style=\"background-color: {color}; font-weight: bold;\">{changed}</span>{suffix}";
     }
     
     // Inspired by @https://github.com/google/diff-match-patch/blob/master/csharp/DiffMatchPatch.cs
