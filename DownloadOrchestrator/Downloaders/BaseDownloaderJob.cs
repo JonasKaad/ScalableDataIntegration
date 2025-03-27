@@ -16,10 +16,6 @@ public class BaseDownloaderJob : IDownloaderJob
     protected readonly SecretService SecretService;
     private readonly ILogger<IDownloaderJob> _logger;
     
-    // public BaseDownloaderJob() : this(new Logger<BaseDownloaderJob>(new LoggerFactory()), new StatisticsContext(new DbContextOptionsBuilder<StatisticsContext>().Options), 
-    //     new SecretService(new SecretClient(new Uri("uri"), new EnvironmentCredential())))
-    // {
-    // }
     public BaseDownloaderJob(ILogger<BaseDownloaderJob> logger, StatisticsContext context, SecretService secretService)
     {
         _context = context; 
