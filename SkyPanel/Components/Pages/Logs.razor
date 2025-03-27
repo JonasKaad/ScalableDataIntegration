@@ -1,6 +1,79 @@
 ﻿@page "/logs"
 <PageTitle>SkyPanel — Logs</PageTitle>
 
-<MudText Typo="Typo.h3" GutterBottom="true">Datadog Logs</MudText>
-<MudText Typo="Typo.body1" GutterBottom="true">This page displays logs from Datadog.</MudText>
-<MudText>https://www.datadoghq.com</MudText>
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
+    <MudGrid>
+        <MudItem xs="12" sm="6">
+            <MudPaper Elevation="3" Class="pa-8 ma-2" Style="border-radius: 16px; height: 95%">
+                <MudText Typo="Typo.h5" Class="mb-4">Services</MudText>
+                <MudSelect T="string" Label="Services" MultiSelection="true" @bind-SelectedValues="_selectedServices"
+                           Disabled="_loading" Class="mb-4">
+                    @if (_loading)
+                    {
+                        <MudProgressLinear Indeterminate="true" Class="my-2" />
+                    }
+                    else
+                    {
+                        @foreach (var service in _services)
+                        {
+                            <MudSelectItem Value="@service">@service</MudSelectItem>
+                        }
+                    }
+                </MudSelect>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" sm="6">
+            <MudPaper Elevation="3" Class="pa-8 ma-2" Style="border-radius: 16px; height: 95%">
+                <MudText Typo="Typo.h5" Class="mb-4">Filters</MudText>
+                <MudStack>
+                    <MudGrid>
+                        <MudItem xs="6" sm="6" Class="mb-2">
+                            <MudDateRangePicker
+                                PickerVariant="PickerVariant.Inline"
+                                Label="Date Range"
+                                Editable="true"
+                                @bind-DateRange="_dateRange"
+                                Placeholder="Select Date"/>
+                        </MudItem>
+                        <MudItem xs="5" sm="5">
+                            <MudGrid>
+                                <MudItem xs="6">
+                                    <MudTimePicker Label="From" Editable="true" @bind-Time="_fromTime"/>
+                                </MudItem>
+                                <MudItem xs="6">
+                                    <MudTimePicker Label="To" Editable="true" @bind-Time="_toTime"/>
+                                </MudItem>
+                            </MudGrid>
+                        </MudItem>
+                    </MudGrid>
+
+                    <MudSelect T="string" Label="Severity Levels" MultiSelection="true"
+                               @bind-SelectedValues="_selectedSeverities" Class="mb-4">
+                        @foreach (var severity in _severities)
+                        {
+                            <MudSelectItem Value="@severity">@severity</MudSelectItem>
+                        }
+                    </MudSelect>
+
+                    <MudSelect T="string" Label="Source Languages" MultiSelection="true"
+                               @bind-SelectedValues="_selectedSources">
+                        @foreach (var source in _sources)
+                        {
+                            <MudSelectItem Value="@source">@source</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudStack>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12">
+            <MudPaper Elevation="3" Class="pa-8 ma-2" Style="border-radius: 16px;">
+                <MudText Typo="Typo.h5" Class="mb-4">Datadog Link</MudText>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OpenDatadog" Class="mb-4">
+                    Open in Datadog
+                </MudButton>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
