@@ -1,8 +1,7 @@
 ﻿@page "/Profile"
-@inject TokenProvider tokenProvider
 @attribute [Authorize]
 
-<PageTitle>Profile</PageTitle>
+<PageTitle>SkyPanel — Profile</PageTitle>
 
 <div class="row">
     <div class="col-md-12">
@@ -18,9 +17,6 @@
                 <p>
                     <i class="bi bi-envelope"></i> @EmailAddress
                 </p>
-                <p>
-                    <strong>Id Token</strong>: @IdToken
-                </p>
             </div>
         </div>
     </div>
@@ -29,31 +25,29 @@
 @code {
 
     [CascadingParameter]
-    public Task<AuthenticationState> AuthenticationStateTask { get; set; }
+    public Task<AuthenticationState> authenticationState { get; set; }
     private string Username = "";
     private string EmailAddress = "";
     private string Picture = "";
-    private string IdToken = "";
-
+    
     protected override async Task OnInitializedAsync()
     {
-        var state = await AuthenticationStateTask;
+        if (authenticationState is not null)
+        {
+            var state = await authenticationState;
 
-        Username = state.User.Identity.Name ?? string.Empty;
-        EmailAddress = state.User.Claims
-            .Where(c => c.Type.Equals(System.Security.Claims.ClaimTypes.Email))
-            .Select(c => c.Value)
-            .FirstOrDefault() ?? string.Empty;
+            Username = state?.User?.Identity?.Name ?? string.Empty;
+            
+            EmailAddress = state.User.Claims
+                .Where(c => c.Type.Equals(System.Security.Claims.ClaimTypes.Email))
+                .Select(c => c.Value)
+                .FirstOrDefault() ?? string.Empty;
 
-        Picture = state.User.Claims
-            .Where(c => c.Type.Equals("picture"))
-            .Select(c => c.Value)
-            .FirstOrDefault() ?? string.Empty;
-
-
-        IdToken = tokenProvider.IdToken;
-
-        await base.OnInitializedAsync();
+            Picture = state.User.Claims
+                .Where(c => c.Type.Equals("picture"))
+                .Select(c => c.Value)
+                .FirstOrDefault() ?? string.Empty;
+        }
     }
 }
 
