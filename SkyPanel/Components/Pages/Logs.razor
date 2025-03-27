@@ -1,5 +1,5 @@
 ﻿@page "/logs"
-@attribute [Authorize]
+@attribute [Authorize(Roles = "Admin, Developer")]
 <PageTitle>SkyPanel — Logs</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">

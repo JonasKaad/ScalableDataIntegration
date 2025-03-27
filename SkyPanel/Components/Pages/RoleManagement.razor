@@ -1,5 +1,5 @@
 ﻿@page "/role-management"
-@attribute [Authorize]
+@attribute [Authorize(Roles = "Admin")]
 <PageTitle>SkyPanel — Role Management</PageTitle>
 
 <MudText Typo="Typo.h3" GutterBottom="true">Roles</MudText>

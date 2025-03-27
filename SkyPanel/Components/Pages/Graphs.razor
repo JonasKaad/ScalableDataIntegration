@@ -1,5 +1,5 @@
 ﻿@page "/graphs"
-@attribute [Authorize]
+@attribute [Authorize(Roles = "Admin, Developer")]
 @using ApexCharts
 <PageTitle>SkyPanel — Graphs</PageTitle>
 <MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
