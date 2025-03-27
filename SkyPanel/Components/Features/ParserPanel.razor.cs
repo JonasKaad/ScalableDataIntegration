@@ -16,12 +16,12 @@ public partial class ParserPanel : ComponentBase
     
     public string Parser
     {
-        get => ParserState.ParserName;
+        get => string.IsNullOrEmpty(ParserState.ParserName) ? _selectedParser : ParserState.ParserName;
         set
         {
+            _selectedParser = value;
             _ = InvokeAsync(async () => 
             {
-                _selectedParser = value;
                 await GetDownloaderConfiguration(value);
                 StateHasChanged();
             });
@@ -38,6 +38,7 @@ public partial class ParserPanel : ComponentBase
         // Get the full parser configuration and store it
         var parserConfig = await OrchestratorClient.GetDownloaderConfiguration(parserName);
         ParserState.SetParser(parserConfig);
+        StateHasChanged();
     }
     
     protected override void OnInitialized()
