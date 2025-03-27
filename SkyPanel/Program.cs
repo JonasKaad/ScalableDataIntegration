@@ -1,3 +1,4 @@
+using Auth0.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
 using SkyPanel.Components;
@@ -5,7 +6,8 @@ using SkyPanel.Components.Services;
 using DotNetEnv;
 using DotNetEnv.Configuration;
 using MudBlazor;
-
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 var builder = WebApplication.CreateBuilder(args);
 
 // Load env variables
@@ -39,6 +41,12 @@ builder.Services.AddDbContext<StatisticsDatabaseService>(options =>
     options.UseNpgsql(connectionString);
 });
 
+builder.Services.AddAuth0WebAppAuthentication(options =>
+{
+    options.Domain = Env.GetString("AUTH0_DOMAIN");
+    options.ClientId =Env.GetString("AUTH0_CLIENT_ID");
+});
+
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
@@ -57,8 +65,27 @@ app.UseHttpsRedirection();
 
 
 app.UseAntiforgery();
-
 app.MapStaticAssets();
+
+app.MapGet("/Account/Login", async (HttpContext httpContext, string returnUrl = "/") =>
+{
+    var authenticationProperties = new LoginAuthenticationPropertiesBuilder()
+        .WithRedirectUri(returnUrl)
+        .Build();
+
+    await httpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
+});
+
+app.MapGet("/Account/Logout", async (HttpContext httpContext) =>
+{
+    var authenticationProperties = new LogoutAuthenticationPropertiesBuilder()
+        .WithRedirectUri("/")
+        .Build();
+
+    await httpContext.SignOutAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
+    await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+});
+
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
