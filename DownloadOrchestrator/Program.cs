@@ -8,6 +8,7 @@ using DownloadOrchestrator.Models;
 using DownloadOrchestrator.Services;
 using Microsoft.EntityFrameworkCore;
 using Hangfire;
+using Hangfire.PostgreSql;
 using Serilog;
 using Serilog.Sinks.Datadog.Logs;
 
@@ -18,14 +19,21 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 
 builder.Configuration.AddDotNetEnv(".env", LoadOptions.TraversePath());
-var config = new DatadogConfiguration() { Url = "https://http-intake.logs.us5.datadoghq.com", UseSSL = true, UseTCP = false};
-Log.Logger = new LoggerConfiguration()
-    .WriteTo.DatadogLogs(
-        apiKey: Environment.GetEnvironmentVariable("DD_API_KEY"),
-        configuration: config, 
-        service: "DownloadOrchestrator"
-        )
-    .CreateLogger();
+if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+{
+    Log.Logger = new LoggerConfiguration().WriteTo.Console().CreateLogger();
+}
+else
+{
+    var datadogConfiguration = new DatadogConfiguration() { Url = "https://http-intake.logs.us5.datadoghq.com", UseSSL = true, UseTCP = false};
+    Log.Logger = new LoggerConfiguration()
+        .WriteTo.DatadogLogs(
+            apiKey: Environment.GetEnvironmentVariable("DD_API_KEY"),
+            configuration: datadogConfiguration, 
+            service: "DownloadOrchestrator"
+            )
+        .CreateLogger();
+}
 
 var connectionString = "Server=" + Environment.GetEnvironmentVariable("SERVER") + ";" + 
                        "Database=" + Environment.GetEnvironmentVariable("DATABASE")+ ";"  + 
@@ -75,7 +83,7 @@ builder.Services.AddSingleton(downloaders)
     })
     .AddScoped<IDownloaderJob, BaseDownloaderJob>()
     .AddScoped<IDownloaderService, DownloaderService>()
-    .AddHangfire(config => config.UseInMemoryStorage())
+    .AddHangfire(config => config.UsePostgreSqlStorage(c => c.UseNpgsqlConnection(connectionString)))
     .AddHangfireServer()
     .AddControllers();
 
