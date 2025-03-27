@@ -10,10 +10,6 @@ namespace DownloadOrchestrator.Downloaders;
 public class DirectDownloadJob : BaseDownloaderJob
 {
     private readonly ILogger<DirectDownloadJob> _logger;
-    // public DirectDownloadJob() : base(new Logger<BaseDownloaderJob>(new LoggerFactory()), new StatisticsContext(new DbContextOptionsBuilder<StatisticsContext>().Options), 
-    //     new SecretService(new SecretClient(new Uri("uri"), new EnvironmentCredential()), new Logger<SecretService>()))
-    // {
-    // }
 
     public DirectDownloadJob(ILogger<DirectDownloadJob> logger, StatisticsContext statisticsContext, SecretService secretService) : base(logger, statisticsContext, secretService)
     {
