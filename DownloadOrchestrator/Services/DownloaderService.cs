@@ -42,8 +42,9 @@ public class DownloaderService : IDownloaderService
     {
         var jobs = _jobStorage.GetReadOnlyConnection().GetRecurringJobs();
         return jobs
-            .Where(job => job.Job.Args[0] is DownloaderData)
-            .Select(job => (DownloaderData)job.Job.Args[0])
+            .Where(job => job.Job.Args.Count > 0 && job.Job.Args[0] is DownloaderData)
+            .Select(job => job.Job.Args[0] as DownloaderData)
+            .Where(data => data != null)
             .ToList();
     }
 }
