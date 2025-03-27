@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
+using Azure;
 using Azure.Identity;
 using Azure.Storage.Blobs;
 using Grpc.Core;
@@ -26,10 +27,10 @@ public class AusotParserService : Parser.ParserBase
         doc.Load(new MemoryStream(request.RawData.ToByteArray()));
         var result = doc.DocumentNode.InnerText.Trim();
         var matches = AusRegex.Matches(result);
-        Console.WriteLine(result);
 
         if (matches.Count < 3)
         {
+            _logger.LogWarning("Failed to match enough tracks, only matched {Matches}", matches);
             return await Task.FromResult(new ParseResponse()
             {
                 Success = false,
@@ -57,6 +58,7 @@ public class AusotParserService : Parser.ParserBase
         }
         
         await SaveDataToBlob(result, tracks);
+        _logger.LogInformation("Parsed {Tracks}", tracks.Count);
 
         return await Task.FromResult(new ParseResponse
         {
@@ -65,7 +67,7 @@ public class AusotParserService : Parser.ParserBase
         });
     }
 
-    private static async Task SaveDataToBlob(string result, List<Track> tracks)
+    private async Task SaveDataToBlob(string result, List<Track> tracks)
     {
         DotNetEnv.Env.Load();
         var connectionString = Environment.GetEnvironmentVariable("blobConnection");
@@ -78,8 +80,15 @@ public class AusotParserService : Parser.ParserBase
         var hour = DateTime.UtcNow.Hour;
         var min = DateTime.UtcNow.Minute;
 
-        await container.UploadBlobAsync($"{date:yyyy/MM/dd}/{hour}{min}-tracks_raw.txt", new BinaryData(result));
-        await container.UploadBlobAsync($"{date:yyyy/MM/dd}/{hour}{min}-tracks_parsed.txt", new BinaryData(tracks));
+        try
+        {
+            await container.UploadBlobAsync($"{date:yyyy/MM/dd}/{hour}{min}-tracks_raw.txt", new BinaryData(result));
+            await container.UploadBlobAsync($"{date:yyyy/MM/dd}/{hour}{min}-tracks_parsed.txt", new BinaryData(tracks));
+        }
+        catch (RequestFailedException ex)
+        {
+            _logger.LogError("Failed to upload to blob: {Error}", ex);
+        }
     }
 
     private class Track(
