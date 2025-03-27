@@ -36,7 +36,7 @@ else
             </MudGrid>
         </ToolBarContent>
         <Columns>
-            <PropertyColumn Property="x => x.ParserName" InitialDirection="SortDirection.None" SortBy="new Func<BlobDataItem, object?>(x => x.ParserName!)"/>
+            <PropertyColumn Property="x => x.ParserName" Title="Name" InitialDirection="SortDirection.None" SortBy="new Func<BlobDataItem, object?>(x => x.ParserName!)"/>
             <PropertyColumn Property="x => x.Date" Format="dd/MM/yyyy HH\:mm" />
             <TemplateColumn CellClass=" justify-end">
                 <CellTemplate>
