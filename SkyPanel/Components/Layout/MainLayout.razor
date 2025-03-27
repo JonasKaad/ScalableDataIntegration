@@ -1,4 +1,4 @@
-@inherits LayoutComponentBase
+﻿@inherits LayoutComponentBase
 
 <MudThemeProvider Theme="@_theme" IsDarkMode="_isDarkMode" />
 <MudPopoverProvider />
@@ -7,8 +7,13 @@
 <MudLayout>
     <MudAppBar Elevation="1">
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@(() => DrawerToggle())" />
-        <MudImage Src="images/ff_white.svg" Width="56" Height="56"/>
-        <MudText Typo="Typo.h5" Class="ml-3">Data Integration Service — SkyPanel</MudText>
+        <MudLink Href="/" Style="display: flex; align-items: center;">
+            <MudImage Src="images/ff_white.svg" Width="56" Height="56"/>
+        </MudLink>
+        <MudLink Href="/" Typo="Typo.h5" Class="ml-3" Color="Color.Inherit" Underline="Underline.None">
+            Data Integration Service — SkyPanel
+        </MudLink>
+
         <MudSpacer />
         
         <MudText Typo="Typo.body1" >@_theTime</MudText>
