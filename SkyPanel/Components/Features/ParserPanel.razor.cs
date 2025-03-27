@@ -16,7 +16,7 @@ public partial class ParserPanel : ComponentBase
     
     public string Parser
     {
-        get => _selectedParser;
+        get => ParserState.ParserName;
         set
         {
             _ = InvokeAsync(async () => 
