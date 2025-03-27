@@ -6,7 +6,7 @@
         <MudItem xs="12" sm="6">
             <MudPaper Elevation="3" Class="pa-8 ma-2" Style="border-radius: 16px; height: 95%">
                 <MudText Typo="Typo.h5" Class="mb-4">Services</MudText>
-                <MudSelect T="string" Label="Services" MultiSelection="true" @bind-SelectedValues="_selectedServices"
+                <MudSelect T="string" Label="Services" MultiSelection="true" @bind-SelectedValues="SelectedServices"
                            Disabled="_loading" Class="mb-4">
                     @if (_loading)
                     {
@@ -33,23 +33,23 @@
                                 PickerVariant="PickerVariant.Inline"
                                 Label="Date Range"
                                 Editable="true"
-                                @bind-DateRange="_dateRange"
+                                @bind-DateRange="DateRange"
                                 Placeholder="Select Date"/>
                         </MudItem>
                         <MudItem xs="5" sm="5">
                             <MudGrid>
                                 <MudItem xs="6">
-                                    <MudTimePicker Label="From" Editable="true" @bind-Time="_fromTime"/>
+                                    <MudTimePicker Label="From" Editable="true" @bind-Time="FromTime"/>
                                 </MudItem>
                                 <MudItem xs="6">
-                                    <MudTimePicker Label="To" Editable="true" @bind-Time="_toTime"/>
+                                    <MudTimePicker Label="To" Editable="true" @bind-Time="ToTime"/>
                                 </MudItem>
                             </MudGrid>
                         </MudItem>
                     </MudGrid>
 
                     <MudSelect T="string" Label="Severity Levels" MultiSelection="true"
-                               @bind-SelectedValues="_selectedSeverities" Class="mb-4">
+                               @bind-SelectedValues="SelectedSeverities" Class="mb-4">
                         @foreach (var severity in _severities)
                         {
                             <MudSelectItem Value="@severity">@severity</MudSelectItem>
@@ -57,7 +57,7 @@
                     </MudSelect>
 
                     <MudSelect T="string" Label="Source Languages" MultiSelection="true"
-                               @bind-SelectedValues="_selectedSources">
+                               @bind-SelectedValues="SelectedSources">
                         @foreach (var source in _sources)
                         {
                             <MudSelectItem Value="@source">@source</MudSelectItem>
@@ -70,8 +70,20 @@
         <MudItem xs="12">
             <MudPaper Elevation="3" Class="pa-8 ma-2" Style="border-radius: 16px;">
                 <MudText Typo="Typo.h5" Class="mb-4">Datadog Link</MudText>
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OpenDatadog" Class="mb-4">
+
+                <MudPaper Elevation="3" Class="pa-4 ma-4 mud-primary-text" Style="@($"background:#EFEFEF")">
+                    <MudText @onclick="@(async () => await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", _datadogUrl))">
+                        @GetFormattedUrl()
+                    </MudText>
+                </MudPaper>
+
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OpenDatadog" Class="me-2">
                     Open in Datadog
+                </MudButton>
+
+                <MudButton Variant="Variant.Text" Color="Color.Primary"
+                           OnClick="@(async () => await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", _datadogUrl))">
+                    Copy URL
                 </MudButton>
             </MudPaper>
         </MudItem>

@@ -38,13 +38,80 @@ public partial class Logs
     private TimeSpan? _fromTime = new TimeSpan(00, 00, 00);
     private TimeSpan? _toTime = new TimeSpan(23, 59, 59);
     
+    public DateRange DateRange
+    {
+        get => _dateRange;
+        set
+        {
+            _dateRange = value;
+            UpdateDatadogUrl();
+        }
+    }
+
+    public IEnumerable<string> SelectedServices
+    {
+        get => _selectedServices;
+        set
+        {
+            _selectedServices = value;
+            UpdateDatadogUrl();
+        }
+    }
+
+    public IEnumerable<string> SelectedSeverities
+    {
+        get => _selectedSeverities;
+        set
+        {
+            _selectedSeverities = value;
+            UpdateDatadogUrl();
+        }
+    }
+
+    public IEnumerable<string> SelectedSources
+    {
+        get => _selectedSources;
+        set
+        {
+            _selectedSources = value;
+            UpdateDatadogUrl();
+        }
+    }
+
+    public TimeSpan? FromTime
+    {
+        get => _fromTime;
+        set
+        {
+            _fromTime = value;
+            UpdateDatadogUrl();
+        }
+    }
+
+    public TimeSpan? ToTime
+    {
+        get => _toTime;
+        set
+        {
+            _toTime = value;
+            UpdateDatadogUrl();
+        }
+    }
+    
 
     protected override async Task OnInitializedAsync()
     {
+        _loading = true;
+
+        SelectedSeverities = _severities;
+        SelectedServices = new List<string>();
+        SelectedSources = new List<string>();
+        
+        StateHasChanged();
         try
         {
             var downloaders = await OrchestratorClient.GetDownloaders();
-            
+        
             foreach (var downloader in downloaders)
             {
                 _services.Add(downloader);
@@ -59,23 +126,34 @@ public partial class Logs
             _loading = false;
             StateHasChanged();
         }
-        _selectedSeverities = _severities;
     }
     
-    private async Task<IEnumerable<string>>? SearchServices(string? searchText, CancellationToken cancellationToken)
+    private void UpdateDatadogUrl()
     {
-        if (string.IsNullOrEmpty(searchText))
-            return _services;
+        _datadogUrl = GenerateDatadogUrl();
+        StateHasChanged();
+    }
     
-        return _services
-            .Where(s => s.Contains(searchText, StringComparison.OrdinalIgnoreCase))
-            .ToList();
+    private MarkupString GetFormattedUrl()
+    {
+        if (string.IsNullOrEmpty(_datadogUrl))
+            return new MarkupString("");
+        
+        var paramParts = _datadogUrl.Split('&');
+        var formattedUrl = string.Join("<br>&", paramParts);
+        
+        var breakPoints = new[] { "+source", "+service", "+status" };
+        foreach (var breakPoint in breakPoints)
+        {
+            var termParts = formattedUrl.Split(breakPoint);
+            formattedUrl = string.Join("<br>" + breakPoint, termParts);
+        }
+        return new MarkupString(formattedUrl);
     }
 
     private async Task OpenDatadog()
     {
-        string url = GenerateDatadogUrl();
-        await JSRuntime.InvokeVoidAsync("open", url, "_blank");
+        await JSRuntime.InvokeVoidAsync("open", _datadogUrl, "_blank");
     }
 
     private string GenerateDatadogUrl()
