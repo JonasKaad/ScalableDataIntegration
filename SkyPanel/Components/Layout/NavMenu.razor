@@ -1,13 +1,15 @@
 ﻿<MudNavMenu>
-    <AuthorizeView>
+    <AuthorizeView Roles="Admin, Developer">
         <Authorized>
             <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Dashboard</MudNavLink>
             <MudNavLink Href="graphs" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.BarChart">Graphs</MudNavLink>
             <MudNavLink Href="logs" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Link">Datadog Logs</MudNavLink>
-            <MudNavLink Href="role-management" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.ManageAccounts">Role Management</MudNavLink>
         </Authorized>
         <NotAuthorized>
             <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Dashboard</MudNavLink>
         </NotAuthorized>
+    </AuthorizeView>
+    <AuthorizeView Roles="Admin">
+            <MudNavLink Href="role-management" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.ManageAccounts">Role Management</MudNavLink>
     </AuthorizeView>
 </MudNavMenu>
