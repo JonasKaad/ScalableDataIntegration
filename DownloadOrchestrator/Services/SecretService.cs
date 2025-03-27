@@ -24,7 +24,7 @@ public class SecretService
         var rawSecret = await _client.GetSecretAsync("DataIntegrationService");
         if (string.IsNullOrEmpty(rawSecret.Value.Value))
         {
-            _logger.LogWarning("Tried to fetch {Secret} but it does not exist", rawSecret.Value.Value);
+            _logger.LogWarning("Tried to fetch secret 'DataIntegrationService' but it does not exist");
             throw new ArgumentException("The specified secret was not found");
         }
         _currentVersion = rawSecret.Value.Properties.Version;
