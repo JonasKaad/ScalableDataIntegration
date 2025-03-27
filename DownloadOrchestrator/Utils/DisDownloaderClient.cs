@@ -71,7 +71,7 @@ public class DisDownloaderClient
 
     private static void CheckFtpCredentials(string tokenName, string token)
     {
-        if (String.IsNullOrEmpty(token) || String.IsNullOrEmpty(tokenName))
+        if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(tokenName))
         {
             // TODO: handle exception
             throw new ArgumentNullException(tokenName, "No credentials provided for FTP");

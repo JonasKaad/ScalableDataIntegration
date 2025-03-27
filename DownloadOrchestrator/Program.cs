@@ -8,6 +8,8 @@ using DownloadOrchestrator.Models;
 using DownloadOrchestrator.Services;
 using Microsoft.EntityFrameworkCore;
 using Hangfire;
+using Serilog;
+using Serilog.Sinks.Datadog.Logs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +18,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 
 builder.Configuration.AddDotNetEnv(".env", LoadOptions.TraversePath());
+var config = new DatadogConfiguration() { Url = "https://http-intake.logs.us5.datadoghq.com", UseSSL = true, UseTCP = false};
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.DatadogLogs(
+        apiKey: Environment.GetEnvironmentVariable("DD_API_KEY"),
+        configuration: config, 
+        service: "DownloadOrchestrator"
+        )
+    .CreateLogger();
 
 var connectionString = "Server=" + Environment.GetEnvironmentVariable("SERVER") + ";" + 
                        "Database=" + Environment.GetEnvironmentVariable("DATABASE")+ ";"  + 
@@ -31,8 +41,20 @@ var downloaders = new List<DownloaderData>
         "*/10 * * * *")
 };
 
+DownloaderData CreateDownloaderData(string url, string backup, string parserService, string name, string pollingRate)
+{
+    return new DownloaderData{
+        DownloadUrl = url,
+        BackUpUrl = backup,
+        ParserUrl = parserService, 
+        Name = name,
+        PollingRate = pollingRate
+    };
+}
+
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton(downloaders)
+    .AddSerilog()
     .AddDbContextFactory<StatisticsContext>(options =>
         options.UseNpgsql(connectionString))
     .AddScoped<SecretService>(s =>
@@ -48,7 +70,8 @@ builder.Services.AddSingleton(downloaders)
         var kvUri = "https://" + keyVaultName + ".vault.azure.net";
 
         var client = new SecretClient(new Uri(kvUri), credential);
-        return new SecretService(client);
+        var logger = s.GetService<Logger<SecretService>>();
+        return new SecretService(client, logger!);
     })
     .AddScoped<IDownloaderJob, BaseDownloaderJob>()
     .AddScoped<IDownloaderService, DownloaderService>()
@@ -69,16 +92,18 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.MapControllers();
 app.UseHangfireDashboard();
+app.UseSerilogRequestLogging();
 
-app.Run();
-
-DownloaderData CreateDownloaderData(string url, string backup, string parserService, string name, string pollingRate)
+try
 {
-    return new DownloaderData{
-        DownloadUrl = url,
-        BackUpUrl = backup,
-        ParserUrl = parserService, 
-        Name = name,
-        PollingRate = pollingRate
-    };
+    Log.Information("Starting app");
+    app.Run();
+}
+catch (Exception e)
+{
+    Log.Fatal(e, "DownloadOrchestrator terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
 }

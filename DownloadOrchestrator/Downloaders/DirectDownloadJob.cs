@@ -9,13 +9,15 @@ namespace DownloadOrchestrator.Downloaders;
 
 public class DirectDownloadJob : BaseDownloaderJob
 {
-    public DirectDownloadJob() : base(new StatisticsContext(new DbContextOptionsBuilder<StatisticsContext>().Options), 
-        new SecretService(new SecretClient(new Uri("uri"), new EnvironmentCredential())))
-    {
-    }
+    private readonly ILogger<DirectDownloadJob> _logger;
+    // public DirectDownloadJob() : base(new Logger<BaseDownloaderJob>(new LoggerFactory()), new StatisticsContext(new DbContextOptionsBuilder<StatisticsContext>().Options), 
+    //     new SecretService(new SecretClient(new Uri("uri"), new EnvironmentCredential()), new Logger<SecretService>()))
+    // {
+    // }
 
-    public DirectDownloadJob(StatisticsContext statisticsContext, SecretService secretService) : base(statisticsContext, secretService)
+    public DirectDownloadJob(ILogger<DirectDownloadJob> logger, StatisticsContext statisticsContext, SecretService secretService) : base(logger, statisticsContext, secretService)
     {
+        _logger = logger;
     }
 
     public new async Task Download(DownloaderData data)
@@ -30,7 +32,7 @@ public class DirectDownloadJob : BaseDownloaderJob
                         ?? await FetchBytes(data.BackUpUrl, tokenName, token);
             if (bytes is null)
             {
-                Console.WriteLine("Download Failed");
+                _logger.LogError("Unable to fetch bytes from {Url} or {BackUpUrl}", data.DownloadUrl, data.BackUpUrl);
                 return;
             }
             Log(data.Name, bytes.Length, DateTime.UtcNow);
@@ -38,11 +40,11 @@ public class DirectDownloadJob : BaseDownloaderJob
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            _logger.LogError(e, "Error downloading from {Url} or {BackUpUrl} using {Secret} ", data.DownloadUrl, data.BackUpUrl, data.SecretName);
         }
     }
 
-    private async Task SendToParser(byte[] downloadedBytes, string name)
+    private new async Task SendToParser(byte[] downloadedBytes, string name)
     {
         var connectionString = Environment.GetEnvironmentVariable("blobConnection");
         var blobServiceClient = new BlobServiceClient(connectionString);
@@ -52,7 +54,8 @@ public class DirectDownloadJob : BaseDownloaderJob
 
         var date = DateTime.UtcNow.Date;
         var time = DateTime.UtcNow.ToString("HHmm");
-
+        
+        _logger.LogInformation("Saving raw data to {Container} at {Date}-direct_raw.txt", name, $"{date:yyyy/MM/dd}/{time}");
         await container.UploadBlobAsync($"{date:yyyy/MM/dd}/{time}-direct_raw.txt", new BinaryData(downloadedBytes));
     }
 }
