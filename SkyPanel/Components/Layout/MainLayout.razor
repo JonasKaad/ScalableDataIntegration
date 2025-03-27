@@ -13,8 +13,40 @@
         
         <MudText Typo="Typo.body1" >@_theTime</MudText>
         <MudIconButton Icon="@(DarkLightModeButtonIcon)" Color="Color.Inherit" OnClick="@DarkModeToggle" />
-        <MudIconButton Icon="@Icons.Material.Outlined.AccountCircle" Color="Color.Inherit"  />
-        <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit"  Edge="Edge.End" />
+        <MudIconButton Icon="@Icons.Material.Outlined.AccountCircle" Color="Color.Inherit" Href="profile" />
+        <MudMenu Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
+            <AuthorizeView>
+                <Authorized>
+                    <MudMenuItem Href="Account/Logout">
+                        <div class="d-flex align-center">
+                            <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Logout" Class="mr-2"/>
+                            Log Out
+                        </div>
+                    </MudMenuItem>
+                </Authorized>
+                <NotAuthorized>
+                    <MudMenuItem Href="Account/Login">
+                        <div class="d-flex align-center">
+                            <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Login" Class="mr-2"/>
+                            Log In
+                        </div>
+                    </MudMenuItem>
+                </NotAuthorized>
+            </AuthorizeView>
+            <MudDivider />
+            <MudMenuItem Disabled="true">
+                <div class="d-flex align-center">
+                    <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Settings" Class="mr-2"/>
+                    Settings
+                </div>
+            </MudMenuItem>
+            <MudMenuItem Href="https://www.youtube.com/watch?v=xvFZjo5PgG0">
+                <div class="d-flex align-center">
+                    <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Info" Class="mr-2"/>
+                    About
+                </div>
+            </MudMenuItem>
+        </MudMenu>
     </MudAppBar>
     <MudDrawer id="nav-drawer" @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
         <NavMenu />
