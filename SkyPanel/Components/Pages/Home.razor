@@ -2,12 +2,63 @@
 <PageTitle>SkyPanel — Dashboard</PageTitle>
 <AuthorizeView>
     <Authorized>
-        <MudText></MudText>
-        <MudText Typo="Typo.h6">Hello, @context.User.Identity?.Name</MudText>
-        <MudButton Href="Account/Logout" Color="Color.Error" Variant="Variant.Filled">Log out</MudButton>
-<Dashboard />
+        <Dashboard />
     </Authorized>
     <NotAuthorized>
-        <MudButton Href="Account/Login" Color="Color.Primary" Variant="Variant.Filled">Log in</MudButton>
+        <MudContainer MaxWidth="MaxWidth.Large" Class="mt-10">
+            <MudGrid>
+                <MudItem xs="12" Class="d-flex justify-center">
+                    <CascadingValue Value="IsDarkMode" IsFixed="false">
+                        <MudImage Src="@($"images/ff_{(IsDarkMode ? "white" : "black")}.svg")" />
+                    </CascadingValue>
+                </MudItem>
+                <MudItem xs="12" Class="d-flex justify-center">
+                    <MudText Typo="Typo.h3" Align="Align.Center" Class="mt-4 mb-8">SkyPanel — Data Integration Configuration</MudText>
+                </MudItem>
+                <MudItem xs="12" md="6" Class="d-flex flex-column justify-center">
+                    <MudText Typo="Typo.h5" Class="mb-4">Internal Configuration Portal</MudText>
+                    <MudText Typo="Typo.body1" Class="mb-4">
+                        SkyPanel is an internal tool designed for configuring and monitoring data integration processes. 
+                        Manage parser configurations, view datasets, and monitor download volumes from a centralized interface.
+                    </MudText>
+                    <MudText Typo="Typo.body1" Class="mb-6">
+                        Please log in with your credentials to access the configuration dashboard.
+                    </MudText>
+                    <div class="d-flex justify-center mt-4">
+                        <MudButton Href="Account/Login" Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large"
+                                  StartIcon="@Icons.Material.Filled.Login" Class="pa-4">
+                            Log in to SkyPanel
+                        </MudButton>
+                    </div>
+                </MudItem>
+                <MudItem xs="12" md="6" Class="d-flex justify-center align-center">
+                    <MudPaper Elevation="3" Class="pa-6">
+                        <MudList T="string">
+                            <MudListItem Icon="@Icons.Material.Filled.Settings">
+                                <MudText Typo="Typo.h6">Parser Configuration</MudText>
+                                <MudText Typo="Typo.body2">Configure download URLs, polling rates, and AWS secrets</MudText>
+                            </MudListItem>
+                            <MudListItem Icon="@Icons.Material.Filled.Storage">
+                                <MudText Typo="Typo.h6">Dataset Management</MudText>
+                                <MudText Typo="Typo.body2">View and download latest parsed and raw datasets</MudText>
+                            </MudListItem>
+                            <MudListItem Icon="@Icons.Material.Filled.Analytics">
+                                <MudText Typo="Typo.h6">Analytics Dashboard</MudText>
+                                <MudText Typo="Typo.body2">Track download volumes from parsers</MudText>
+                            </MudListItem>
+                            <MudListItem Icon="@Icons.Material.Filled.MonitorHeart">
+                                <MudText Typo="Typo.h6">Log Monitoring</MudText>
+                                <MudText Typo="Typo.body2">Setup filters and track system logs in Datadog</MudText>
+                            </MudListItem>
+                        </MudList>
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
+        </MudContainer>
     </NotAuthorized>
 </AuthorizeView>
+
+@code {
+    [CascadingParameter] 
+    public bool IsDarkMode { get; set; }
+}
