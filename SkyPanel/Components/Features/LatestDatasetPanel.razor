@@ -90,9 +90,10 @@ else
             var parserSearch = _searchString.Split(',');
             foreach (var parser in parserSearch)
             {
+                var trimmedParser = parser.Trim();
                 // If the "parser" after a comma is empty, we don't want to show all parsers
-                if (parserSearch.Length > 1 && string.IsNullOrEmpty(parser)) continue;
-                if (x.ParserName.Contains(parser))
+                if (parserSearch.Length > 1 && string.IsNullOrEmpty(trimmedParser)) continue;
+                if (x.ParserName.Contains(trimmedParser, StringComparison.OrdinalIgnoreCase))
                 {
                     parserMatch = true;
                     break;
