@@ -1,6 +1,18 @@
-@page "/Login"
-<h3>Login</h3>
-
-@code {
-    
-}
+<AuthorizeView>
+    <Authorized>
+        <MudMenuItem Href="Account/Logout">
+            <div class="d-flex align-center">
+                <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Logout" Class="mr-2"/>
+                Log Out
+            </div>
+        </MudMenuItem>
+    </Authorized>
+    <NotAuthorized>
+        <MudMenuItem Href="Account/Login">
+            <div class="d-flex align-center">
+                <MudIcon Size="Size.Small" Icon="@Icons.Material.Filled.Login" Class="mr-2"/>
+                Log In
+            </div>
+        </MudMenuItem>
+    </NotAuthorized>
+</AuthorizeView>
