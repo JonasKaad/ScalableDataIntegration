@@ -10,11 +10,13 @@ public class SecretService
     private string _currentVersion;
     private readonly SecretClient _client;
     private DateTime _lastUpdated;
+    private readonly ILogger<SecretService> _logger;
 
-    public SecretService(SecretClient client)
+    public SecretService(SecretClient client, ILogger<SecretService> logger)
     {
         _client = client;
         _lastUpdated = DateTime.UtcNow.AddYears(-420);
+        _logger = logger;
     }
 
     private async Task LoadSecretsAsync()
@@ -22,6 +24,7 @@ public class SecretService
         var rawSecret = await _client.GetSecretAsync("DataIntegrationService");
         if (string.IsNullOrEmpty(rawSecret.Value.Value))
         {
+            _logger.LogWarning("Tried to fetch {Secret} but it does not exist", rawSecret.Value.Value);
             throw new ArgumentException("The specified secret was not found");
         }
         _currentVersion = rawSecret.Value.Properties.Version;

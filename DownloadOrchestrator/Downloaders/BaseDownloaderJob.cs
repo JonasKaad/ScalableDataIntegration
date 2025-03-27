@@ -14,15 +14,17 @@ public class BaseDownloaderJob : IDownloaderJob
 {
     private readonly StatisticsContext _context;
     protected readonly SecretService SecretService;
+    private readonly ILogger<IDownloaderJob> _logger;
     
-    public BaseDownloaderJob() : this(new StatisticsContext(new DbContextOptionsBuilder<StatisticsContext>().Options), 
-        new SecretService(new SecretClient(new Uri("uri"), new EnvironmentCredential())))
-    {
-    }
-    public BaseDownloaderJob(StatisticsContext context, SecretService secretService)
+    // public BaseDownloaderJob() : this(new Logger<BaseDownloaderJob>(new LoggerFactory()), new StatisticsContext(new DbContextOptionsBuilder<StatisticsContext>().Options), 
+    //     new SecretService(new SecretClient(new Uri("uri"), new EnvironmentCredential())))
+    // {
+    // }
+    public BaseDownloaderJob(ILogger<BaseDownloaderJob> logger, StatisticsContext context, SecretService secretService)
     {
         _context = context; 
         SecretService = secretService;
+        _logger = logger;
     }
 
     public virtual async Task Download(DownloaderData data)
@@ -37,7 +39,7 @@ public class BaseDownloaderJob : IDownloaderJob
                         ?? await FetchBytes(data.BackUpUrl, tokenName, token);
             if (bytes is null)
             {
-                Console.WriteLine("Download Failed");
+                _logger.LogError("Unable to fetch bytes from {Url} or {BackUpUrl}", data.DownloadUrl, data.BackUpUrl);
                 return;
             }
             Log(data.Name, bytes.Length, DateTime.UtcNow);
@@ -45,7 +47,7 @@ public class BaseDownloaderJob : IDownloaderJob
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            _logger.LogError(e, "Error downloading from {Url} or {BackUpUrl} using {Secret} ", data.DownloadUrl, data.BackUpUrl, data.SecretName);
         }
     }
 
@@ -60,7 +62,7 @@ public class BaseDownloaderJob : IDownloaderJob
         }
         catch (HttpRequestException e)
         {
-            Console.WriteLine($"Failed to download from {url}");
+            _logger.LogError("Failed to download from {Url}", url);
             return null;
         }
     }
@@ -68,7 +70,7 @@ public class BaseDownloaderJob : IDownloaderJob
     protected void Log(string parserName, int bytesAmount, DateTime date)
     {
         // Save to database
-        Console.WriteLine(parserName + "," + bytesAmount + "," + date);
+        _logger.LogInformation("Downloaded {Bytes} bytes for {Parser} on {Date}", bytesAmount, parserName, date);
         var stats = new Dataset(){Parser = parserName, Date = date, DownloadedAmount = bytesAmount};
         _context.Add(stats);
         _context.SaveChanges();
@@ -80,6 +82,5 @@ public class BaseDownloaderJob : IDownloaderJob
         var client = new Parser.ParserClient(channel);
 
         var reply = await client.ParseCallAsync(new (){ RawData = ByteString.CopyFrom(downloadedBytes), Format = "str"});
-        Console.WriteLine($"Success: {reply.Success}. Msg: {reply.ErrMsg}");
     }
 }

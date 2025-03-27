@@ -12,12 +12,14 @@ public class DownloaderController : ControllerBase
     private readonly IDownloaderService _downloaderService;
     private readonly List<DownloaderData> _downloaders;
     private readonly SecretService _secretService;
+    private readonly ILogger<DownloaderController> _logger;
 
-    public DownloaderController(IDownloaderService downloaderService, List<DownloaderData> downloaders, SecretService secretService)
+    public DownloaderController(IDownloaderService downloaderService, List<DownloaderData> downloaders, SecretService secretService, ILogger<DownloaderController> logger)
     {
         _downloaderService = downloaderService;
         _downloaders = downloaders;
         _secretService = secretService;
+        _logger = logger;
     }
 
     [Route("downloaders")]
@@ -34,6 +36,7 @@ public class DownloaderController : ControllerBase
         var dlToConfigure = GetDownloader(downloader);
         if (dlToConfigure is null)
         {
+            _logger.LogInformation("Tried to find downloader {Downloader} but it was not found", downloader);
             return NotFound("The downloader could not be found.");
         }
 
@@ -62,7 +65,7 @@ public class DownloaderController : ControllerBase
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            _logger.LogError(e, "Error configuring downloader {Downloader} with {Configuration}", downloader, dlConfiguration);
             return BadRequest("An error occured while configuring the downloader.");
         }
         return Ok("Downloader has been updated.");
@@ -158,7 +161,7 @@ public class DownloaderController : ControllerBase
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            _logger.LogWarning(e, "Failed to connect to {Url} with {Secret} when testing connection", downloader.DownloadUrl, downloader.SecretName);
         }
 
         try
@@ -180,7 +183,7 @@ public class DownloaderController : ControllerBase
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            _logger.LogWarning(e,"Failed to connect to {Url} with {Secret} when testing connection", downloader.DownloadUrl, downloader.SecretName);
         }
         return new List<bool> {mainResult, backUpResult};
     }
