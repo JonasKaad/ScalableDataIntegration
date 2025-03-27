@@ -1,4 +1,4 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
 
 <MudThemeProvider Theme="@_theme" IsDarkMode="_isDarkMode" />
 <MudPopoverProvider />
@@ -13,7 +13,20 @@
         
         <MudText Typo="Typo.body1" >@_theTime</MudText>
         <MudIconButton Icon="@(DarkLightModeButtonIcon)" Color="Color.Inherit" OnClick="@DarkModeToggle" />
-        <MudIconButton Icon="@Icons.Material.Outlined.AccountCircle" Color="Color.Inherit" Href="profile" />
+        <AuthorizeView>
+            <Authorized>
+                @if (string.IsNullOrEmpty(Picture))
+                {
+                    <MudIconButton Icon="@Icons.Material.Outlined.AccountCircle" Color="Color.Inherit" Href="profile"/>
+                }
+                else
+                {
+                    <MudLink Href="profile" Class="d-flex align-center" Style="text-decoration: none;">
+                        <MudImage Src="@Picture" Class="rounded-circle" width="32" height="32" Style="border: 0.08em solid white;"/>
+                    </MudLink>                
+                }
+            </Authorized>
+        </AuthorizeView>
         <MudMenu Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
             <AuthorizeView>
                 <Authorized>
@@ -154,4 +167,20 @@
         _aTimer?.Dispose();
     }
     
+    [CascadingParameter]
+    public Task<AuthenticationState> authenticationState { get; set; }
+    private string Picture = "";
+    
+    protected override async Task OnInitializedAsync()
+    {
+        if (authenticationState is not null)
+        {
+            var state = await authenticationState;
+            
+            Picture = state.User.Claims
+                .Where(c => c.Type.Equals("picture"))
+                .Select(c => c.Value)
+                .FirstOrDefault() ?? string.Empty;
+        }
+    }
 }
