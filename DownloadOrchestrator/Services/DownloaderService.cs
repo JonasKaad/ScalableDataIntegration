@@ -1,6 +1,7 @@
 using DownloadOrchestrator.Downloaders;
 using DownloadOrchestrator.Models;
 using Hangfire;
+using Hangfire.Storage;
 
 namespace DownloadOrchestrator.Services;
 
@@ -8,11 +9,13 @@ public class DownloaderService : IDownloaderService
 {
     private readonly IBackgroundJobClient _backgroundJobClient;
     private readonly IRecurringJobManager _recurringJobManager;
+    private readonly JobStorage _jobStorage;
 
-    public DownloaderService(IBackgroundJobClient backgroundJobClient, IRecurringJobManager recurringJobManager)
+    public DownloaderService(IBackgroundJobClient backgroundJobClient, IRecurringJobManager recurringJobManager, JobStorage jobStorage)
     {
         _backgroundJobClient = backgroundJobClient;
         _recurringJobManager = recurringJobManager;
+        _jobStorage = jobStorage;
     }
     public string ScheduleDownload(DownloaderData data)
     {
@@ -33,5 +36,14 @@ public class DownloaderService : IDownloaderService
             _recurringJobManager.AddOrUpdate<BaseDownloaderJob>(data.Name, x => x.Download(data), data.PollingRate);
         }
         return data.Name;
+    }
+
+    public List<DownloaderData> GetRecurringJobs()
+    {
+        var jobs = _jobStorage.GetReadOnlyConnection().GetRecurringJobs();
+        return jobs
+            .Where(job => job.Job.Args[0] is DownloaderData)
+            .Select(job => (DownloaderData)job.Job.Args[0])
+            .ToList();
     }
 }

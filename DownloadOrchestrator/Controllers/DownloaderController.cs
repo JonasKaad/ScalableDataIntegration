@@ -14,10 +14,10 @@ public class DownloaderController : ControllerBase
     private readonly SecretService _secretService;
     private readonly ILogger<DownloaderController> _logger;
 
-    public DownloaderController(IDownloaderService downloaderService, List<DownloaderData> downloaders, SecretService secretService, ILogger<DownloaderController> logger)
+    public DownloaderController(IDownloaderService downloaderService, SecretService secretService, ILogger<DownloaderController> logger)
     {
         _downloaderService = downloaderService;
-        _downloaders = downloaders;
+        _downloaders = downloaderService.GetRecurringJobs();
         _secretService = secretService;
         _logger = logger;
     }

@@ -39,29 +39,8 @@ var connectionString = "Server=" + Environment.GetEnvironmentVariable("SERVER") 
                        "Database=" + Environment.GetEnvironmentVariable("DATABASE")+ ";"  + 
                        "Username=" + Environment.GetEnvironmentVariable("USER")+ ";"  + 
                        "Password=" + Environment.GetEnvironmentVariable("PASSWORD") + ";" ;
-var downloaders = new List<DownloaderData>
-{
-    CreateDownloaderData(
-        "https://www.airservicesausralia.com/flextracks/text.asp?ver=1",
-        "https://www.airservicesaustralia.com/flextracks/text.asp?ver=1",
-        "http://ausotparser.jonaskaad.com", 
-        "AusotParser",
-        "*/10 * * * *")
-};
-
-DownloaderData CreateDownloaderData(string url, string backup, string parserService, string name, string pollingRate)
-{
-    return new DownloaderData{
-        DownloadUrl = url,
-        BackUpUrl = backup,
-        ParserUrl = parserService, 
-        Name = name,
-        PollingRate = pollingRate
-    };
-}
-
 builder.Services.AddSwaggerGen();
-builder.Services.AddSingleton(downloaders)
+builder.Services
     .AddSerilog()
     .AddDbContextFactory<StatisticsContext>(options =>
         options.UseNpgsql(connectionString))
