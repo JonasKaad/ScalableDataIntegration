@@ -69,6 +69,10 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
     ForwardedHeaders = ForwardedHeaders.XForwardedProto
 });
 
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.UseAntiforgery();
 app.MapStaticAssets();
 
 app.MapGet("/Account/Login", async (HttpContext httpContext, string returnUrl = "/") =>
