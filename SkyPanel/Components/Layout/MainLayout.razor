@@ -27,7 +27,9 @@
                 else
                 {
                     <MudLink Href="profile" Class="d-flex align-center" Style="text-decoration: none;">
-                        <MudImage Src="@Picture" Class="rounded-circle" width="32" height="32"/>
+                        <MudAvatar Size="Size.Medium">
+                            <MudImage Src="@Picture"/>
+                        </MudAvatar>
                     </MudLink>                
                 }
             </Authorized>
