@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0cparser.proto\x12\nsdi.parser\"k\n\x0cParseRequest\x12\x10\n\x08raw_data\x18\x01 \x01(\x0c\x12\x0e\n\x06\x66ormat\x18\x02 \x01(\t\x12.\n\x06\x66ilter\x18\x03 \x01(\x0b\x32\x19.sdi.parser.FilterRequestH\x00\x88\x01\x01\x42\t\n\x07_filter\"B\n\rParseResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x14\n\x07\x65rr_msg\x18\x02 \x01(\tH\x00\x88\x01\x01\x42\n\n\x08_err_msg\"/\n\rFilterRequest\x12\x0e\n\x06\x66ilter\x18\x01 \x01(\x0c\x12\x0e\n\x06\x66ormat\x18\x02 \x01(\t2J\n\x06Parser\x12@\n\tParseCall\x12\x18.sdi.parser.ParseRequest\x1a\x19.sdi.parser.ParseResponseB<Z:github.com/JonasKaad/ScalableDataIntegration/protos/parserb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0cparser.proto\x12\nsdi.parser\"0\n\x0cParseRequest\x12\x10\n\x08raw_data\x18\x01 \x01(\x0c\x12\x0e\n\x06\x66ormat\x18\x02 \x01(\t\"B\n\rParseResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x14\n\x07\x65rr_msg\x18\x02 \x01(\tH\x00\x88\x01\x01\x42\n\n\x08_err_msg2J\n\x06Parser\x12@\n\tParseCall\x12\x18.sdi.parser.ParseRequest\x1a\x19.sdi.parser.ParseResponseB<Z:github.com/JonasKaad/ScalableDataIntegration/protos/parserb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -33,11 +33,9 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['DESCRIPTOR']._loaded_options = None
   _globals['DESCRIPTOR']._serialized_options = b'Z:github.com/JonasKaad/ScalableDataIntegration/protos/parser'
   _globals['_PARSEREQUEST']._serialized_start=28
-  _globals['_PARSEREQUEST']._serialized_end=135
-  _globals['_PARSERESPONSE']._serialized_start=137
-  _globals['_PARSERESPONSE']._serialized_end=203
-  _globals['_FILTERREQUEST']._serialized_start=205
-  _globals['_FILTERREQUEST']._serialized_end=252
-  _globals['_PARSER']._serialized_start=254
-  _globals['_PARSER']._serialized_end=328
+  _globals['_PARSEREQUEST']._serialized_end=76
+  _globals['_PARSERESPONSE']._serialized_start=78
+  _globals['_PARSERESPONSE']._serialized_end=144
+  _globals['_PARSER']._serialized_start=146
+  _globals['_PARSER']._serialized_end=220
 # @@protoc_insertion_point(module_scope)
