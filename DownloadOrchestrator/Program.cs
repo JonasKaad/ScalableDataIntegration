@@ -39,6 +39,14 @@ var connectionString = "Server=" + Environment.GetEnvironmentVariable("SERVER") 
                        "Database=" + Environment.GetEnvironmentVariable("DATABASE")+ ";"  + 
                        "Username=" + Environment.GetEnvironmentVariable("USER")+ ";"  + 
                        "Password=" + Environment.GetEnvironmentVariable("PASSWORD") + ";" ;
+builder.Services.AddScoped<AuthService>(_ =>
+{
+    var domain = Env.GetString("AUTH0_DOMAIN");
+    var clientId = Env.GetString("AUTH0_CLIENT_ID");
+    var clientSecret = Env.GetString("AUTH0_CLIENT_SECRET");
+    return new AuthService(domain, clientId, clientSecret);
+});
+
 builder.Services.AddSwaggerGen();
 builder.Services
     .AddSerilog()
