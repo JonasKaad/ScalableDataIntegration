@@ -7,52 +7,44 @@ namespace DownloadOrchestrator.Controllers;
 public class AuthController : ControllerBase
 {
     private AuthService AuthService  { get; set; }
+    private readonly ILogger<AuthController> _logger;
+    private readonly TokenCacheService _tokenCacheService;
     
-    public AuthController(AuthService authService)
+    public AuthController(AuthService authService, ILogger<AuthController> logger, TokenCacheService tokenCacheService)
     {
         AuthService = authService;
+        _logger = logger;
+        _tokenCacheService = tokenCacheService;
     }
-    
-    [Microsoft.AspNetCore.Mvc.Route("token")]
-    [HttpGet]
-    public ActionResult<string> GetKeys()
-    {
-        var client = new HttpClient();
-        Console.WriteLine(AuthService.GetDomain());
-        var request = new HttpRequestMessage(HttpMethod.Post, $"https://{AuthService.GetDomain()}/oauth/token");
-        var parameters = new Dictionary<string, string>
-        {
-            { "grant_type", "client_credentials" }, 
-            { "client_id", $"{AuthService.GetClientId()}" },
-            { "client_secret", $"{AuthService.GetClientSecret()}" },
-            { "audience", $"https://{AuthService.GetDomain()}/api/v2/" }
-        };
-        var encodedContent = new FormUrlEncodedContent(parameters);
-        request.Content = encodedContent;
-        request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
-        
-        var response = client.Send(request);
 
-        if (response.StatusCode == HttpStatusCode.OK)
-        {
-            var responseContent = response.Content.ReadAsStringAsync().Result;
-            Console.WriteLine(responseContent);
-        
-            // Parse the JSON to extract the access token
-            var tokenResponse = System.Text.Json.JsonSerializer.Deserialize<TokenResponse>(responseContent);
-            Console.WriteLine("Token: " + tokenResponse.access_token);
-            return tokenResponse.access_token;
-            
-        }
-        return BadRequest("Failed to obtain access token");
-    }
-    
-    // Class to deserialize the token response
-    private class TokenResponse
+    [Route("roles")]
+    [HttpGet]
+    public async Task<ActionResult<string>> GetRoles()
     {
-        public string access_token { get; set; }
-        public int expires_in { get; set; }
-        public string scope { get; set; }
-        public string token_type { get; set; }
+        try
+        {
+            var token = await _tokenCacheService.GetTokenAsync();
+
+
+            var client = new HttpClient();
+            var request = new HttpRequestMessage(HttpMethod.Get, $"https://{AuthService.GetDomain()}/api/v2/roles");
+            request.Headers.Add("Accept", "application/json");
+            request.Headers.Add("Authorization", $"Bearer {token}");
+            var response = client.SendAsync(request);
+
+            var status = response.Result.StatusCode;
+            if (status == HttpStatusCode.OK)
+            {
+                var res = response.Result.Content.ReadAsStringAsync();
+                return res.Result;
+            }
+
+            return BadRequest($"Failed to obtain roles: {status} \n {response.Result.Content.ReadAsStringAsync()}");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to obtain roles");
+            return StatusCode((int)HttpStatusCode.InternalServerError);
+        }
     }
 }
