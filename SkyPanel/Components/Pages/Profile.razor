@@ -18,6 +18,23 @@
                     <i class="bi bi-envelope"></i> @EmailAddress
                 </p>
             </div>
+            <div>
+                <ul class="list-group">
+                    @if (Roles.Length > 0)
+                    {
+                        @foreach (var role in Roles)
+                        {
+                            <li class="list-group-item">
+                                <i class="bi bi-person-badge"></i> @role
+                            </li>
+                        }
+                    }
+                    else
+                    {
+                        <li class="list-group-item text-muted">No roles assigned</li>
+                    }
+                </ul>
+            </div>
         </div>
     </div>
 </div>
@@ -29,6 +46,7 @@
     private string Username = "";
     private string EmailAddress = "";
     private string Picture = "";
+    private string[] Roles = [];
     
     protected override async Task OnInitializedAsync()
     {
@@ -47,6 +65,11 @@
                 .Where(c => c.Type.Equals("picture"))
                 .Select(c => c.Value)
                 .FirstOrDefault() ?? string.Empty;
+            
+            Roles = state.User.Claims
+                .Where(c => c.Type.Equals(System.Security.Claims.ClaimTypes.Role))
+                .Select(c => c.Value)
+                .ToArray();
         }
     }
 }
