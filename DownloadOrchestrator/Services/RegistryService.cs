@@ -32,7 +32,8 @@ public abstract class RegistryService
             {
                 throw new Exception($"{serviceName} exists with a different URL");
             }
-            throw new ArgumentException($"{serviceName} already exists");
+
+            return;
         }
 
         try
@@ -51,6 +52,7 @@ public abstract class RegistryService
     {
         if (_services.ContainsKey(serviceName))
         {
+            _serviceDateTimes.Remove(serviceName);
             _services.Remove(serviceName);
         }
         else
@@ -65,12 +67,13 @@ public abstract class RegistryService
         {
             while (!_cts.Token.IsCancellationRequested)
             {
-                await Task.Delay(TimeSpan.FromHours(1), _cts.Token);
+                var delay = TimeSpan.FromMinutes(30);
+                await Task.Delay(delay, _cts.Token);
                 
                 var services = _serviceDateTimes.Keys.ToList();
                 foreach (var service in services)
                 {
-                    if (_serviceDateTimes.TryGetValue(service, out var datetime) && datetime.AddHours(1) < DateTime.Now)
+                    if (_serviceDateTimes.TryGetValue(service, out var datetime) && datetime.Add(delay) < DateTime.Now)
                     {
                         DeRegisterService(service);
                     }
