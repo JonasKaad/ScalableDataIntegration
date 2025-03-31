@@ -13,13 +13,15 @@ public class DownloaderController : ControllerBase
     private readonly List<DownloaderData> _downloaders;
     private readonly SecretService _secretService;
     private readonly ILogger<DownloaderController> _logger;
+    private readonly ParserRegistry _parserRegistry;
 
-    public DownloaderController(IDownloaderService downloaderService, SecretService secretService, ILogger<DownloaderController> logger)
+    public DownloaderController(IDownloaderService downloaderService, SecretService secretService, ILogger<DownloaderController> logger, ParserRegistry parserRegistry)
     {
         _downloaderService = downloaderService;
         _downloaders = downloaderService.GetRecurringJobs();
         _secretService = secretService;
         _logger = logger;
+        _parserRegistry = parserRegistry;
     }
 
     [Route("downloaders")]
@@ -27,6 +29,37 @@ public class DownloaderController : ControllerBase
     public ActionResult<List<string>> GetDownloaders()
     {
         return _downloaders.Select(dl => dl.Name).ToList();
+    }
+    
+    [Route("parsers")]
+    [HttpGet]
+    public ActionResult<List<string>> GetParsers()
+    {
+        return _parserRegistry.GetServices();
+    }
+    
+    [Route("{parser}/register")]
+    [HttpPost]
+    public ActionResult RegisterParser(string parser, [FromBody] string url)
+    {
+        _parserRegistry.RegisterService(parser, url);
+        return Ok($"Parser {parser} has been registered.");
+    }
+
+    [Route("{parser}/deregister")]
+    [HttpDelete]
+    public ActionResult DeregisterParser(string parser)
+    {
+        _parserRegistry.DeRegisterService(parser);
+        return Ok($"Parser {parser} has been deregistered.");
+    }
+    
+    [Route("{parser}/heartbeat")]
+    [HttpPost]
+    public ActionResult ParserHeartbeat(string parser)
+    {
+        _parserRegistry.RefreshService(parser);
+        return Ok($"Heartbeat Acknowledged for {parser}");
     }
     
     [Route("{downloader}/configuration")]
@@ -56,7 +89,8 @@ public class DownloaderController : ControllerBase
         
         try
         {
-            dlToConfigure.ParserUrl = HandleConfiguration(dlToConfigure.ParserUrl, dlConfiguration.ParserUrl);
+            var parser = _parserRegistry.GetService(dlConfiguration.ParserUrl);
+            dlToConfigure.ParserUrl = HandleConfiguration(dlToConfigure.ParserUrl, parser);
             dlToConfigure.DownloadUrl = HandleConfiguration(dlToConfigure.DownloadUrl, dlConfiguration.DownloadUrl);
             dlToConfigure.BackUpUrl = HandleConfiguration(dlToConfigure.BackUpUrl, dlConfiguration.BackUpUrl);
             dlToConfigure.PollingRate = HandleConfiguration(dlToConfigure.PollingRate, dlConfiguration.PollingRate);

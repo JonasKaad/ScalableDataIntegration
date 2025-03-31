@@ -42,6 +42,7 @@ var connectionString = "Server=" + Environment.GetEnvironmentVariable("SERVER") 
 builder.Services.AddSwaggerGen();
 builder.Services
     .AddSerilog()
+    .AddSingleton<ParserRegistry>()
     .AddDbContextFactory<StatisticsContext>(options =>
         options.UseNpgsql(connectionString))
     .AddScoped<SecretService>(s =>
