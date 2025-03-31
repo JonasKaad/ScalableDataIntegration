@@ -1,3 +1,4 @@
+import aiohttp
 import asyncio
 import datetime
 import json
@@ -90,7 +91,7 @@ class ParserServicer(parser_pb2_grpc.ParserServicer):
         print("Checking azure creds")
         client = self.azure_cred_checker();
         print("Got azure creds")
-        container_name = "python-taf"
+        container_name = os.getenv("PARSER_NAME", "python-taf")
         print("Getting container client")
         container_client = client.get_container_client(container_name)
         if not await container_client.exists():
@@ -117,6 +118,37 @@ class ParserServicer(parser_pb2_grpc.ParserServicer):
         return blob_client
 
 
+
+async def send_heartbeat():
+    baseurl = os.getenv("BASE_URL", "http://do.jonaskaad.com")
+    parser_name = os.getenv("PARSER_NAME", "python-taf")
+    url = f"{baseurl}/{parser_name}/heartbeat"
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url) as response:
+            print(f"Heartbeat sent: {response.status}")
+
+async def heartbeat_scheduler():
+    while True:
+        await asyncio.sleep(30 * 60)  # Sleep for 30 minutes
+        await send_heartbeat()
+
+async def register_parser(loop):
+    registered = False;
+    while not registered:
+        async with aiohttp.ClientSession() as session:
+            baseurl = os.getenv("BASE_URL", "http://do.jonaskaad.com")
+            parser_name = os.getenv("PARSER_NAME", "python-taf")
+            url = f"{baseurl}/{parser_name}/register"
+            async with session.post(url, json=os.getenv("PARSER_URL", "http://pythonparser.jonaskaad.com")) as response:
+                print(f"Register response: {response.status}")
+                if response.status == 200:
+                    registered = True
+                    loop.create_task(heartbeat_scheduler())
+                else:
+                    print("Failed to register, retrying in 10 seconds...")
+                    await asyncio.sleep(10)
+
+
 async def serve():
     # Create a gRPC server
     server = grpc.aio.server()
@@ -135,5 +167,6 @@ async def serve():
 
 if __name__ == '__main__':
     loop = asyncio.new_event_loop()
+    loop.create_task(register_parser(loop))
     asyncio.set_event_loop(loop)
     loop.run_until_complete(serve())
