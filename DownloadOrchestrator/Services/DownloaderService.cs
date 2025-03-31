@@ -19,7 +19,7 @@ public class DownloaderService : IDownloaderService
     }
     public string ScheduleDownload(DownloaderData data)
     {
-        var jobId = string.IsNullOrEmpty(data.ParserUrl) ? 
+        var jobId = string.IsNullOrEmpty(data.Parser) ? 
             _backgroundJobClient.Enqueue<DirectDownloadJob>(x => x.Download(data)) :
             _backgroundJobClient.Enqueue<BaseDownloaderJob>(x => x.Download(data));
         return jobId;
@@ -27,7 +27,7 @@ public class DownloaderService : IDownloaderService
 
     public string ScheduleOrUpdateRecurringDownload(DownloaderData data)
     {
-        if (string.IsNullOrEmpty(data.ParserUrl))
+        if (string.IsNullOrEmpty(data.Parser))
         {
             _recurringJobManager.AddOrUpdate<DirectDownloadJob>(data.Name, x => x.Download(data), data.PollingRate);
         }

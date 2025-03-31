@@ -39,7 +39,7 @@ public class BaseDownloaderJob : IDownloaderJob
                 return;
             }
             Log(data.Name, bytes.Length, DateTime.UtcNow);
-            await SendToParser(bytes, data.ParserUrl);
+            await SendToParser(bytes, data.Parser);
         }
         catch (Exception e)
         {
