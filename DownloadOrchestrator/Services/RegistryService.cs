@@ -90,14 +90,10 @@ public abstract class RegistryService
         }
     }
     
-    public string GetService(string serviceName)
+    public string? GetService(string serviceName)
     {
         var service = _services.FirstOrDefault(a => a.Key.Equals(serviceName)).Value;
-        if (service != null)
-        {
-            return service;
-        }
-        throw new KeyNotFoundException($"{serviceName} not found");
+        return service ?? null;
     }
 
     public List<string> GetServices()
