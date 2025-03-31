@@ -58,7 +58,14 @@ public class DownloaderController : ControllerBase
     [HttpPost]
     public ActionResult ParserHeartbeat(string parser)
     {
-        _parserRegistry.RefreshService(parser);
+        try
+        {
+            _parserRegistry.RefreshService(parser);
+        }
+        catch (KeyNotFoundException e)
+        {
+            return NotFound($"{parser} has not been registered.");
+        }
         return Ok($"Heartbeat Acknowledged for {parser}");
     }
     
