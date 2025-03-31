@@ -31,9 +31,9 @@ builder.Services
     .AddHostedService<HeartbeatService>(sp =>
     {
         var logger = sp.GetRequiredService<ILogger<HeartbeatService>>();
-        var baseUrl = Environment.GetEnvironmentVariable("BASE_URL");
-        var parserName = Environment.GetEnvironmentVariable("PARSER_NAME");
-        var parserUrl = Environment.GetEnvironmentVariable("PARSER_URL");
+        var baseUrl = Environment.GetEnvironmentVariable("BASE_URL") ?? "";
+        var parserName = Environment.GetEnvironmentVariable("PARSER_NAME") ?? "";
+        var parserUrl = Environment.GetEnvironmentVariable("PARSER_URL") ?? "";
         var interval = TimeSpan.FromMinutes(1);
         return new HeartbeatService(logger, baseUrl, parserName, parserUrl, interval);
     })
@@ -49,7 +49,11 @@ app.MapGet("/",
 var registered = false;
 while (!registered)
 {
-    var response = await HeartbeatService.RegisterParser(new HttpClient(), "http://localhost:5162/ausotparser/register", "http://ausotparser.jonaskaad.com", new Logger<HeartbeatService>(new LoggerFactory()));
+    var baseUrl = Environment.GetEnvironmentVariable("BASE_URL");
+    var parserName = Environment.GetEnvironmentVariable("PARSER_NAME");
+    var url = $"{baseUrl}/{parserName}/register";
+    var parserUrl = Environment.GetEnvironmentVariable("PARSER_URL") ?? "";
+    var response = await HeartbeatService.RegisterParser(new HttpClient(), url, parserUrl, new Logger<HeartbeatService>(new LoggerFactory()));
     if(response)
     {
         registered = true;
