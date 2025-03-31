@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+option go_package = "github.com/JonasKaad/ScalableDataIntegration/protos/filter";
+
+package sdi.filter;
+
+service Filter {
+	rpc FilterCall (FilterRequest) returns (FilterReply);
+}
+
+message FilterRequest {
+	bytes raw_data = 1;
+	string format = 2;
+    string parameters = 3;
+    string next_urls = 4;
+}
+
+message FilterReply {
+	bool success = 1;
+	optional string err_msg = 2;
+}
+
