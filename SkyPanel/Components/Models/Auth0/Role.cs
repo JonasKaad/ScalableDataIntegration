@@ -1,4 +1,4 @@
-namespace DownloadOrchestrator.Models.Auth0;
+namespace SkyPanel.Components.Models.Auth0;
 
 public class Role(string id, string name, string description)
 {

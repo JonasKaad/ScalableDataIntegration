@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace DownloadOrchestrator.Models.Auth0;
+namespace SkyPanel.Components.Models.Auth0;
 
 public class User
 {
