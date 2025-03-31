@@ -8,27 +8,33 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.AddDotNetEnv(".env", LoadOptions.TraversePath());
 
-var config = new DatadogConfiguration() { Url = "https://http-intake.logs.us5.datadoghq.com", UseSSL = true, UseTCP = false};
-Log.Logger = new LoggerConfiguration()
-    .WriteTo.DatadogLogs(
-        apiKey: Environment.GetEnvironmentVariable("DD_API_KEY"),
-        configuration: config, 
-        service: "AusotParser"
-    )
-    .CreateLogger();
+if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+{
+    Log.Logger = new LoggerConfiguration().WriteTo.Console().CreateLogger();
+}
+else
+{
+    var config = new DatadogConfiguration()
+        { Url = "https://http-intake.logs.us5.datadoghq.com", UseSSL = true, UseTCP = false };
+    Log.Logger = new LoggerConfiguration()
+        .WriteTo.DatadogLogs(
+            apiKey: Environment.GetEnvironmentVariable("DD_API_KEY"),
+            configuration: config,
+            service: Environment.GetEnvironmentVariable("PARSER_NAME")
+        )
+        .CreateLogger();
+}
 
 // Add services to the container.
 builder.Services
     .AddSerilog()
-    .AddHttpClient()
     .AddHostedService<HeartbeatService>(sp =>
     {
         var logger = sp.GetRequiredService<ILogger<HeartbeatService>>();
-        var client = sp.GetRequiredService<IHttpClientFactory>().CreateClient();
-        var baseUrl = "http://localhost:5162";
-        var parserName = "ausotparser";
-        var parserUrl = "http://ausotparser.jonaskaad.com";
-        var interval = TimeSpan.FromMinutes(30);
+        var baseUrl = Environment.GetEnvironmentVariable("BASE_URL");
+        var parserName = Environment.GetEnvironmentVariable("PARSER_NAME");
+        var parserUrl = Environment.GetEnvironmentVariable("PARSER_URL");
+        var interval = TimeSpan.FromMinutes(1);
         return new HeartbeatService(logger, baseUrl, parserName, parserUrl, interval);
     })
     .AddGrpc();

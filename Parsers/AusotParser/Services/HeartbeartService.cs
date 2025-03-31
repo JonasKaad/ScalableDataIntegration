@@ -25,6 +25,7 @@ public class HeartbeatService : BackgroundService
 
         while (!stoppingToken.IsCancellationRequested)
         {
+            await Task.Delay(_heartbeatInterval, stoppingToken);
             try
             {
                 var response = await _httpClient.PostAsync(_baseUrl + $"/{_parserName}/heartbeat", null, stoppingToken);
@@ -38,8 +39,6 @@ public class HeartbeatService : BackgroundService
             {
                 _logger.LogError(ex, "Error sending heartbeat");
             }
-
-            await Task.Delay(_heartbeatInterval, stoppingToken);
         }
     }
 
