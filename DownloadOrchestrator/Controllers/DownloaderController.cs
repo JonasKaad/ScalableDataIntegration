@@ -151,14 +151,14 @@ public class DownloaderController : ControllerBase
                 totalBytes.AddRange("magic"u8.ToArray());
             }
         }
-        await BaseDownloaderJob.SendToParser(totalBytes.ToArray(), dl.Parser);
+        await BaseDownloaderJob.SendToParser(totalBytes.ToArray(), dl.Parser, dl.FilterUrl, dl.Parameters);
         return Ok($"Parsing for {downloader} has been started with uploaded data.");
     }
 
 
     private DownloaderData? GetDownloader(string downloader) =>  _downloaders.FirstOrDefault(d => d.Name.Equals(downloader));
 
-    [Route("test")]
+    [Route("/test")]
     [HttpPost]
     public async Task<ActionResult<List<bool>>> TestConnection([FromBody]DownloaderData downloader)
     {

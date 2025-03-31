@@ -3,6 +3,7 @@ using CommonDis.Services;
 using DownloadOrchestrator.Utils;
 using Google.Protobuf;
 using Grpc.Net.Client;
+using Sdi.Filter;
 using Sdi.Parser;
 
 namespace DownloadOrchestrator.Downloaders;
@@ -36,7 +37,7 @@ public class BaseDownloaderJob : IDownloaderJob
                 return;
             }
             Log(data.Name, bytes.Length, DateTime.UtcNow);
-            await SendToParser(bytes, data.Parser);
+            await SendToParser(bytes, data.Parser, data.FilterUrl, data.Parameters);
         }
         catch (Exception e)
         {
@@ -69,11 +70,27 @@ public class BaseDownloaderJob : IDownloaderJob
         _context.SaveChanges();
     }
 
-    public static async Task SendToParser(byte[] downloadedBytes, string parserUrl)
+    public static async Task SendToParser(byte[] downloadedBytes, string parserUrl, string filterUrl, string parameters)
     {
-        using var channel = GrpcChannel.ForAddress(parserUrl);
-        var client = new Parser.ParserClient(channel);
+        var hasFilter = !string.IsNullOrWhiteSpace(filterUrl);
+        var address = hasFilter ? filterUrl : parserUrl;
+        using var channel = GrpcChannel.ForAddress(address);
 
-        var reply = await client.ParseCallAsync(new (){ RawData = ByteString.CopyFrom(downloadedBytes), Format = "str"});
+        if (hasFilter)
+        {
+            var client = new Filter.FilterClient(channel);
+            var reply = await client.FilterCallAsync(new ()
+            {
+                RawData = ByteString.CopyFrom(downloadedBytes), 
+                Format = "img", 
+                Parameters = parameters,
+                NextUrls = parserUrl
+            });
+        }
+        else
+        {
+            var client = new Parser.ParserClient(channel);
+            var reply = await client.ParseCallAsync(new (){ RawData = ByteString.CopyFrom(downloadedBytes), Format = "str"});
+        }
     }
 }

@@ -30,6 +30,8 @@
     <ItemGroup>
         <Compile Include="../GeneratedClients/csharp/Parser.cs" />
         <Compile Include="../GeneratedClients/csharp/ParserGrpc.cs" />
+        <Compile Include="../GeneratedClients/csharp/Filter.cs" />
+        <Compile Include="../GeneratedClients/csharp/FilterGrpc.cs" />
     </ItemGroup>
     
     <ItemGroup>
