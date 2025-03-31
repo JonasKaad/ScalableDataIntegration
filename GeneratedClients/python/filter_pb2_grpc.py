@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-import parser_pb2 as parser__pb2
+import filter_pb2 as filter__pb2
 
 GRPC_GENERATED_VERSION = '1.71.0'
 GRPC_VERSION = grpc.__version__
@@ -18,14 +18,14 @@ except ImportError:
 if _version_not_supported:
     raise RuntimeError(
         f'The grpc package installed is at version {GRPC_VERSION},'
-        + f' but the generated code in parser_pb2_grpc.py depends on'
+        + f' but the generated code in filter_pb2_grpc.py depends on'
         + f' grpcio>={GRPC_GENERATED_VERSION}.'
         + f' Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}'
         + f' or downgrade your generated code using grpcio-tools<={GRPC_VERSION}.'
     )
 
 
-class ParserStub(object):
+class FilterStub(object):
     """Missing associated documentation comment in .proto file."""
 
     def __init__(self, channel):
@@ -34,43 +34,43 @@ class ParserStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.ParseCall = channel.unary_unary(
-                '/sdi.parser.Parser/ParseCall',
-                request_serializer=parser__pb2.ParseRequest.SerializeToString,
-                response_deserializer=parser__pb2.ParseResponse.FromString,
+        self.FilterCall = channel.unary_unary(
+                '/sdi.filter.Filter/FilterCall',
+                request_serializer=filter__pb2.FilterRequest.SerializeToString,
+                response_deserializer=filter__pb2.FilterReply.FromString,
                 _registered_method=True)
 
 
-class ParserServicer(object):
+class FilterServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def ParseCall(self, request, context):
+    def FilterCall(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
 
-def add_ParserServicer_to_server(servicer, server):
+def add_FilterServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'ParseCall': grpc.unary_unary_rpc_method_handler(
-                    servicer.ParseCall,
-                    request_deserializer=parser__pb2.ParseRequest.FromString,
-                    response_serializer=parser__pb2.ParseResponse.SerializeToString,
+            'FilterCall': grpc.unary_unary_rpc_method_handler(
+                    servicer.FilterCall,
+                    request_deserializer=filter__pb2.FilterRequest.FromString,
+                    response_serializer=filter__pb2.FilterReply.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'sdi.parser.Parser', rpc_method_handlers)
+            'sdi.filter.Filter', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
-    server.add_registered_method_handlers('sdi.parser.Parser', rpc_method_handlers)
+    server.add_registered_method_handlers('sdi.filter.Filter', rpc_method_handlers)
 
 
  # This class is part of an EXPERIMENTAL API.
-class Parser(object):
+class Filter(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def ParseCall(request,
+    def FilterCall(request,
             target,
             options=(),
             channel_credentials=None,
@@ -83,9 +83,9 @@ class Parser(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/sdi.parser.Parser/ParseCall',
-            parser__pb2.ParseRequest.SerializeToString,
-            parser__pb2.ParseResponse.FromString,
+            '/sdi.filter.Filter/FilterCall',
+            filter__pb2.FilterRequest.SerializeToString,
+            filter__pb2.FilterReply.FromString,
             options,
             channel_credentials,
             insecure,
