@@ -42,7 +42,7 @@ public class DirectDownloadJob : BaseDownloaderJob
 
     private new async Task SendToParser(byte[] downloadedBytes, string name)
     {
-        var connectionString = Environment.GetEnvironmentVariable("blobConnection");
+        var connectionString = Environment.GetEnvironmentVariable("BLOB_CONNECTION_STRING");
         var blobServiceClient = new BlobServiceClient(connectionString);
 
         var container = blobServiceClient.GetBlobContainerClient(name);
