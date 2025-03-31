@@ -5,7 +5,6 @@ using CommonDis.Services;
 using DotNetEnv;
 using DotNetEnv.Configuration;
 using DownloadOrchestrator.Downloaders;
-using DownloadOrchestrator.Models;
 using DownloadOrchestrator.Services;
 using Microsoft.EntityFrameworkCore;
 using Hangfire;
@@ -78,7 +77,17 @@ builder.Services
     })
     .AddScoped<IDownloaderJob, BaseDownloaderJob>()
     .AddScoped<IDownloaderService, DownloaderService>()
-    .AddHangfire(config => config.UsePostgreSqlStorage(c => c.UseNpgsqlConnection(connectionString)))
+    .AddHangfire(config =>
+    {
+        if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+        {
+            config.UseInMemoryStorage();
+        }
+        else
+        {
+            config.UsePostgreSqlStorage(c => c.UseNpgsqlConnection(connectionString));
+        }
+    })
     .AddHangfireServer()
     .AddControllers();
 
