@@ -96,8 +96,12 @@ public class DownloaderController : ControllerBase
         
         try
         {
-            var parser = _parserRegistry.GetService(dlConfiguration.ParserUrl);
-            dlToConfigure.ParserUrl = HandleConfiguration(dlToConfigure.ParserUrl, parser);
+            var parser = _parserRegistry.GetService(dlConfiguration.Parser);
+            if(parser is null)
+            {
+                return BadRequest("The parser could not be resolved.");
+            }
+            dlToConfigure.Parser = HandleConfiguration(dlToConfigure.Parser, parser!);
             dlToConfigure.DownloadUrl = HandleConfiguration(dlToConfigure.DownloadUrl, dlConfiguration.DownloadUrl);
             dlToConfigure.BackUpUrl = HandleConfiguration(dlToConfigure.BackUpUrl, dlConfiguration.BackUpUrl);
             dlToConfigure.PollingRate = HandleConfiguration(dlToConfigure.PollingRate, dlConfiguration.PollingRate);
@@ -141,7 +145,7 @@ public class DownloaderController : ControllerBase
 
         if (_parserRegistry.GetService(downloader) is { } parser)
         {
-            newDl.ParserUrl = parser;
+            newDl.Parser = parser;
         }
         else
         {
@@ -186,7 +190,7 @@ public class DownloaderController : ControllerBase
             totalBytes.AddRange(bytes);
             totalBytes.AddRange("magic"u8.ToArray());
         }
-        await BaseDownloaderJob.SendToParser(totalBytes.ToArray(), dl.ParserUrl);
+        await BaseDownloaderJob.SendToParser(totalBytes.ToArray(), dl.Parser);
         return Ok($"Parsing for {downloader} has been started with uploaded data.");
     }
 
