@@ -1,53 +1,76 @@
 ﻿@page "/Profile"
 @attribute [Authorize]
+@using MudBlazor
 
 <PageTitle>SkyPanel — Profile</PageTitle>
 
-<div class="row">
-    <div class="col-md-12">
-        <div class="row">
-            <h2>Profile</h2>
-
-            <div class="col-md-2">
-                <img src="@Picture"
-                     alt="" class="img-rounded img-responsive" />
-            </div>
-            <div class="col-md-4">
-                <h3>@Username</h3>
-                <p>
-                    <i class="bi bi-envelope"></i> @EmailAddress
-                </p>
-            </div>
-            <div>
-                <ul class="list-group">
-                    @if (Roles.Length > 0)
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-6">
+    <MudCard Elevation="3" Class="rounded-lg">
+        <MudCardHeader>
+            <CardHeaderAvatar>
+                @if (!string.IsNullOrEmpty(Picture))
+                {
+                    
+                    <MudAvatar Size="Size.Large">
+                        <MudImage Src="@Picture"/>
+                    </MudAvatar>
+                }
+                else
+                {
+                    <MudAvatar Size="Size.Large" Color="Color.Primary">
+                        <MudIcon Icon="@Icons.Material.Filled.Person" />
+                    </MudAvatar>
+                }
+            </CardHeaderAvatar>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h5">@Username</MudText>
+                <MudText Typo="Typo.body1" Class="d-flex align-center">
+                    <MudIcon Icon="@Icons.Material.Filled.Email" Size="Size.Small" Class="mr-1" />
+                    @EmailAddress
+                </MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+        
+        <MudDivider />
+        
+        <MudCardContent>
+            <MudText Typo="Typo.h6" Class="mb-3">User Roles</MudText>
+            
+            @if (Roles.Length > 0)
+            {
+                <MudList T="string" Dense="true" ReadOnly="true">
+                    @foreach (var role in Roles)
                     {
-                        @foreach (var role in Roles)
-                        {
-                            <li class="list-group-item">
-                                <i class="bi bi-person-badge"></i> @role
-                            </li>
-                        }
+                        <MudListItem Icon="@Icons.Material.Filled.Security" IconColor="Color.Primary">
+                            <MudText>@role</MudText>
+                        </MudListItem>
                     }
-                    else
-                    {
-                        <li class="list-group-item text-muted">No roles assigned</li>
-                    }
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
+                </MudList>
+            }
+            else
+            {
+                <MudAlert Severity="Severity.Info" Class="my-2">No roles assigned</MudAlert>
+            }
+        </MudCardContent>
+        
+        <MudCardActions>
+            <MudButton Variant="Variant.Text" Color="Color.Primary" 
+                       Href="Account/Logout" Class="ml-auto">
+                <MudIcon Icon="@Icons.Material.Filled.Logout" Class="mr-2" />
+                Logout
+            </MudButton>
+        </MudCardActions>
+    </MudCard>
+</MudContainer>
 
 @code {
-
     [CascadingParameter]
     public Task<AuthenticationState> authenticationState { get; set; }
     private string Username = "";
     private string EmailAddress = "";
     private string Picture = "";
     private string[] Roles = [];
-    
+
     protected override async Task OnInitializedAsync()
     {
         if (authenticationState is not null)
@@ -55,9 +78,9 @@
             var state = await authenticationState;
 
             Username = state?.User?.Identity?.Name ?? string.Empty;
-            
+
             EmailAddress = state.User.Claims
-                .Where(c => c.Type.Equals(System.Security.Claims.ClaimTypes.Email))
+                .Where(c => c.Type.Equals("http://schemas.microsoft.com/ws/2008/06/identity/claims/emailaddress"))
                 .Select(c => c.Value)
                 .FirstOrDefault() ?? string.Empty;
 
@@ -65,7 +88,7 @@
                 .Where(c => c.Type.Equals("picture"))
                 .Select(c => c.Value)
                 .FirstOrDefault() ?? string.Empty;
-            
+
             Roles = state.User.Claims
                 .Where(c => c.Type.Equals(System.Security.Claims.ClaimTypes.Role))
                 .Select(c => c.Value)
@@ -73,4 +96,3 @@
         }
     }
 }
-
