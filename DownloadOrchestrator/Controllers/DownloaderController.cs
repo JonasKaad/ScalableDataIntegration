@@ -138,6 +138,16 @@ public class DownloaderController : ControllerBase
         {
             return BadRequest("The downloader must have a polling rate.");
         }
+
+        if (_parserRegistry.GetService(downloader) is { } parser)
+        {
+            newDl.ParserUrl = parser;
+        }
+        else
+        {
+            return BadRequest("The parser could not be resolved");
+        }
+
         
         _downloaders.Add(newDl);
         _downloaderService.ScheduleOrUpdateRecurringDownload(newDl);
