@@ -42,6 +42,23 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
         return new Parser("", "", "", "", "", "");
     }
 
+    public async Task<bool> UploadFiles(string parser, MultipartFormDataContent form)
+    {
+        var client = httpClientFactory.CreateClient();
+        try
+        {
+            using HttpResponseMessage response = await client.PostAsync($"{baseUrl}/{parser}/upload", form);
+            var returnStatusCode = response.StatusCode;
+            Console.WriteLine(response);
+            return returnStatusCode == HttpStatusCode.OK;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return false;
+        }
+    }
+    
     public async Task<bool> ConfigureDownloader(string parser, string url, string backupUrl, string secretName, string pollingRate)
     {
         
