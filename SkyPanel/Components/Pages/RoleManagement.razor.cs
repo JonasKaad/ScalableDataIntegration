@@ -129,26 +129,21 @@ public partial class RoleManagement
         if (_selectedUser == null) return;
         bool success = true;
         
-        var rolesToAdd = _userRoles
+        // Find roles that need to be added
+        var rolesToAddObjects = _userRoles
             .Where(r => _originalUserRoles.All(or => or.id != r.id))
-            .Select(r => r.id)
-            .ToArray();
-        
-        var auditRoleNamesToAdd = _userRoles
-            .Where(r => _originalUserRoles.All(or => or.id != r.id))
-            .Select(r => r.name)
-            .ToArray();
-        
-        var rolesToRemove = _originalUserRoles
+            .ToList();
+
+        var rolesToAdd = rolesToAddObjects.Select(r => r.id).ToArray();
+        var auditRoleNamesToAdd = rolesToAddObjects.Select(r => r.name).ToArray();
+
+        // Find roles that need to be removed
+        var rolesToRemoveObjects = _originalUserRoles
             .Where(r => _userRoles.All(ur => ur.id != r.id))
-            .Select(r => r.id)
-            .ToArray();
-        
-        var auditRoleNamesToRemove = _originalUserRoles
-            .Where(r => _userRoles.All(or => or.id != r.id))
-            .Select(r => r.name)
-            .ToArray();
-        
+            .ToList();
+
+        var rolesToRemove = rolesToRemoveObjects.Select(r => r.id).ToArray();
+        var auditRoleNamesToRemove = rolesToRemoveObjects.Select(r => r.name).ToArray();
         
         if (rolesToAdd.Length > 0)
         {
