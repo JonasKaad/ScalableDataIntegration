@@ -151,7 +151,10 @@ public class DownloaderController : ControllerBase
                 totalBytes.AddRange("magic"u8.ToArray());
             }
         }
-        await BaseDownloaderJob.SendToParser(totalBytes.ToArray(), dl.Parser, dl.FilterUrl, dl.Parameters);
+
+        var urls = dl.Filters;
+        urls.Add(dl.Parser);
+        await BaseDownloaderJob.SendToParser(totalBytes.ToArray(), urls, dl.Parameters);
         return Ok($"Parsing for {downloader} has been started with uploaded data.");
     }
 
