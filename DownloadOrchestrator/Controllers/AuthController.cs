@@ -84,4 +84,39 @@ public class AuthController : ControllerBase
     }
     
     
+    [Route("users/{userId}/roles")]
+    [HttpPost]
+    public async Task<ActionResult<bool>> UpdateUserRoles(string userId, [FromBody] RoleData roles)
+    {
+        try
+        {
+            var token = await _tokenCacheService.GetTokenAsync();
+
+            var client = new HttpClient();
+            var request = new HttpRequestMessage(HttpMethod.Post, $"https://{AuthService.GetDomain()}/api/v2/users/{userId}/roles");
+            request.Headers.Add("Accept", "application/json");
+            request.Headers.Add("Authorization", $"Bearer {token}");
+            
+            var payload = new {roles = roles.roles};
+            var jsonContent = JsonSerializer.Serialize(payload);
+            var content = new StringContent(jsonContent, null, "application/json");
+            request.Content = content;
+            
+            var response = await client.SendAsync(request);
+            
+            if(response.StatusCode == HttpStatusCode.NoContent)
+            {
+                Console.WriteLine(await response.Content.ReadAsStringAsync());
+                return Ok($"Updated user data.");
+            }
+            else return BadRequest("Failed to update user's roles. " + response.StatusCode + response.Content.ReadAsStringAsync());
+            
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to update user's roles");
+            return StatusCode((int)HttpStatusCode.InternalServerError);
+        }
+    }
+    
 }
