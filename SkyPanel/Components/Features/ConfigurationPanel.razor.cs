@@ -312,29 +312,79 @@ public partial class ConfigurationPanel : ComponentBase
         var secretNameToSend = "";
         var pollingRateToSend = "";
         
+        // Track what changes were made for audit logging
+        var changes = new List<string>();
+        
         // Check if parser values have changed. If not send a string with a space: " "
         if (string.IsNullOrEmpty(UrlValue))
         {
             urlValueToSend = " ";
-        } else urlValueToSend = string.Compare(ParserState.DownloadUrl, UrlValue, StringComparison.OrdinalIgnoreCase) == 0 ? "" : UrlValue;
-
-           
+        }
+        else
+        {
+            urlValueToSend = string.Compare(ParserState.DownloadUrl, UrlValue, StringComparison.OrdinalIgnoreCase) == 0 ? "" : UrlValue;
+            if (!string.IsNullOrEmpty(urlValueToSend))
+            {
+                changes.Add($"URL changed from '{ParserState.DownloadUrl ?? "empty"}' to '{UrlValue}'");
+            }
+        } 
+        
         if (string.IsNullOrEmpty(BackupUrlValue))
         {
             backupUrlValueToSend = " ";
-        } else  backupUrlValueToSend = string.Compare(ParserState.BackupUrl, BackupUrlValue, StringComparison.OrdinalIgnoreCase) == 0 ? "" : BackupUrlValue;
+        }
+        else
+        {
+            backupUrlValueToSend = string.Compare(ParserState.BackupUrl, BackupUrlValue, StringComparison.OrdinalIgnoreCase) == 0 ? "" : BackupUrlValue;
+            if (!string.IsNullOrEmpty(backupUrlValueToSend))
+            {
+                changes.Add($"Backup URL changed from '{ParserState.BackupUrl ?? "empty"}' to '{BackupUrlValue}'");
+            }
+        }
 
         if (string.IsNullOrEmpty(SecretName))
         {
             secretNameToSend = " ";
-        } else secretNameToSend = string.Compare(ParserState.SecretName, SecretName, StringComparison.OrdinalIgnoreCase) == 0 ? "" : SecretName;
+        }
+        else
+        {
+            secretNameToSend = string.Compare(ParserState.SecretName, SecretName, StringComparison.OrdinalIgnoreCase) == 0 ? "" : SecretName;
+            if (!string.IsNullOrEmpty(secretNameToSend))
+            {
+                changes.Add($"Secret name changed from '{ParserState.SecretName ?? "empty"}' to '{SecretName}'");
+            }
+        }
         
         pollingRateToSend = PollingValue;
+        if (!string.Equals(ParserState.Polling, pollingRateToSend, StringComparison.OrdinalIgnoreCase))
+        {
+            changes.Add($"Polling rate changed from '{ParserState.Polling ?? "empty"}' to '{pollingRateToSend}'");
+        }
         
         var response = await OrchestratorClientService.ConfigureDownloader(ParserState.ParserName, 
             urlValueToSend, backupUrlValueToSend, secretNameToSend, pollingRateToSend);
         if (response)
         {
+            var authState = await AuthenticationStateTask;
+            var authUser = authState.User;
+            var user = RoleUtil.GetUserEmail(authUser);
+            
+            // Summary entry
+            _logger.LogInformation( "[AUDIT] {User} updated configuration for {Parser}", user, ParserState.ParserName);   
+            
+            // Log detailed changes
+            if (changes.Count > 0)
+            {
+                foreach (var change in changes)
+                {
+                    _logger.LogInformation("[AUDIT] {User} for {Parser}: {Change}", user, ParserState.ParserName, change);
+                }
+            }
+            else
+            {
+                _logger.LogInformation("[AUDIT] {User} submitted configuration update for {Parser} but no values were changed", 
+                    user, ParserState.ParserName);
+            }
             Snackbar.Add("Successfully updated configuration", Severity.Success);
         }
         else
