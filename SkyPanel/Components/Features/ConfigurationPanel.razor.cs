@@ -195,17 +195,16 @@ public partial class ConfigurationPanel : ComponentBase
         }
     }
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         ParserState.OnChange += OnParserStateChanged;
-        UpdateFromParserState().Wait();
+        await UpdateFromParserState();
     }
     
     private void OnParserStateChanged()
     {
-        UpdateFromParserState().Wait();
-        OnParserChanged().Wait();
-        StateHasChanged();
+        _ = UpdateFromParserState();
+        _ = OnParserChanged();
     }
     
     private async Task UpdateFromParserState()
@@ -229,7 +228,7 @@ public partial class ConfigurationPanel : ComponentBase
         }
         await CheckForCredentials(ParserState.SecretName);
         
-        
+        StateHasChanged();
     }
     
     private string _parserNameSelection = string.Empty;
@@ -240,6 +239,7 @@ public partial class ConfigurationPanel : ComponentBase
         _secretName = parserSecret ?? "";
         Username = secret.TokenName ?? "";
         Password = secret.Token ?? "";
+        StateHasChanged();
     }
     
     private Task OpenSecretManagementDialog()
@@ -399,6 +399,7 @@ public partial class ConfigurationPanel : ComponentBase
         if (string.IsNullOrEmpty(ParserState.ParserName)) return;
         var secretExists = await CredentialsService.HasSecret(ParserState.SecretName);
         PlaceholderText = !secretExists ? "No Secret Found!" : "No Secret Selected";
+        StateHasChanged();
     }
     
     private void SnackPop(string urlType, string url, Severity severity, string message)

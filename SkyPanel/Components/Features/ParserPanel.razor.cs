@@ -38,6 +38,7 @@ public partial class ParserPanel : ComponentBase
         // Get the full parser configuration and store it
         var parserConfig = await OrchestratorClient.GetDownloaderConfiguration(parserName);
         ParserState.SetParser(parserConfig);
+        StateHasChanged();
     }
     
     protected override void OnInitialized()
