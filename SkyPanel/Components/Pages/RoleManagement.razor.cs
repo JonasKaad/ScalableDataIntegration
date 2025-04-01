@@ -1,10 +1,23 @@
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using MudBlazor;
 using SkyPanel.Components.Models.Auth0;
+using SkyPanel.Utils;
 
 namespace SkyPanel.Components.Pages;
 
 public partial class RoleManagement
 {
+    private readonly ILogger<RoleManagement> _logger;
+    
+    public RoleManagement (ILogger<RoleManagement> logger)
+    {
+        _logger = logger;
+    }
+
+    [CascadingParameter] 
+    private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
+    
     private List<User> _users = new();
     private List<User> _filteredUsers => _users
         .Where(u => string.IsNullOrWhiteSpace(_searchString) ||
