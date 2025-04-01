@@ -188,24 +188,27 @@ public partial class ConfigurationPanel : ComponentBase
                 Username = string.Empty;
                 Password = string.Empty;
             }
-            else CheckForCredentials(value);
+            else
+            {
+                CheckForCredentials(value).Wait();
+            }
         }
     }
 
     protected override void OnInitialized()
     {
         ParserState.OnChange += OnParserStateChanged;
-        UpdateFromParserState();
+        UpdateFromParserState().Wait();
     }
     
     private void OnParserStateChanged()
     {
-        UpdateFromParserState();
-        OnParserChanged();
+        UpdateFromParserState().Wait();
+        OnParserChanged().Wait();
         StateHasChanged();
     }
     
-    private void UpdateFromParserState()
+    private async Task UpdateFromParserState()
     {
         // Update UI components with values from ParserState
         UrlValue = ParserState.DownloadUrl;
@@ -224,28 +227,19 @@ public partial class ConfigurationPanel : ComponentBase
             // Parse polling value when a parser is selected
             ParsePollingValue(ParserState.Polling);
         }
-        CheckForCredentials(ParserState.SecretName);
+        await CheckForCredentials(ParserState.SecretName);
         
         
     }
     
     private string _parserNameSelection = string.Empty;
     
-    private void CheckForCredentials(string parserSecret)
+    private async Task CheckForCredentials(string parserSecret)
     {
-        if (CredentialsService.GetParserSecretNames().Contains(parserSecret))
-        {
-            _secretName = parserSecret;
-            Username = CredentialsService.GetUsername(parserSecret);
-            Password = CredentialsService.GetPassword(parserSecret);
-        }
-        else
-        {
-            _secretName = string.Empty;
-            Username = string.Empty;
-            Password = string.Empty;
-        }
-        
+        var secret = await CredentialsService.GetSecret(parserSecret);
+        _secretName = parserSecret ?? "";
+        Username = secret.TokenName ?? "";
+        Password = secret.Token ?? "";
     }
     
     private Task OpenSecretManagementDialog()
@@ -282,19 +276,17 @@ public partial class ConfigurationPanel : ComponentBase
         }
     }
     
-    private Task<IEnumerable<string>> Search(string value, CancellationToken token)
+    private async Task<IEnumerable<string>> Search(string value, CancellationToken token)
     {
-        var allParserNames = CredentialsService.GetParserSecretNames();
+        var allParserNames = await CredentialsService.GetParserSecretNames();
 
         // if text is null or empty, return all parser names
         if (string.IsNullOrEmpty(value))
-            return Task.FromResult(allParserNames);
+            return allParserNames;
     
         // Filter parser names based on the input value
-        var filteredParsers = allParserNames
+        return allParserNames
             .Where(key => key.Contains(value, StringComparison.InvariantCultureIgnoreCase));
-        
-        return Task.FromResult(filteredParsers);
     }
     
     private async Task UpdateParserConfiguration()
@@ -402,17 +394,11 @@ public partial class ConfigurationPanel : ComponentBase
     }
 
 
-    private void OnParserChanged()
+    private async Task OnParserChanged()
     {
         if (string.IsNullOrEmpty(ParserState.ParserName)) return;
-        if (!CredentialsService.GetParserSecretNames().Contains(ParserState.SecretName))
-        {
-            PlaceholderText = "No Secret Found!";
-        }
-        else
-        {
-            PlaceholderText = "No Secret Selected";
-        }
+        var secretExists = await CredentialsService.HasSecret(ParserState.SecretName);
+        PlaceholderText = !secretExists ? "No Secret Found!" : "No Secret Selected";
     }
     
     private void SnackPop(string urlType, string url, Severity severity, string message)
