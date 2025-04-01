@@ -4,17 +4,22 @@
 @using Color = MudBlazor.Color
 <MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
    <MudGrid>
-      <AuthorizeView Roles="Admin, Developer">
-         <MudItem xs="12" sm="5" Class="pr-8">
-            <MudPaper Elevation="3" Class="pa-8 ma-2" Style="border-radius: 16px;">
-               <ParserPanel/>
-            </MudPaper>
-         </MudItem>
-         <MudItem xs="12" sm="7" Class="pl-8">
-            <MudPaper Elevation="3" Class="pa-8 ma-2" Style="@ParserSelectedStyle()">
-               <ConfigurationPanel/>
-            </MudPaper>
-         </MudItem>
+      <AuthorizeView>
+         <Authorized>
+            @if (_canAccessParsers || context.User.IsInRole("Admin"))
+            {
+               <MudItem xs="12" sm="5" Class="pr-8">
+                  <MudPaper Elevation="3" Class="pa-8 ma-2" Style="border-radius: 16px;">
+                     <ParserPanel/>
+                  </MudPaper>
+               </MudItem>
+               <MudItem xs="12" sm="7" Class="pl-8">
+                  <MudPaper Elevation="3" Class="pa-8 ma-2" Style="@ParserSelectedStyle()">
+                     <ConfigurationPanel/>
+                  </MudPaper>
+               </MudItem>
+            }
+         </Authorized>
       </AuthorizeView>
       <MudItem xs="12" sm="12">
          <MudPaper Elevation="3" Class="pa-8 ma-2" Style="border-radius: 16px;">
