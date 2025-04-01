@@ -24,8 +24,12 @@ builder.Services.AddMudServices(config =>
     .AddHttpClient()
     .AddScoped<SecretService>(s =>
     {
-        var userAssignedClientId = new ResourceIdentifier(Environment.GetEnvironmentVariable("AZURE_CLIENT_ID") ?? "abc");
-
+        var azureClientId = Environment.GetEnvironmentVariable("AZURE_CLIENT_ID");
+        if (string.IsNullOrEmpty(azureClientId))
+        {
+            throw new InvalidOperationException("AZURE_CLIENT_ID environment variable is not set.");
+        }
+        var userAssignedClientId = new ResourceIdentifier(azureClientId);
         var credential = new DefaultAzureCredential(
             new DefaultAzureCredentialOptions
             {
