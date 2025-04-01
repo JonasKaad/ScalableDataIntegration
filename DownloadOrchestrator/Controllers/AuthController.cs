@@ -154,4 +154,36 @@ public class AuthController : ControllerBase
         }
     }
     
+    
+    [Route("users")]
+    [HttpGet]
+    public async Task<ActionResult<List<User>>> GetUsers()
+    {
+        try
+        {
+            var token = await _tokenCacheService.GetTokenAsync();
+
+
+            var client = new HttpClient();
+            var request = new HttpRequestMessage(HttpMethod.Get, $"https://{AuthService.GetDomain()}/api/v2/users");
+            request.Headers.Add("Accept", "application/json");
+            request.Headers.Add("Authorization", $"Bearer {token}");
+            var response = client.SendAsync(request);
+
+            var status = response.Result.StatusCode;
+            if (status == HttpStatusCode.OK)
+            {
+                
+                List<User>? users = JsonSerializer.Deserialize<List<User>>(response.Result.Content.ReadAsStringAsync().Result);
+                return users ?? [];
+            }
+
+            return BadRequest($"Failed to obtain users: {status} \n {response.Result.Content.ReadAsStringAsync()}");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to obtain users");
+            return StatusCode((int)HttpStatusCode.InternalServerError);
+        }
+    }
 }
