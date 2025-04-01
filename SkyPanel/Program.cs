@@ -1,4 +1,7 @@
 using Auth0.AspNetCore.Authentication;
+using Azure.Core;
+using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
 using SkyPanel.Components;
@@ -17,37 +20,51 @@ builder.Configuration.AddDotNetEnv(".env", LoadOptions.TraversePath());
 builder.Services.AddMudServices(config =>
     {
     config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomRight;
-});
-builder.Services.AddHttpClient();
-builder.Services.AddScoped<ParserStateService>();
-builder.Services.AddScoped<SecretCredentialsService>();
-builder.Services.AddScoped<OrchestratorClientService>(provider =>
-{
-    var httpClientFactory = provider.GetRequiredService<IHttpClientFactory>();
-    var baseUrl = Env.GetString("DOWNLOAD_ORCHESTRATOR_URL");
-    return new OrchestratorClientService(httpClientFactory, baseUrl);
-});
-builder.Services.AddScoped<BlobManagerService>(provider =>
-{
-    var connectionString = Env.GetString("BLOB_CONNECTION_STRING");
-    return new BlobManagerService(connectionString);
-});
-//Database service setup
-builder.Services.AddDbContext<StatisticsDatabaseService>(options =>
-{
-    // Npgsql formatted connection string
-    var connectionString = "Server=" + Env.GetString("SERVER") + ";" + 
-                           "Database=" + Env.GetString("DATABASE")+ ";"  + 
-                           "Username=" + Env.GetString("USER")+ ";"  + 
-                           "Password=" + Env.GetString("PASSWORD") + ";" ;
-    options.UseNpgsql(connectionString);
-});
+    })
+    .AddHttpClient()
+    .AddScoped<SecretService>(s =>
+    {
+        var userAssignedClientId = new ResourceIdentifier(Environment.GetEnvironmentVariable("AZURE_CLIENT_ID") ?? "abc");
 
-builder.Services.AddAuth0WebAppAuthentication(options =>
-{
-    options.Domain = Env.GetString("AUTH0_DOMAIN");
-    options.ClientId =Env.GetString("AUTH0_CLIENT_ID");
-});
+        var credential = new DefaultAzureCredential(
+            new DefaultAzureCredentialOptions
+            {
+                ManagedIdentityClientId = userAssignedClientId
+            });
+        var keyVaultName = Environment.GetEnvironmentVariable("KEY_VAULT_NAME");
+        var kvUri = "https://" + keyVaultName + ".vault.azure.net";
+
+        var client = new SecretClient(new Uri(kvUri), credential);
+        var logger = s.GetService<Logger<SecretService>>();
+        return new SecretService(client, logger!);
+    })
+    .AddScoped<ParserStateService>()
+    .AddScoped<SecretCredentialsService>()
+    .AddScoped<OrchestratorClientService>(provider =>
+    {
+        var httpClientFactory = provider.GetRequiredService<IHttpClientFactory>();
+        var baseUrl = Env.GetString("DOWNLOAD_ORCHESTRATOR_URL");
+        return new OrchestratorClientService(httpClientFactory, baseUrl);
+    })
+    .AddScoped<BlobManagerService>(_ =>
+    {
+        var connectionString = Env.GetString("BLOB_CONNECTION_STRING");
+        return new BlobManagerService(connectionString);
+    })
+    .AddDbContext<StatisticsDatabaseService>(options =>
+    {
+        // Npgsql formatted connection string
+        var connectionString = "Server=" + Env.GetString("SERVER") + ";" + 
+                               "Database=" + Env.GetString("DATABASE")+ ";"  + 
+                               "Username=" + Env.GetString("USER")+ ";"  + 
+                               "Password=" + Env.GetString("PASSWORD") + ";" ;
+        options.UseNpgsql(connectionString);
+    })
+    .AddAuth0WebAppAuthentication(options =>
+    {
+        options.Domain = Env.GetString("AUTH0_DOMAIN");
+        options.ClientId =Env.GetString("AUTH0_CLIENT_ID");
+    });
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
