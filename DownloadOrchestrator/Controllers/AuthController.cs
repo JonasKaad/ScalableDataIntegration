@@ -49,4 +49,39 @@ public class AuthController : ControllerBase
             return StatusCode((int)HttpStatusCode.InternalServerError);
         }
     }
+    
+    
+    [Route("users/{userId}/roles")]
+    [HttpGet]
+    public async Task<ActionResult<List<Role>>> GetUserRoles(string userId)
+    {
+        try
+        {
+            var token = await _tokenCacheService.GetTokenAsync();
+
+            var client = new HttpClient();
+            var request = new HttpRequestMessage(HttpMethod.Get, $"https://{AuthService.GetDomain()}/api/v2/users/{userId}/roles");
+
+            request.Headers.Add("Accept", "application/json");
+            request.Headers.Add("Authorization", $"Bearer {token}");
+            var response = client.SendAsync(request);
+            Console.WriteLine(response.Result);
+            var status = response.Result.StatusCode;
+            if (status == HttpStatusCode.OK)
+            {
+                
+                List<Role>? userRoles = JsonSerializer.Deserialize<List<Role>>(response.Result.Content.ReadAsStringAsync().Result);
+                return userRoles ?? [];
+            }
+
+            return BadRequest($"Failed to obtain user's roles: {status} \n {response.Result.Content.ReadAsStringAsync()}");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to obtain user's roles");
+            return StatusCode((int)HttpStatusCode.InternalServerError);
+        }
+    }
+    
+    
 }
