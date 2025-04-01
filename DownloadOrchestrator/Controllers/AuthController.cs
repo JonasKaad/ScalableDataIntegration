@@ -1,5 +1,7 @@
 using System.Net;
 using System.Net.Http.Headers;
+using System.Text.Json;
+using DownloadOrchestrator.Models.Auth0;
 using DownloadOrchestrator.Services;
 using Microsoft.AspNetCore.Mvc;
 namespace DownloadOrchestrator.Controllers;
@@ -19,7 +21,7 @@ public class AuthController : ControllerBase
 
     [Route("roles")]
     [HttpGet]
-    public async Task<ActionResult<string>> GetRoles()
+    public async Task<ActionResult<List<Role>>> GetRoles()
     {
         try
         {
@@ -35,8 +37,8 @@ public class AuthController : ControllerBase
             var status = response.Result.StatusCode;
             if (status == HttpStatusCode.OK)
             {
-                var res = response.Result.Content.ReadAsStringAsync();
-                return res.Result;
+                List<Role>? roles = JsonSerializer.Deserialize<List<Role>>(response.Result.Content.ReadAsStringAsync().Result);
+                return roles ?? [];
             }
 
             return BadRequest($"Failed to obtain roles: {status} \n {response.Result.Content.ReadAsStringAsync()}");
