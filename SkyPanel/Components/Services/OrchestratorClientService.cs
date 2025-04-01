@@ -132,4 +132,26 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
         return [];
     }
     
+    public async Task<bool> RemoveUserRole(string userId, RoleData roles)
+    {
+        var client = httpClientFactory.CreateClient();
+        try
+        {
+            var request = new HttpRequestMessage(HttpMethod.Delete, $"{baseUrl}/users/{userId}/roles")
+            {
+                Content = new StringContent(
+                    JsonSerializer.Serialize(new { roles = roles.roles }),
+                    Encoding.UTF8,
+                    "application/json")
+            };
+            using HttpResponseMessage response = await client.SendAsync(request);
+            return response.StatusCode == HttpStatusCode.OK;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return false;
+        }
+    }
+    
 }
