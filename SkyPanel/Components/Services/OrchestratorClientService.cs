@@ -116,4 +116,20 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
         return [];
     }
     
+    public async Task<List<Role>> GetUserRoles(string userId)
+    {
+        var client = httpClientFactory.CreateClient();
+        try
+        {
+            var response = await client.GetAsync($"{baseUrl}/users/{userId}/roles");
+            var roles = await response.Content.ReadFromJsonAsync<List<Role>>();
+            return roles ?? [];
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+        return [];
+    }
+    
 }
