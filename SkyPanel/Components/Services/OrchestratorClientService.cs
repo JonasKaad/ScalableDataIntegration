@@ -2,6 +2,7 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 using SkyPanel.Components.Models;
+using SkyPanel.Components.Models.Auth0;
 
 namespace SkyPanel.Components.Services;
 
@@ -98,4 +99,21 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
         }
         return [];
     }
+
+    public async Task<List<User>> GetUsers()
+    {
+        var client = httpClientFactory.CreateClient();
+        try
+        {
+            var response = await client.GetAsync($"{baseUrl}/users");
+            var users = await response.Content.ReadFromJsonAsync<List<User>>();
+            return users ?? [];
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+        return [];
+    }
+    
 }
