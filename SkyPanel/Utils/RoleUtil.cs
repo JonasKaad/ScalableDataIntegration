@@ -23,4 +23,18 @@ public static class RoleUtil
         return userRoles.Any(role =>
             string.Equals(role, parserName, StringComparison.OrdinalIgnoreCase));
     }
+
+    /// <summary>
+    /// Retrieves the email address of a user from their claims.
+    /// </summary>
+    /// <param name="user">The user whose email address will be retrieved</param>
+    /// <returns>The user's email address if available, otherwise the user's identity name, or an empty string if neither is available</returns>
+    public static string GetUserEmail(ClaimsPrincipal user)
+    {
+        var emailAddress = user.Claims
+            .Where(c => c.Type.Equals("http://schemas.microsoft.com/ws/2008/06/identity/claims/emailaddress"))
+            .Select(c => c.Value)
+            .FirstOrDefault() ?? string.Empty;
+        return (!string.IsNullOrEmpty(emailAddress) ? emailAddress : user.Identity?.Name) ?? "unknown";
+    }
 }
