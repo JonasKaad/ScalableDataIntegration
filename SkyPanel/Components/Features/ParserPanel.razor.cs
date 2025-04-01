@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using MudBlazor;
 using SkyPanel.Components.Dialogs;
 using SkyPanel.Components.Services;
+using SkyPanel.Utils;
 
 namespace SkyPanel.Components.Features;
 
@@ -81,8 +82,9 @@ public partial class ParserPanel : ComponentBase
     {
         var downloaders = await OrchestratorClient.GetDownloaders();
         var authenticationState = await authenticationStateTask;
+        var user = authenticationState.User;
 
-        if (authenticationState.User.IsInRole("Admin"))
+        if (user.IsInRole("Admin"))
         {
             if (string.IsNullOrEmpty(value))
             {
@@ -94,7 +96,7 @@ public partial class ParserPanel : ComponentBase
         var downloadersToReturn = new List<string>();
         foreach (var downloader in downloaders)
         {
-            if (authenticationState.User.IsInRole(downloader))
+            if (RoleUtil.HasRole(downloader, user))
             {
                 downloadersToReturn.Add(downloader);
             }
