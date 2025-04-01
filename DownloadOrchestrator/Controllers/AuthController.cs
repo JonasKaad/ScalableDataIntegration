@@ -64,17 +64,17 @@ public class AuthController : ControllerBase
 
             request.Headers.Add("Accept", "application/json");
             request.Headers.Add("Authorization", $"Bearer {token}");
-            var response = client.SendAsync(request);
-            Console.WriteLine(response.Result);
-            var status = response.Result.StatusCode;
+            var response = await client.SendAsync(request);
+            Console.WriteLine(response);
+            var status = response.StatusCode;
             if (status == HttpStatusCode.OK)
             {
                 
-                List<Role>? userRoles = JsonSerializer.Deserialize<List<Role>>(response.Result.Content.ReadAsStringAsync().Result);
+                List<Role>? userRoles = JsonSerializer.Deserialize<List<Role>>(await response.Content.ReadAsStringAsync());
                 return userRoles ?? [];
             }
 
-            return BadRequest($"Failed to obtain user's roles: {status} \n {response.Result.Content.ReadAsStringAsync()}");
+            return BadRequest($"Failed to obtain user's roles: {status} \n {await response.Content.ReadAsStringAsync()}");
         }
         catch (Exception ex)
         {
