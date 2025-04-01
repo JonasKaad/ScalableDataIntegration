@@ -5,6 +5,7 @@ using MudBlazor;
 using SkyPanel.Components.Dialogs;
 using SkyPanel.Components.Models;
 using SkyPanel.Components.Services;
+using SkyPanel.Utils;
 
 namespace SkyPanel.Components.Features;
  
@@ -18,9 +19,30 @@ public partial class LatestDatasetPanel : ComponentBase
     [Inject] private ParserStateService ParserState { get; set; } = default!;
     [Inject] private BlobManagerService BlobService { get; set; } = default!;
     
+    [CascadingParameter] 
+    private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
+
     [Inject]
     private IDialogService DialogService { get; set; } = default!;
     
+    private async Task<bool> CanInteractWithParser(string? parserName)
+    {
+        if (string.IsNullOrEmpty(parserName))
+            return false;
+            
+        var authState = await AuthenticationStateTask;
+        var user = authState.User;
+        
+        // Admin can interact with all parsers
+        if (user.IsInRole("Admin"))
+            return true;
+        
+        // User can interact with parsers matching their role
+        return RoleUtil.HasRole(parserName, user);
+    }
+
+   
+
     private void OnParserStateChanged()
     {
         _searchString = ParserState.ParserName;
@@ -51,6 +73,12 @@ public partial class LatestDatasetPanel : ComponentBase
         if (string.IsNullOrEmpty(blobName))
             return;
 
+        if (!await CanInteractWithParser(containerName))
+        {
+            Snackbar.Add("You don't have permission to download this file.", Severity.Warning);
+            return;
+        }
+        
         try
         {
             var stream = await BlobService.DownloadBlob(containerName, blobName);
@@ -67,7 +95,12 @@ public partial class LatestDatasetPanel : ComponentBase
     
     private async Task OpenBlobDialogAsync(BlobDataItem blobDataItem)
     {
-           
+        if (blobDataItem.ParserName == null || !await CanInteractWithParser(blobDataItem.ParserName))
+        {
+            Snackbar.Add("You don't have permission to delete this dataset.", Severity.Warning);
+            return;
+        }
+        
         var parameters = new DialogParameters<BlobDeleteDialog>
         {
             { x => x.RawDataset, blobDataItem.RawPath},
