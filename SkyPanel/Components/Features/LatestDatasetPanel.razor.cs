@@ -90,6 +90,10 @@ public partial class LatestDatasetPanel : ComponentBase
             var stream = await BlobService.DownloadBlob(containerName, blobName);
             using var st = new DotNetStreamReference(stream: stream);
             await JS.InvokeVoidAsync("downloadFileFromStream", $"{containerName}_{blobName}", st);
+            var authState = await AuthenticationStateTask;
+            var authUser = authState.User;
+            var user = RoleUtil.GetUserEmail(authUser);
+            _logger.LogInformation( "[AUDIT] {User} downloaded dataset: {Dataset} from {Parser}", user, blobName, containerName);
         }
         catch (Exception e)
         {
