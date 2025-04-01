@@ -1,13 +1,24 @@
 using System.ComponentModel;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using MudBlazor;
 using SkyPanel.Components.Dialogs;
 using SkyPanel.Components.Services;
+using SkyPanel.Utils;
 
 namespace SkyPanel.Components.Features;
 
 public partial class ConfigurationPanel : ComponentBase
 {
+    private readonly ILogger<ConfigurationPanel> _logger;
+    
+    public ConfigurationPanel (ILogger<ConfigurationPanel> logger)
+    {
+        _logger = logger;
+    }
+
+    [CascadingParameter] 
+    private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
     [Inject] private ParserStateService ParserState { get; set; } = default!;
     
     [Inject] private SecretCredentialsService CredentialsService { get; set; } = default!;
