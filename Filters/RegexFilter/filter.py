@@ -65,7 +65,7 @@ class FilterServicer(filter_pb2_grpc.FilterServicer):
                     stub = parser_pb2_grpc.ParserStub(channel)
                     data_to_send = raw[0]
                     data_to_send += b'magic'
-                    data_to_send += bytes(match[0], encoding='utf-8')
+                    data_to_send += bytes(match, encoding='utf-8')
                     response = await stub.ParseCall(parser_pb2.ParseRequest(raw_data=data_to_send))
 
                 if response.success:
