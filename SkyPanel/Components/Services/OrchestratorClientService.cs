@@ -154,4 +154,26 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
         }
     }
     
+    public async Task<bool> UpdateUserRoles(string userId, RoleData roles )
+    {
+        var client = httpClientFactory.CreateClient();
+        try
+        {
+            using StringContent jsonContent = new(
+                JsonSerializer.Serialize(new
+                {
+                    roles = roles.roles,
+                }),
+                Encoding.UTF8,
+                "application/json");
+                using HttpResponseMessage response = await client.PostAsync($"{baseUrl}/users/{userId}/roles", jsonContent);
+                var returnStatusCode = response.StatusCode;
+                return returnStatusCode == HttpStatusCode.OK;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+        return false;
+    }
 }
