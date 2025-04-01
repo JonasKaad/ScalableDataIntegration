@@ -34,23 +34,3 @@
         </MudItem>
     </MudGrid>
 </MudStack>
-
-@code
-{
-    //TODO: Loop through all role
-    //https://auth0.com/docs/api/management/v2/roles/get-roles#endpoint
-    //https://manage.auth0.com/dashboard/eu/scalabledataintegration/apis/management/explorer api explorer
-    
-    
-    [CascadingParameter]
-    private Task<AuthenticationState> authenticationStateTask { get; set; }
-  
-    private async Task SetAuthor()
-    {
-        var authenticationState = await authenticationStateTask;
-        if (authenticationState.User.IsInRole("Developer"))
-        {
-            
-        }
-    }
-}

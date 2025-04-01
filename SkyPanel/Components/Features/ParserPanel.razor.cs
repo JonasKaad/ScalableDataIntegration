@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using MudBlazor;
 using SkyPanel.Components.Dialogs;
 using SkyPanel.Components.Services;
@@ -73,15 +74,35 @@ public partial class ParserPanel : ComponentBase
         return DialogService.ShowAsync<BasicDialog>("Fetch and parse latest dataset", parameters, options);
     }
     
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    
     private async Task<IEnumerable<string>> Search(string value, CancellationToken token)
     {
         var downloaders = await OrchestratorClient.GetDownloaders();
-        
-        if (string.IsNullOrEmpty(value))
-        { 
-           return downloaders;
+        var authenticationState = await authenticationStateTask;
+
+        if (authenticationState.User.IsInRole("Admin"))
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                return downloaders;
+            }
+            return downloaders.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
         }
 
-        return downloaders.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+        var downloadersToReturn = new List<string>();
+        foreach (var downloader in downloaders)
+        {
+            if (authenticationState.User.IsInRole(downloader))
+            {
+                downloadersToReturn.Add(downloader);
+            }
+        }
+        if (string.IsNullOrEmpty(value))
+        {
+            return downloadersToReturn;
+        }
+        return downloadersToReturn.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
     }
 }
