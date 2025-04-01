@@ -25,7 +25,7 @@ public partial class Graphs
     private Amount _yaxis = Amount.Byte;
     [Inject] private StatisticsDatabaseService context { get; set; } = null!;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         _options = new ApexChartOptions<ParserData>
         {
@@ -67,23 +67,32 @@ public partial class Graphs
                 Palette = PaletteType.Palette1
             }
         };
-
-        await LoadDataFromDb();
-        
-        _loading = false;
-        StateHasChanged();
     }
 
-    private async Task LoadDataFromDb()
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            LoadDataFromDb();
+            _loading = false;
+            StateHasChanged();
+        }
+    }
+    private void LoadDataFromDb()
     {
         var start = DateTime.UtcNow - TimeSpan.FromDays(14);
-        await FetchDataFromDb(start);
-
+        try
+        {
+            FetchDataFromDb(start);
+        } catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetching data from db: {ex.Message}");
+        }
     }
 
-    private async Task FetchDataFromDb(DateTime start)
+    private void FetchDataFromDb(DateTime start)
     {
-        var parsers = await context.Datasets.Where(d => d.Date > start).GroupBy(d => d.Parser).ToListAsync();
+        var parsers = context.Datasets.Where(d => d.Date > start).GroupBy(d => d.Parser);
         foreach (var parser in parsers)
         {
             var groupedData = parser.Select(dataset => new ParserData(dataset.Date, dataset.DownloadedAmount)).ToList();

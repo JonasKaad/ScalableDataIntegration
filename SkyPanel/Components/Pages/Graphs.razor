@@ -19,7 +19,7 @@
                                 </MudSelect>
                             </MudItem>
                             <MudItem>
-                                <MudText>Showing parsers with downloaded data in the last 31 days</MudText>
+                                <MudText>Showing parsers with downloaded data in the last 14 days</MudText>
                                 <MudButton Variant="Variant.Filled" OnClick="@(() => FetchDataFromDb(DateTime.Parse("2023-01-01").ToUniversalTime()))">Fetch more?</MudButton>
                             </MudItem>
                         </MudGrid>
@@ -81,13 +81,15 @@
         </MudItem>
     
         <MudItem xs="12" sm="12">
-            <MudPaper Class="pa-8 ma-2" >
-                @if (_loading)
-                {
-                    <MudProgressCircular Indeterminate="true"/>
-                }
-                else
-                {
+            @if (_loading)
+            {
+                <MudPaper Class="pa-8 ma-2 d-flex justify-center">
+                    <MudProgressCircular Color="MudBlazor.Color.Primary" Indeterminate="true" Size="MudBlazor.Size.Large" />
+                </MudPaper>
+            }
+            else
+            {
+                <MudPaper Class="pa-8 ma-2">
                     <ApexChart TItem="ParserData"
                                Options=_options
                                Title="Downloaded data amount" @ref="Chart"
@@ -103,21 +105,21 @@
                             </div>
                         </ApexPointTooltip>
                         <ChildContent>
-                        @foreach (string parser in _selected)
-                        {
-                            <ApexPointSeries TItem="ParserData"
-                                             Items="@_parserData[@parser]"
-                                             Name="@parser"
-                                             SeriesType="SeriesType.Bar"
-                                             XValue="e => e.Time"
-                                             YAggregate="e => Math.Round(e.Sum(es => es.DownloadedBytes),5)"
-                                             OrderByDescending="e => e.X"
-                                             ShowDataLabels />
-                        }
+                            @foreach (string parser in _selected)
+                            {
+                                <ApexPointSeries TItem="ParserData"
+                                                 Items="@_parserData[@parser]"
+                                                 Name="@parser"
+                                                 SeriesType="SeriesType.Bar"
+                                                 XValue="e => e.Time"
+                                                 YAggregate="e => Math.Round(e.Sum(es => es.DownloadedBytes),5)"
+                                                 OrderByDescending="e => e.X"
+                                                 ShowDataLabels />
+                            }
                         </ChildContent>
                     </ApexChart>
-                }
-            </MudPaper>
+                </MudPaper>
+            }
         </MudItem>
     </MudGrid>
 </MudContainer>
