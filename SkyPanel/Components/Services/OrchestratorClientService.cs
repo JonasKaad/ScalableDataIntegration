@@ -166,8 +166,8 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
                 }),
                 Encoding.UTF8,
                 "application/json");
-                using HttpResponseMessage response = await client.PostAsync($"{baseUrl}/users/{userId}/roles", jsonContent);
-                var returnStatusCode = response.StatusCode;
+            using HttpResponseMessage response = await client.PostAsync($"{baseUrl}/users/{userId}/roles", jsonContent);
+            var returnStatusCode = response.StatusCode;
                 return returnStatusCode == HttpStatusCode.OK;
         }
         catch (Exception e)
