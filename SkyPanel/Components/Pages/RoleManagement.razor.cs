@@ -174,6 +174,23 @@ public partial class RoleManagement
         }
         if (success)
         {
+            
+            var authState = await AuthenticationStateTask;
+            var authUser = authState.User;
+            var user = RoleUtil.GetUserEmail(authUser);
+            
+            // Detailed entry for adding roles
+            foreach (var role in auditRoleNamesToAdd)
+            {
+                _logger.LogInformation( "[AUDIT] {User} added role {Role} to {TargetUser}", user, role, _selectedUser.Email);
+            }
+            
+            // Detailed entry for removing roles
+            foreach (var role in auditRoleNamesToRemove)
+            {
+                _logger.LogInformation( "[AUDIT] {User} removed role {Role} from {TargetUser}", user, role, _selectedUser.Email);
+            }
+            
             Snackbar.Add("User roles updated successfully", Severity.Success);
             _originalUserRoles = new List<Role>(_userRoles);
             _rolesChanged = false;
