@@ -1,18 +1,309 @@
 ﻿@page "/role-management"
+@using SkyPanel.Components.Models.Auth0
+@using SkyPanel.Components.Services
 @attribute [Authorize(Roles = "Admin")]
+@inject OrchestratorClientService OrchestratorClient
+@inject ISnackbar Snackbar
+
+
 <PageTitle>SkyPanel — Role Management</PageTitle>
 
-<MudText Typo="Typo.h3" GutterBottom="true">Roles</MudText>
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-4">
+    <MudText Typo="Typo.h3" GutterBottom="true">Role Management</MudText>
 
-<MudText Typo="Typo.body1" Class="mb-4">Current amount of roles: @currentCount</MudText>
+    <MudGrid>
+        <MudItem xs="12" md="6">
+            <MudPaper Class="pa-4" Elevation="3">
+                <MudText Typo="Typo.h5" Class="mb-4">Users</MudText>
 
-<MudButton Color="Color.Primary" Variant="Variant.Filled" @onclick="IncrementCount">Click me</MudButton>
+                @if (_isLoadingUsers)
+                {
+                    <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-4" />
+                }
+                else if (_users.Count == 0)
+                {
+                    <MudAlert Severity="Severity.Info" Dense="true">No users found.</MudAlert>
+                }
+                else
+                {
+                    <MudTextField @bind-Value="_searchString" Placeholder="Search users..." Adornment="Adornment.Start"
+                                AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mb-4"/>
+
+                    <div style="height: 600px; overflow: auto;">
+                        <MudList T="string" Clickable="true" Dense="true">
+                            @foreach (var user in _filteredUsers)
+                            {
+                                <MudListItem OnClick="@(() => SelectUser(user))"
+                                            Selected="@(_selectedUser?.UserId == user.UserId)">
+                                    <div class="d-flex align-center">
+                                        @if (!string.IsNullOrEmpty(user.Picture))
+                                        {
+                                            <MudAvatar Class="mr-3" Size="Size.Small">
+                                                <MudImage Src="@user.Picture"/>
+                                            </MudAvatar>
+                                        }
+                                        else
+                                        {
+                                            <MudAvatar Class="mr-3" Size="Size.Small" Color="Color.Secondary">
+                                                @(user.Name?.FirstOrDefault() ?? '?')
+                                            </MudAvatar>
+                                        }
+                                        <div>
+                                            <MudText Typo="Typo.body1">@user.Name</MudText>
+                                            <MudText Typo="Typo.caption">@user.Email</MudText>
+                                        </div>
+                                    </div>
+                                </MudListItem>
+                            }
+                        </MudList>
+                    </div>
+                }
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" md="6">
+            <MudPaper Class="pa-4" Elevation="3">
+                <MudText Typo="Typo.h5" Class="mb-4">User Roles</MudText>
+
+                @if (_selectedUser == null)
+                {
+                    <MudAlert Severity="Severity.Info" Dense="true">Select a user to manage their roles.</MudAlert>
+                }
+                else
+                {
+                    <MudText Typo="Typo.subtitle1" Class="mb-4">
+                        Roles for: <strong>@_selectedUser.Name</strong>
+                    </MudText>
+
+                    @if (_isLoadingRoles)
+                    {
+                        <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-4" />
+                    }
+                    else
+                    {
+                        <MudText Typo="Typo.subtitle2" Class="mt-4 mb-2">Assigned Roles</MudText>
+                        @if (!_assignedRoles.Any())
+                        {
+                            <MudAlert Severity="Severity.Info" Dense="true" Class="mb-4">No roles assigned to this user.</MudAlert>
+                        }
+                        else
+                        {
+                            <MudTable Items="@_assignedRoles" Dense="true" Hover="true" Class="mb-4">
+                                <HeaderContent>
+                                    <MudTh>Role</MudTh>
+                                    <MudTh>Description</MudTh>
+                                    <MudTh>Action</MudTh>
+                                </HeaderContent>
+                                <RowTemplate>
+                                    <MudTd DataLabel="Role">@context.name</MudTd>
+                                    <MudTd DataLabel="Description">@context.description</MudTd>
+                                    <MudTd DataLabel="Action">
+                                        <MudIconButton 
+                                            Icon="@Icons.Material.Filled.Delete" 
+                                            Color="Color.Error" 
+                                            Size="Size.Small"
+                                            OnClick="@(() => RemoveRole(context))"/>
+                                    </MudTd>
+                                </RowTemplate>
+                            </MudTable>
+                        }
+
+                        <MudText Typo="Typo.subtitle2" Class="mt-4 mb-2">Available Roles</MudText>
+                        @if (!_availableRoles.Any())
+                        {
+                            <MudAlert Severity="Severity.Info" Dense="true" Class="mb-4">No additional roles available.</MudAlert>
+                        }
+                        else
+                        {
+                            <MudTable Items="@_availableRoles" Dense="true" Hover="true" Class="mb-4">
+                                <HeaderContent>
+                                    <MudTh>Role</MudTh>
+                                    <MudTh>Description</MudTh>
+                                    <MudTh>Action</MudTh>
+                                </HeaderContent>
+                                <RowTemplate>
+                                    <MudTd DataLabel="Role">@context.name</MudTd>
+                                    <MudTd DataLabel="Description">@context.description</MudTd>
+                                    <MudTd DataLabel="Action">
+                                        <MudIconButton 
+                                            Icon="@Icons.Material.Filled.Add" 
+                                            Color="Color.Success" 
+                                            Size="Size.Small"
+                                            OnClick="@(() => AddRole(context))"/>
+                                    </MudTd>
+                                </RowTemplate>
+                            </MudTable>
+                        }
+
+                        @if (_rolesChanged)
+                        {
+                            <div class="d-flex justify-end">
+                                <MudButton
+                                    Variant="Variant.Filled"
+                                    Color="Color.Primary"
+                                    OnClick="SaveUserRoles">
+                                    Save Changes
+                                </MudButton>
+                            </div>
+                        }
+                    }
+                }
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
 
 @code {
-    private int currentCount = 0;
+    private List<User> _users = new();
+    private List<User> _filteredUsers => _users
+        .Where(u => string.IsNullOrWhiteSpace(_searchString) ||
+                    u.Name.Contains(_searchString, StringComparison.OrdinalIgnoreCase) ||
+                    u.Email.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+        .ToList();
 
-    private void IncrementCount()
+    private string _searchString = "";
+    private User? _selectedUser;
+    private List<Role> _userRoles = new();
+    private List<Role> _originalUserRoles = new();
+    private List<Role> _allRoles = new();
+    private List<Role> _assignedRoles => _userRoles.ToList();
+    private List<Role> _availableRoles => _allRoles
+        .Where(r => _userRoles.All(ur => ur.id != r.id))
+        .ToList();
+    
+    private bool _isLoadingUsers = true;
+    private bool _isLoadingRoles = false;
+    private bool _rolesChanged = false;
+
+    protected override async Task OnInitializedAsync()
     {
-        currentCount++;
+        await LoadUsers();
+        await LoadAllRoles();
+    }
+
+    private async Task LoadUsers()
+    {
+        _isLoadingUsers = true;
+        _users = await OrchestratorClient.GetUsers();
+        _isLoadingUsers = false;
+    }
+
+    private async Task LoadAllRoles()
+    {
+        _allRoles = await OrchestratorClient.GetRoles();
+    }
+
+    private async Task SelectUser(User user)
+    {
+        _selectedUser = user;
+        await LoadUserRoles();
+    }
+
+    private async Task LoadUserRoles()
+    {
+        if (_selectedUser == null) return;
+
+        _isLoadingRoles = true;
+        _userRoles = await OrchestratorClient.GetUserRoles(_selectedUser.UserId);
+        _originalUserRoles = new List<Role>(_userRoles);
+        _rolesChanged = false;
+        _isLoadingRoles = false;
+    }
+
+    private void AddRole(Role role)
+    {
+        if (_userRoles.All(r => r.id != role.id))
+        {
+            _userRoles.Add(role);
+            UpdateRolesChangedState();
+        }
+    }
+
+    private void RemoveRole(Role role)
+    {
+        if (_userRoles.Any(r => r.id == role.id))
+        {
+            _userRoles.RemoveAll(r => r.id == role.id);
+            UpdateRolesChangedState();
+        }
+    }
+    private void UpdateRolesChangedState()
+    {
+        // Check if the current roles are different from the original roles
+        if (_userRoles.Count != _originalUserRoles.Count)
+        {
+            _rolesChanged = true;
+            return;
+        }
+
+        // Check if all roles in _userRoles exist in _originalUserRoles with the same id
+        foreach (var role in _userRoles)
+        {
+            if (_originalUserRoles.All(r => r.id != role.id))
+            {
+                _rolesChanged = true;
+                return;
+            }
+        }
+
+        // Check if all roles in _originalUserRoles exist in _userRoles with the same id
+        foreach (var role in _originalUserRoles)
+        {
+            if (_userRoles.All(r => r.id != role.id))
+            {
+                _rolesChanged = true;
+                return;
+            }
+        }
+
+        // If we get here, the collections have the same roles (by id)
+        _rolesChanged = false;
+    }
+
+    private async Task SaveUserRoles()
+    {
+        if (_selectedUser == null) return;
+        bool success = true;
+        
+        var rolesToAdd = _userRoles
+            .Where(r => _originalUserRoles.All(or => or.id != r.id))
+            .Select(r => r.id)
+            .ToArray();
+        
+        var rolesToRemove = _originalUserRoles
+            .Where(r => _userRoles.All(ur => ur.id != r.id))
+            .Select(r => r.id)
+            .ToArray();
+        
+        
+        if (rolesToAdd.Length > 0)
+        {
+            var addRoleData = new RoleData { roles = rolesToAdd };
+            var addSuccess = await OrchestratorClient.UpdateUserRoles(_selectedUser.UserId, addRoleData);
+            if (!addSuccess)
+            {
+                Snackbar.Add("Failed to add roles", Severity.Error);
+                success = false;
+            }
+        }
+        
+        // Remove roles if needed
+        if (rolesToRemove.Length > 0)
+        {
+            var removeRoleData = new RoleData { roles = rolesToRemove };
+            var removeSuccess = await OrchestratorClient.RemoveUserRole(_selectedUser.UserId, removeRoleData);
+            if (!removeSuccess)
+            {
+                Snackbar.Add("Failed to remove roles", Severity.Error);
+                success = false;
+            }
+        }
+        if (success)
+        {
+            Snackbar.Add("User roles updated successfully", Severity.Success);
+            _originalUserRoles = new List<Role>(_userRoles);
+            _rolesChanged = false;
+            StateHasChanged();
+        }
     }
 }
