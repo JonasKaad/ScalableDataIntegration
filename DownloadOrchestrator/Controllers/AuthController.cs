@@ -65,7 +65,6 @@ public class AuthController : ControllerBase
             request.Headers.Add("Accept", "application/json");
             request.Headers.Add("Authorization", $"Bearer {token}");
             var response = await client.SendAsync(request);
-            Console.WriteLine(response);
             var status = response.StatusCode;
             if (status == HttpStatusCode.OK)
             {
@@ -106,7 +105,6 @@ public class AuthController : ControllerBase
             
             if(response.StatusCode == HttpStatusCode.NoContent)
             {
-                Console.WriteLine(await response.Content.ReadAsStringAsync());
                 return Ok($"Updated user data.");
             }
             else return BadRequest("Failed to update user's roles. " + response.StatusCode + response.Content.ReadAsStringAsync());
@@ -141,7 +139,6 @@ public class AuthController : ControllerBase
             
             if(response.StatusCode == HttpStatusCode.NoContent)
             {
-                Console.WriteLine(await response.Content.ReadAsStringAsync());
                 return Ok($"Updated & deleted user data.");
             }
             else return BadRequest("Failed to update user's roles. " + response.StatusCode + response.Content.ReadAsStringAsync());
