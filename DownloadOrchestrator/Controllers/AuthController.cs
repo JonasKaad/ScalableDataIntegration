@@ -107,7 +107,11 @@ public class AuthController : ControllerBase
             {
                 return Ok($"Updated user data.");
             }
-            else return BadRequest("Failed to update user's roles. " + response.StatusCode + response.Content.ReadAsStringAsync());
+            else 
+            {
+                var errorMessage = await response.Content.ReadAsStringAsync();
+                return BadRequest("Failed to update user's roles. " + response.StatusCode + errorMessage);
+            }
             
         }
         catch (Exception ex)
