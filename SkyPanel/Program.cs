@@ -12,11 +12,29 @@ using MudBlazor;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.HttpOverrides;
+using Serilog;
+using Serilog.Sinks.Datadog.Logs;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Load env variables
 builder.Configuration.AddDotNetEnv(".env", LoadOptions.TraversePath());
+if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+{
+    Log.Logger = new LoggerConfiguration().WriteTo.Console().CreateLogger();
+}
+else
+{
+    var datadogConfiguration = new DatadogConfiguration() { Url = "https://http-intake.logs.us5.datadoghq.com", UseSSL = true, UseTCP = false};
+    Log.Logger = new LoggerConfiguration()
+        .WriteTo.DatadogLogs(
+            apiKey: Environment.GetEnvironmentVariable("DD_API_KEY"),
+            configuration: datadogConfiguration, 
+            service: "SkyPanel"
+        )
+        .CreateLogger();
+}
+
 builder.Services.AddMudServices(config =>
     {
     config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomRight;
