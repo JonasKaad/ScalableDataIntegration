@@ -40,21 +40,71 @@ else
             <PropertyColumn Property="x => x.Date" Format="dd/MM/yyyy HH\:mm" />
             <TemplateColumn CellClass=" justify-end">
                 <CellTemplate>
-                    <MudTooltip Text="Raw dataset not found" Disabled="@(!string.IsNullOrEmpty(@context.Item?.RawPath))" Arrow="true">
-                        <MudButton StartIcon="@Icons.Material.Filled.Download" Variant="Variant.Outlined" Color="Color.Info" Disabled="@(string.IsNullOrEmpty(@context.Item?.RawPath))" OnClick="@(() => Download(@context.Item?.ParserName, @context.Item?.RawPath))">Raw</MudButton>
-                    </MudTooltip>
+                    @{
+                        var parserName = context.Item?.ParserName;
+                        var canInteract = CanInteractWithParser(parserName).Result;
+                    }
+        
+                    @if (canInteract)
+                    {
+                        <MudTooltip Text="Raw dataset not found" Disabled="@(!string.IsNullOrEmpty(@context.Item?.RawPath))" Arrow="true">
+                            <MudButton StartIcon="@Icons.Material.Filled.Download" Variant="Variant.Outlined" Color="Color.Info" 
+                                       Disabled="@(string.IsNullOrEmpty(@context.Item?.RawPath))" 
+                                       OnClick="@(() => Download(@context.Item?.ParserName, @context.Item?.RawPath))">Raw</MudButton>
+                        </MudTooltip>
+                    }
+                    else
+                    {
+                        <MudTooltip Text="You don't have permission to download this file" Arrow="true">
+                            <MudButton StartIcon="@Icons.Material.Filled.Download" Variant="Variant.Outlined" Color="Color.Info" 
+                                       Disabled="true">Raw</MudButton>
+                        </MudTooltip>
+                    }
                 </CellTemplate>
             </TemplateColumn>
             <TemplateColumn CellClass="justify-end">
                 <CellTemplate>
-                    <MudTooltip Text="Parsed dataset not found" Disabled="@(!string.IsNullOrEmpty(@context.Item?.ParsedPath))" Arrow="true">
-                        <MudButton StartIcon="@Icons.Material.Filled.Download" Variant="Variant.Outlined" Color="Color.Primary" Disabled="@(string.IsNullOrEmpty(@context.Item?.ParsedPath))" OnClick="@(() => Download(@context.Item?.ParserName, @context.Item?.ParsedPath))">Parsed</MudButton>
-                    </MudTooltip>
+                    @{
+                        var parserName = context.Item?.ParserName;
+                        var canInteract = CanInteractWithParser(parserName).Result;
+                    }
+        
+                    @if (canInteract)
+                    {
+                        <MudTooltip Text="Parsed dataset not found" Disabled="@(!string.IsNullOrEmpty(@context.Item?.ParsedPath))" Arrow="true">
+                            <MudButton StartIcon="@Icons.Material.Filled.Download" Variant="Variant.Outlined" Color="Color.Primary" 
+                                       Disabled="@(string.IsNullOrEmpty(@context.Item?.ParsedPath))" 
+                                       OnClick="@(() => Download(@context.Item?.ParserName, @context.Item?.ParsedPath))">Parsed</MudButton>
+                        </MudTooltip>
+                    }
+                    else
+                    {
+                        <MudTooltip Text="You don't have permission to download this file" Arrow="true">
+                            <MudButton StartIcon="@Icons.Material.Filled.Download" Variant="Variant.Outlined" Color="Color.Primary" 
+                                       Disabled="true">Parsed</MudButton>
+                        </MudTooltip>
+                    }
                 </CellTemplate>
             </TemplateColumn>
             <TemplateColumn CellClass="justify-end">
                 <CellTemplate>
-                    <MudButton StartIcon="@Icons.Material.Filled.Delete" Variant="Variant.Outlined" Color="Color.Error" OnClick="@(() => OpenBlobDialogAsync(@context.Item))">Delete</MudButton>
+                    @{
+                        var parserName = context.Item?.ParserName;
+                        var canInteract = CanInteractWithParser(parserName).Result;
+                    }
+        
+                    @if (canInteract)
+                    {
+                        <MudButton StartIcon="@Icons.Material.Filled.Delete" Variant="Variant.Outlined" Color="Color.Error" 
+                                   OnClick="@(() => OpenBlobDialogAsync(@context.Item))">Delete</MudButton>
+                    }
+                    else
+                    {
+                        <MudTooltip Text="You don't have permission to delete this dataset" Arrow="true">
+                            <MudButton StartIcon="@Icons.Material.Filled.Delete" Variant="Variant.Outlined" Color="Color.Error" 
+                                       Disabled="true">Delete</MudButton>
+                        </MudTooltip>
+                    }
                 </CellTemplate>
             </TemplateColumn>
         </Columns>
