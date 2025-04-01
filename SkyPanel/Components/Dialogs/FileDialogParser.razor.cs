@@ -1,11 +1,23 @@
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Forms;
 using MudBlazor;
+using SkyPanel.Utils;
 
 namespace SkyPanel.Components.Dialogs;
 
 public partial class FileDialogParser : ComponentBase
 {
+    private readonly ILogger<FileDialogParser> _logger;
+    
+    public FileDialogParser (ILogger<FileDialogParser> logger)
+    {
+        _logger = logger;
+    }
+
+    [CascadingParameter] 
+    private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
+    
     [Parameter]
     public required string ParserName { get; set; }
     
@@ -44,10 +56,17 @@ public partial class FileDialogParser : ComponentBase
         }
     }
     
-    private void Upload()
+    private async Task Upload()
     {
         // TODO: Implement logic for handling file uploads
         DialogSubmit();
+        var authState = await AuthenticationStateTask;
+        var authUser = authState.User;
+        var user = RoleUtil.GetUserEmail(authUser);
+        foreach (var file in _fileNames)
+        {
+            _logger.LogInformation( "[AUDIT] {User} uploaded dataset: {file} to {Parser}", user, file, ParserName);
+        }
         Snackbar.Add("Uploaded your files!");
     }
     
