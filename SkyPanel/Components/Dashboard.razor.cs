@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 
 namespace SkyPanel.Components;
 using SkyPanel.Components.Services;
+using SkyPanel.Utils;
 
 public partial class Dashboard : ComponentBase
 {
@@ -30,6 +31,6 @@ public partial class Dashboard : ComponentBase
         
         // Check if user has access to any parser
         var availableParsers = await OrchestratorClient.GetDownloaders();
-        _canAccessParsers = availableParsers.Any(parser => user.IsInRole(parser));
+        _canAccessParsers = availableParsers.Any(parser => RoleUtil.HasRole(parser, user));
     }
 }
