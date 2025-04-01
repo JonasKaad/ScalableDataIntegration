@@ -11,6 +11,12 @@ namespace SkyPanel.Components.Features;
  
 public partial class LatestDatasetPanel : ComponentBase
 {
+    private readonly ILogger<LatestDatasetPanel> _logger;
+    
+    public LatestDatasetPanel (ILogger<LatestDatasetPanel> logger)
+    {
+        _logger = logger;
+    }
 
     private List<BlobDataItem>? _blobDataItems;
     private bool _isLoading;
@@ -117,15 +123,20 @@ public partial class LatestDatasetPanel : ComponentBase
             var deletedDatasets = new List<string>();
             if (blobDataItem.ParserName != null)
             {
+                var authState = await AuthenticationStateTask;
+                var authUser = authState.User;
+                var user = RoleUtil.GetUserEmail(authUser);
                 if (!string.IsNullOrEmpty(blobDataItem.ParsedPath))
                 {
                     await BlobService.DeleteBlob(blobDataItem.ParserName, blobDataItem.ParsedPath);
                     deletedDatasets.Add(blobDataItem.ParsedPath);
+                    _logger.LogInformation( "[AUDIT] {User} deleted parsed dataset: {DatasetUrl} for {Parser}", user, blobDataItem.ParsedPath, blobDataItem.ParserName);
                 }
 
                 if (!string.IsNullOrEmpty(blobDataItem.RawPath))
                 {
                     await BlobService.DeleteBlob(blobDataItem.ParserName, blobDataItem.RawPath);
+                    _logger.LogInformation( "[AUDIT] {User} deleted raw dataset: {DatasetUrl} for {Parser}", user, blobDataItem.RawPath, blobDataItem.ParserName);
                     deletedDatasets.Add(blobDataItem.RawPath);
                 }
             }
@@ -138,7 +149,6 @@ public partial class LatestDatasetPanel : ComponentBase
                     Snackbar.Add($"Deleted datasets: {string.Join(", ", deletedDatasets)}", Severity.Info);
                     break;
             }
-
             await RefreshData();
         }
     }
