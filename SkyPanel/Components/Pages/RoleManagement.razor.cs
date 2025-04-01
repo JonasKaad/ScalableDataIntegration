@@ -134,9 +134,19 @@ public partial class RoleManagement
             .Select(r => r.id)
             .ToArray();
         
+        var auditRoleNamesToAdd = _userRoles
+            .Where(r => _originalUserRoles.All(or => or.id != r.id))
+            .Select(r => r.name)
+            .ToArray();
+        
         var rolesToRemove = _originalUserRoles
             .Where(r => _userRoles.All(ur => ur.id != r.id))
             .Select(r => r.id)
+            .ToArray();
+        
+        var auditRoleNamesToRemove = _originalUserRoles
+            .Where(r => _userRoles.All(or => or.id != r.id))
+            .Select(r => r.name)
             .ToArray();
         
         
