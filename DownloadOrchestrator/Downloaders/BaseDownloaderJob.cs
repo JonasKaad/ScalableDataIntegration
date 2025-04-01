@@ -1,6 +1,7 @@
 using CommonDis.Models;
 using CommonDis.Services;
 using DownloadOrchestrator.Utils;
+using FluentFTP.Helpers;
 using Google.Protobuf;
 using Grpc.Net.Client;
 using Sdi.Filter;
@@ -37,7 +38,9 @@ public class BaseDownloaderJob : IDownloaderJob
                 return;
             }
             Log(data.Name, bytes.Length, DateTime.UtcNow);
-            await SendToParser(bytes, data.Parser, data.FilterUrl, data.Parameters);
+            var urls = data.Filters;
+            urls.Add(data.Parser);
+            await SendToParser(bytes, urls, data.Parameters);
         }
         catch (Exception e)
         {
@@ -70,10 +73,10 @@ public class BaseDownloaderJob : IDownloaderJob
         _context.SaveChanges();
     }
 
-    public static async Task SendToParser(byte[] downloadedBytes, string parserUrl, string filterUrl, string parameters)
+    public static async Task SendToParser(byte[] downloadedBytes, List<string> urls, List<string> parameters)
     {
-        var hasFilter = !string.IsNullOrWhiteSpace(filterUrl);
-        var address = hasFilter ? filterUrl : parserUrl;
+        var hasFilter = (urls.Count > 1);
+        var address = urls.FirstOrDefault()!;
         using var channel = GrpcChannel.ForAddress(address);
 
         if (hasFilter)
@@ -83,8 +86,8 @@ public class BaseDownloaderJob : IDownloaderJob
             {
                 RawData = ByteString.CopyFrom(downloadedBytes), 
                 Format = "img", 
-                Parameters = parameters,
-                NextUrls = parserUrl
+                Parameters = parameters.Join(";"),
+                NextUrls = urls.Skip(1).ToList().Join(";")
             });
         }
         else

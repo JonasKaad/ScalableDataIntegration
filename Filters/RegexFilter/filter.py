@@ -1,13 +1,9 @@
-import aiohttp
 import asyncio
 import grpc
 import sys
 import os
 import json
-
-import easyocr
-import cv2
-import numpy as np
+import re
 
 GENCLIENT_PYTHON_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../GeneratedClients/python"))
 
@@ -32,24 +28,17 @@ class FilterServicer(filter_pb2_grpc.FilterServicer):
         # Get data from the request
         raw_data = request.raw_data
         format_type = request.format
-        if format_type != "img":
+        (strings, raw) = get_data(raw_data, format_type)
+        if format_type != "str":
             return filter_pb2.FilterResponse(success=False, err_msg="Invalid format")
 
-        nparr = np.frombuffer(raw_data, np.uint8)
-        image_data = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        (json_parameters, parameters) = read_params(request.parameters.split(";"), "regex")
 
-        (json_parameters, parameters) = read_params(request.parameters.split(";"), "startX")
+        for string in strings:
+            if re.search(json_parameters["regex"], string):
+                match = string
 
-        start_y = json_parameters["startY"]
-        start_x = json_parameters["startX"]
-        end_y = json_parameters["endY"]
-        end_x = json_parameters["endX"]
-        cropped = image_data[start_y:end_y, start_x:end_x]
-        img_bytes = cv2.imencode('.png', cropped)[1].tobytes()
-        result = reader.readtext(img_bytes, detail=0)
 
-        raw_data += b'magic'
-        raw_data += bytes(';'.join(result), encoding='utf-8')
         (next_url, urls) = get_next_url(request.next_urls.split(";"))
 
         if next_url:
@@ -58,6 +47,8 @@ class FilterServicer(filter_pb2_grpc.FilterServicer):
             elif next_url.startswith("https://"):
                 next_url = next_url[8:]
 
+        if ":" not in next_url:
+            next_url = next_url + ":80"
         try:
             # Create channel with timeout options
             options = [
@@ -69,10 +60,13 @@ class FilterServicer(filter_pb2_grpc.FilterServicer):
                 if len(parameters) > 0:
                     stub = filter_pb2_grpc.FilterStub(channel)
                     response = await stub.FilterCall(
-                        filter_pb2.FilterRequest(raw_data=raw_data, parameters=parameters, next_urls=urls, format="str"))
+                        filter_pb2.FilterRequest(raw_data=raw_data, parameters=parameters, next_urls=urls))
                 else:
                     stub = parser_pb2_grpc.ParserStub(channel)
-                    response = await stub.ParseCall(parser_pb2.ParseRequest(raw_data=raw_data))
+                    data_to_send = raw[0]
+                    data_to_send += b'magic'
+                    data_to_send += bytes(match[0], encoding='utf-8')
+                    response = await stub.ParseCall(parser_pb2.ParseRequest(raw_data=data_to_send))
 
                 if response.success:
                     success = True
@@ -86,6 +80,25 @@ class FilterServicer(filter_pb2_grpc.FilterServicer):
             msg = "gRPC connection error"
 
         return filter_pb2.FilterReply(success=success, err_msg=msg)
+
+def get_data(raw_data, format_type):
+    data_list = raw_data.split(b'magic')
+    strings = []
+    raw = []
+    for data in data_list:
+        if data:  # Skip empty data chunks
+            if format_type == "str":
+                try:
+                    #TODO: FIX ME
+                    strings = data.decode('utf-8').split(";")
+                except UnicodeDecodeError:
+                    print(f"Warning: Could not decode part of data as UTF-8")
+                    raw.append(data)  # Keep as bytes
+            else:
+                raw.append(data)
+
+    return strings, raw
+
 
 def read_params(params_list, relevant_string=""):
     relevant = {}
@@ -112,12 +125,11 @@ async def serve():
     filter_pb2_grpc.add_FilterServicer_to_server(
         FilterServicer(), server
     )
-    reader = easyocr.Reader(['en'], gpu=False)
 
     # Listen on port 50051
-    server.add_insecure_port('[::]:50051')
+    server.add_insecure_port('[::]:50052')
     await server.start()
-    print(f"Starting server on {50051}")
+    print(f"Starting server on {50052}")
     await server.wait_for_termination()
 
 
