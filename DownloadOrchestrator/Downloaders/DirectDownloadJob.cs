@@ -1,9 +1,6 @@
-using Azure.Identity;
-using Azure.Security.KeyVault.Secrets;
 using Azure.Storage.Blobs;
-using DownloadOrchestrator.Models;
-using DownloadOrchestrator.Services;
-using Microsoft.EntityFrameworkCore;
+using CommonDis.Models;
+using CommonDis.Services;
 
 namespace DownloadOrchestrator.Downloaders;
 
@@ -11,7 +8,7 @@ public class DirectDownloadJob : BaseDownloaderJob
 {
     private readonly ILogger<DirectDownloadJob> _logger;
 
-    public DirectDownloadJob(ILogger<DirectDownloadJob> logger, StatisticsContext statisticsContext, SecretService secretService) : base(logger, statisticsContext, secretService)
+    public DirectDownloadJob(ILogger<DirectDownloadJob> logger, StatisticsDatabaseService statisticsContext, SecretService secretService) : base(logger, statisticsContext, secretService)
     {
         _logger = logger;
     }

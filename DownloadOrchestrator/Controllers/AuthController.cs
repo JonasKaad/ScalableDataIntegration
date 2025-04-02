@@ -1,7 +1,6 @@
 using System.Net;
-using System.Net.Http.Headers;
 using System.Text.Json;
-using DownloadOrchestrator.Models.Auth0;
+using CommonDis.Models.Auth0;
 using DownloadOrchestrator.Services;
 using Microsoft.AspNetCore.Mvc;
 namespace DownloadOrchestrator.Controllers;

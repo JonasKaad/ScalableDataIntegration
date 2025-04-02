@@ -7,6 +7,7 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
+COPY ["./Common/Csharp/CommonDis/CommonDis.csproj", "/Common/Csharp/CommonDis/"]
 COPY ["./DownloadOrchestrator/DownloadOrchestrator.csproj", "./DownloadOrchestrator/"]
 COPY ["./GeneratedClients/csharp/Parser.cs", "./GeneratedClients/csharp/"]
 COPY ["./GeneratedClients/csharp/ParserGrpc.cs", "./GeneratedClients/csharp/"]

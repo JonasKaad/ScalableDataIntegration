@@ -1,22 +1,19 @@
-using Azure.Identity;
-using Azure.Security.KeyVault.Secrets;
-using DownloadOrchestrator.Models;
-using DownloadOrchestrator.Services;
+using CommonDis.Models;
+using CommonDis.Services;
 using DownloadOrchestrator.Utils;
 using Google.Protobuf;
 using Grpc.Net.Client;
-using Microsoft.EntityFrameworkCore;
 using Sdi.Parser;
 
 namespace DownloadOrchestrator.Downloaders;
 
 public class BaseDownloaderJob : IDownloaderJob
 {
-    private readonly StatisticsContext _context;
+    private readonly StatisticsDatabaseService _context;
     protected readonly SecretService SecretService;
     private readonly ILogger<IDownloaderJob> _logger;
     
-    public BaseDownloaderJob(ILogger<BaseDownloaderJob> logger, StatisticsContext context, SecretService secretService)
+    public BaseDownloaderJob(ILogger<BaseDownloaderJob> logger, StatisticsDatabaseService context, SecretService secretService)
     {
         _context = context; 
         SecretService = secretService;
