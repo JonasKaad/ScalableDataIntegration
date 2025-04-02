@@ -1,8 +1,9 @@
 using System.Net;
 using System.Text;
 using System.Text.Json;
+using CommonDis.Models;
+using CommonDis.Models.Auth0;
 using SkyPanel.Components.Models;
-using SkyPanel.Components.Models.Auth0;
 
 namespace SkyPanel.Components.Services;
 
@@ -13,7 +14,7 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
         var client = httpClientFactory.CreateClient();
         try
         {
-            var response = await client.GetAsync($"{baseUrl}/downloaders");
+            var response = await client.GetAsync($"{baseUrl}/Downloader/downloaders");
             var elements = await response.Content.ReadFromJsonAsync<IEnumerable<string>>();
             return elements ?? [];
         } 
@@ -30,7 +31,7 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
         
         try
         {
-            var response = await client.GetAsync($"{baseUrl}/{downloader}/configuration");
+            var response = await client.GetAsync($"{baseUrl}/Downloader/{downloader}/configuration");
             var parser = await response.Content.ReadFromJsonAsync<Parser>();
             return parser ?? new Parser("", "", "", "", "", "");
         }
@@ -48,19 +49,8 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
         
         try
         {
-            using StringContent jsonContent = new(
-                JsonSerializer.Serialize(new
-                {
-                    name = parser,
-                    downloadUrl = url ?? "",
-                    parser = "",
-                    backupUrl = backupUrl ?? "",
-                    secretName = secretName ?? "",
-                    pollingRate = pollingRate ?? "",
-                }),
-                Encoding.UTF8,
-                "application/json");
-            using HttpResponseMessage response = await client.PutAsync($"{baseUrl}/{parser}/configure", jsonContent);
+            using var jsonContent = SetupJsonContent(parser, url, backupUrl, secretName, pollingRate);
+            using HttpResponseMessage response = await client.PutAsync($"{baseUrl}/Downloader/{parser}/configure", jsonContent);
             var returnStatusCode = response.StatusCode;
             return returnStatusCode == HttpStatusCode.OK;
         }
@@ -70,25 +60,14 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
         }
         return false;
     }
-    
-    public async Task<List<bool>> TestConnection(string _parser, string _url, string _backupUrl, string _secretName, string _pollingRate)
+
+    public async Task<List<bool>> TestConnection(string parser, string url, string backupUrl, string secretName, string pollingRate)
     {
         var client = httpClientFactory.CreateClient();
         try
         {
-            using StringContent jsonContent = new(
-                JsonSerializer.Serialize(new 
-                {
-                    name = _parser,
-                    downloadUrl = _url,
-                    parser = "",
-                    backupUrl = _backupUrl,
-                    secretName = _secretName,
-                    pollingRate = _pollingRate,
-                }),
-                Encoding.UTF8,
-                "application/json");
-            using HttpResponseMessage response  = await client.PostAsync($"{baseUrl}/test", jsonContent);
+            using var jsonContent = SetupJsonContent(parser, url, backupUrl, secretName, pollingRate);
+            using HttpResponseMessage response  = await client.PostAsync($"{baseUrl}/Downloader/test", jsonContent);
             
             var jsonResponse = await response.Content.ReadFromJsonAsync<List<bool>>();
             return jsonResponse ?? [];
@@ -99,13 +78,39 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
         }
         return [];
     }
+    
+    private static StringContent SetupJsonContent(string parser, string url, string backupUrl, string secretName, string pollingRate)
+    {
+        StringContent? jsonContent = null;
+        try
+        {
+            jsonContent = new(
+                JsonSerializer.Serialize(new DownloaderData()
+                {
+                    Name = parser,
+                    DownloadUrl = url ?? "",
+                    Parser = "",
+                    BackUpUrl = backupUrl ?? "",
+                    SecretName = secretName ?? "",
+                    PollingRate = pollingRate ?? "",
+                }),
+                Encoding.UTF8,
+                "application/json");
+            return jsonContent;
+        }
+        catch
+        {
+            jsonContent?.Dispose();
+            throw;
+        }
+    }
 
     public async Task<List<User>> GetUsers()
     {
         var client = httpClientFactory.CreateClient();
         try
         {
-            var response = await client.GetAsync($"{baseUrl}/users");
+            var response = await client.GetAsync($"{baseUrl}/Auth/users");
             var users = await response.Content.ReadFromJsonAsync<List<User>>();
             return users ?? [];
         }
@@ -121,7 +126,7 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
         var client = httpClientFactory.CreateClient();
         try
         {
-            var response = await client.GetAsync($"{baseUrl}/users/{userId}/roles");
+            var response = await client.GetAsync($"{baseUrl}/Auth/users/{userId}/roles");
             var roles = await response.Content.ReadFromJsonAsync<List<Role>>();
             return roles ?? [];
         }
@@ -137,7 +142,7 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
         var client = httpClientFactory.CreateClient();
         try
         {
-            var request = new HttpRequestMessage(HttpMethod.Delete, $"{baseUrl}/users/{userId}/roles")
+            var request = new HttpRequestMessage(HttpMethod.Delete, $"{baseUrl}/Auth/users/{userId}/roles")
             {
                 Content = new StringContent(
                     JsonSerializer.Serialize(new { roles = roles.roles }),
@@ -166,7 +171,7 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
                 }),
                 Encoding.UTF8,
                 "application/json");
-            using HttpResponseMessage response = await client.PostAsync($"{baseUrl}/users/{userId}/roles", jsonContent);
+            using HttpResponseMessage response = await client.PostAsync($"{baseUrl}/Auth/users/{userId}/roles", jsonContent);
             var returnStatusCode = response.StatusCode;
                 return returnStatusCode == HttpStatusCode.OK;
         }
@@ -181,7 +186,7 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
         var client = httpClientFactory.CreateClient();
         try
         {
-            var response = await client.GetAsync($"{baseUrl}/roles");
+            var response = await client.GetAsync($"{baseUrl}/Auth/roles");
             var roles = await response.Content.ReadFromJsonAsync<List<Role>>();
             return roles ?? [];
         }

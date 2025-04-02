@@ -1,9 +1,7 @@
 using ApexCharts;
+using CommonDis.Services;
 using Microsoft.AspNetCore.Components;
-using Microsoft.EntityFrameworkCore;
 using MudBlazor;
-using SkyPanel.Components.Models;
-using SkyPanel.Components.Services;
 
 namespace SkyPanel.Components.Pages;
 

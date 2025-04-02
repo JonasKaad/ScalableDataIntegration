@@ -2,6 +2,7 @@ using Auth0.AspNetCore.Authentication;
 using Azure.Core;
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
+using CommonDis.Services;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
 using SkyPanel.Components;
