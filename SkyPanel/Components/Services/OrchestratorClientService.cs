@@ -53,7 +53,7 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
                 {
                     name = parser,
                     downloadUrl = url ?? "",
-                    parserUrl = "",
+                    parser = "",
                     backupUrl = backupUrl ?? "",
                     secretName = secretName ?? "",
                     pollingRate = pollingRate ?? "",
@@ -81,7 +81,7 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
                 {
                     name = _parser,
                     downloadUrl = _url,
-                    parserUrl = "",
+                    parser = "",
                     backupUrl = _backupUrl,
                     secretName = _secretName,
                     pollingRate = _pollingRate,
