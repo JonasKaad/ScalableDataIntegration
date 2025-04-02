@@ -1,4 +1,5 @@
 using AusotParser.Services;
+using CommonDis.Services;
 using DotNetEnv;
 using DotNetEnv.Configuration;
 using Serilog;
@@ -28,6 +29,7 @@ else
 // Add services to the container.
 builder.Services
     .AddSerilog()
+    .AddSingleton<CommonService>()
     .AddHostedService<HeartbeatService>(sp =>
     {
         var logger = sp.GetRequiredService<ILogger<HeartbeatService>>();

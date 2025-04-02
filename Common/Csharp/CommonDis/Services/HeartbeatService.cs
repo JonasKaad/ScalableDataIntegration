@@ -1,4 +1,8 @@
-namespace AusotParser.Services;
+using System.Net.Http.Json;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+
+namespace CommonDis.Services;
 
 public class HeartbeatService : BackgroundService
 {
