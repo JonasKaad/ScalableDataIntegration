@@ -16,7 +16,7 @@ async def send_heartbeat():
 async def heartbeat_scheduler():
     alive = True
     while True:
-        await asyncio.sleep(1 * 60)  # Sleep for 30 minutes
+        await asyncio.sleep(1 * 60)
         if alive:
             try:
                 alive = await send_heartbeat()
