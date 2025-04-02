@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DownloadOrchestrator.Controllers;
 
+[Route("[controller]")]
 [ApiController]
 public class DownloaderController : ControllerBase
 {
@@ -29,44 +30,6 @@ public class DownloaderController : ControllerBase
     public ActionResult<List<string>> GetDownloaders()
     {
         return _downloaders.Select(dl => dl.Name).ToList();
-    }
-    
-    [Route("parsers")]
-    [HttpGet]
-    public ActionResult<List<string>> GetParsers()
-    {
-        return _parserRegistry.GetServices();
-    }
-    
-    [Route("{parser}/register")]
-    [HttpPost]
-    public ActionResult RegisterParser(string parser, [FromBody] string url)
-    {
-        _parserRegistry.RegisterService(parser, url);
-        return Ok($"Parser {parser} has been registered.");
-    }
-
-    [Route("{parser}/deregister")]
-    [HttpDelete]
-    public ActionResult DeregisterParser(string parser)
-    {
-        _parserRegistry.DeRegisterService(parser);
-        return Ok($"Parser {parser} has been deregistered.");
-    }
-    
-    [Route("{parser}/heartbeat")]
-    [HttpPost]
-    public ActionResult ParserHeartbeat(string parser)
-    {
-        try
-        {
-            _parserRegistry.RefreshService(parser);
-        }
-        catch (KeyNotFoundException e)
-        {
-            return NotFound($"{parser} has not been registered.");
-        }
-        return Ok($"Heartbeat Acknowledged for {parser}");
     }
     
     [Route("{downloader}/configuration")]
@@ -144,16 +107,9 @@ public class DownloaderController : ControllerBase
             return BadRequest("The downloader must have a polling rate.");
         }
 
-        if (_parserRegistry.GetService(downloader) is { } parser)
-        {
-            newDl.Parser = parser;
-        }
-        else
-        {
-            return BadRequest("The parser could not be resolved");
-        }
+        newDl.Parser = _parserRegistry.GetService(downloader.ToLowerInvariant()) ?? "";
 
-        
+
         _downloaders.Add(newDl);
         _downloaderService.ScheduleOrUpdateRecurringDownload(newDl);
         return Ok($"Downloader {downloader} has been added.");
@@ -182,14 +138,17 @@ public class DownloaderController : ControllerBase
         {
             return NotFound("The downloader could not be found.");
         }
-        List<byte> totalBytes = new List<byte>();
+        var totalBytes = new List<byte>();
         foreach (var file in formFiles)
         {
             await using var sr = file.OpenReadStream();
-            byte[] bytes = new byte[sr.Length];
+            var bytes = new byte[sr.Length];
             await sr.ReadExactlyAsync(bytes, 0, bytes.Length);
             totalBytes.AddRange(bytes);
-            totalBytes.AddRange("magic"u8.ToArray());
+            if (formFiles.Count > 1)
+            {
+                totalBytes.AddRange("magic"u8.ToArray());
+            }
         }
         await BaseDownloaderJob.SendToParser(totalBytes.ToArray(), dl.Parser);
         return Ok($"Parsing for {downloader} has been started with uploaded data.");
@@ -198,7 +157,7 @@ public class DownloaderController : ControllerBase
 
     private DownloaderData? GetDownloader(string downloader) =>  _downloaders.FirstOrDefault(d => d.Name.Equals(downloader));
 
-    [Route("/test")]
+    [Route("test")]
     [HttpPost]
     public async Task<ActionResult<List<bool>>> TestConnection([FromBody]DownloaderData downloader)
     {

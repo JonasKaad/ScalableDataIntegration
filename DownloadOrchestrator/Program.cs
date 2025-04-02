@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Hangfire;
 using Hangfire.PostgreSql;
 using Serilog;
+using Serilog.Events;
 using Serilog.Sinks.Datadog.Logs;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,7 +22,11 @@ builder.Services.AddOpenApi();
 builder.Configuration.AddDotNetEnv(".env", LoadOptions.TraversePath());
 if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
 {
-    Log.Logger = new LoggerConfiguration().WriteTo.Console().CreateLogger();
+    Log.Logger = new LoggerConfiguration().WriteTo.Console()
+        .MinimumLevel.Override("Microsoft.AspNetCore.Hosting", LogEventLevel.Warning)
+        .MinimumLevel.Override("Microsoft.AspNetCore.Mvc", LogEventLevel.Warning)
+        .MinimumLevel.Override("Microsoft.AspNetCore.Routing", LogEventLevel.Warning)
+        .CreateLogger();
 }
 else
 {
@@ -32,6 +37,9 @@ else
             configuration: datadogConfiguration, 
             service: "DownloadOrchestrator"
             )
+        .MinimumLevel.Override("Microsoft.AspNetCore.Hosting", LogEventLevel.Warning)
+        .MinimumLevel.Override("Microsoft.AspNetCore.Mvc", LogEventLevel.Warning)
+        .MinimumLevel.Override("Microsoft.AspNetCore.Routing", LogEventLevel.Warning)
         .CreateLogger();
 }
 
@@ -86,10 +94,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseSerilogRequestLogging();
 app.UseHttpsRedirection();
 app.MapControllers();
 app.UseHangfireDashboard();
-app.UseSerilogRequestLogging();
 
 try
 {
