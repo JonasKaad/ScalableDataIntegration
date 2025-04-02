@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using Azure;
 using Azure.Identity;
 using Azure.Storage.Blobs;
+using CommonDis.Services;
 using Grpc.Core;
 using HtmlAgilityPack;
 using Sdi.Parser;
@@ -15,10 +16,12 @@ public class AusotParserService : Parser.ParserBase
 
     private readonly ILogger<AusotParserService> _logger;
     private static string _name = "ausotparser";
+    private CommonService _commonService;
 
-    public AusotParserService(ILogger<AusotParserService> logger)
+    public AusotParserService(ILogger<AusotParserService> logger, CommonService common)
     {
         _logger = logger;
+        _commonService = common;
     }
 
     public override async Task<ParseResponse> ParseCall(ParseRequest request, ServerCallContext context)
@@ -57,7 +60,7 @@ public class AusotParserService : Parser.ParserBase
             }
         }
         
-        await SaveDataToBlob(result, tracks);
+        await _commonService.SaveDataToBlob(_name, new BinaryData(result), new BinaryData(tracks));
         _logger.LogInformation("Parsed {Tracks}", tracks.Count);
 
         return await Task.FromResult(new ParseResponse
@@ -65,30 +68,6 @@ public class AusotParserService : Parser.ParserBase
             Success = true,
             ErrMsg = $"Parsed {tracks.Count} tracks"
         });
-    }
-
-    private async Task SaveDataToBlob(string result, List<Track> tracks)
-    {
-        DotNetEnv.Env.Load();
-        var connectionString = Environment.GetEnvironmentVariable("blobConnection");
-        var blobServiceClient = new BlobServiceClient(connectionString);
-
-        var container = blobServiceClient.GetBlobContainerClient(_name);
-        await container.CreateIfNotExistsAsync();
-
-        var date = DateTime.UtcNow.Date;
-        var hour = DateTime.UtcNow.Hour;
-        var min = DateTime.UtcNow.Minute;
-
-        try
-        {
-            await container.UploadBlobAsync($"{date:yyyy/MM/dd}/{hour}{min}-tracks_raw.txt", new BinaryData(result));
-            await container.UploadBlobAsync($"{date:yyyy/MM/dd}/{hour}{min}-tracks_parsed.txt", new BinaryData(tracks));
-        }
-        catch (RequestFailedException ex)
-        {
-            _logger.LogError("Failed to upload to blob: {Error}", ex);
-        }
     }
 
     private class Track(
