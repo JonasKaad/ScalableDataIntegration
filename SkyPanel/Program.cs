@@ -35,7 +35,9 @@ else
         .CreateLogger();
 }
 
-builder.Services.AddMudServices(config =>
+builder.Services
+    .AddSerilog()
+    .AddMudServices(config =>
     {
     config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomRight;
     })
