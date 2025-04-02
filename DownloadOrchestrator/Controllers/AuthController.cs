@@ -6,6 +6,8 @@ using DownloadOrchestrator.Services;
 using Microsoft.AspNetCore.Mvc;
 namespace DownloadOrchestrator.Controllers;
 
+[Route("[controller]")]
+[ApiController]
 public class AuthController : ControllerBase
 {
     private AuthService AuthService  { get; set; }
