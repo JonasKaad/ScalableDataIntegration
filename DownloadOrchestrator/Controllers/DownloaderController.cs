@@ -96,9 +96,10 @@ public class DownloaderController : ControllerBase
         
         try
         {
-            var parser = _parserRegistry.GetService(dlConfiguration.Parser);
+            var parser = !string.IsNullOrEmpty(dlConfiguration.Parser) ?  _parserRegistry.GetService(dlConfiguration.Parser.ToLowerInvariant()) : "";
             if(parser is null)
             {
+                _logger.LogWarning("Tried to configure downloader {Downloader} with parser {Parser} but the parser was not found", downloader, dlConfiguration.Parser);
                 return BadRequest("The parser could not be resolved.");
             }
             dlToConfigure.Parser = HandleConfiguration(dlToConfigure.Parser, parser!);
