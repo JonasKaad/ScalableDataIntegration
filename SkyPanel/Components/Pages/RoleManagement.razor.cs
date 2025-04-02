@@ -1,7 +1,7 @@
+using CommonDis.Models.Auth0;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using MudBlazor;
-using SkyPanel.Components.Models.Auth0;
 using SkyPanel.Utils;
 
 namespace SkyPanel.Components.Pages;
