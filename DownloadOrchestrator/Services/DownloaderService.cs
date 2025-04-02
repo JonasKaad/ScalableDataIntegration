@@ -1,5 +1,5 @@
+using CommonDis.Models;
 using DownloadOrchestrator.Downloaders;
-using DownloadOrchestrator.Models;
 using Hangfire;
 using Hangfire.Storage;
 
@@ -41,10 +41,18 @@ public class DownloaderService : IDownloaderService
     public List<DownloaderData> GetRecurringJobs()
     {
         var jobs = _jobStorage.GetReadOnlyConnection().GetRecurringJobs();
-        return jobs
-            .Where(job => job.Job.Args.Count > 0 && job.Job.Args[0] is DownloaderData)
-            .Select(job => job.Job.Args[0] as DownloaderData)
-            .Where(data => data != null)
-            .ToList();
+        // Before merging we need to remove the current jobs as they are not the correct type, since the namespace was changed
+        try
+        {
+            return jobs
+                .Where(job => job.Job.Args.Count > 0 && job.Job.Args[0] is DownloaderData)
+                .Select(job => job.Job.Args[0] as DownloaderData)
+                .Where(data => data != null)
+                .ToList()!;
+        }
+        catch
+        {
+            return [];
+        }
     }
 }

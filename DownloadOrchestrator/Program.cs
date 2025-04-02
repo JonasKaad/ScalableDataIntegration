@@ -1,6 +1,7 @@
 using Azure.Core;
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
+using CommonDis.Services;
 using DotNetEnv;
 using DotNetEnv.Configuration;
 using DownloadOrchestrator.Downloaders;
@@ -23,9 +24,6 @@ builder.Configuration.AddDotNetEnv(".env", LoadOptions.TraversePath());
 if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
 {
     Log.Logger = new LoggerConfiguration().WriteTo.Console()
-        .MinimumLevel.Override("Microsoft.AspNetCore.Hosting", LogEventLevel.Warning)
-        .MinimumLevel.Override("Microsoft.AspNetCore.Mvc", LogEventLevel.Warning)
-        .MinimumLevel.Override("Microsoft.AspNetCore.Routing", LogEventLevel.Warning)
         .CreateLogger();
 }
 else
@@ -60,7 +58,7 @@ builder.Services.AddSwaggerGen();
 builder.Services
     .AddSerilog()
     .AddSingleton<ParserRegistry>()
-    .AddDbContextFactory<StatisticsContext>(options =>
+    .AddDbContextFactory<StatisticsDatabaseService>(options =>
         options.UseNpgsql(connectionString))
     .AddScoped<SecretService>(s =>
     {

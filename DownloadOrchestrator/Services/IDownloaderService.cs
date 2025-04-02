@@ -1,4 +1,4 @@
-using DownloadOrchestrator.Models;
+using CommonDis.Models;
 
 namespace DownloadOrchestrator.Services;
 

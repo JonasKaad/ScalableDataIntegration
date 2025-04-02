@@ -31,5 +31,9 @@
         <Compile Include="../GeneratedClients/csharp/Parser.cs" />
         <Compile Include="../GeneratedClients/csharp/ParserGrpc.cs" />
     </ItemGroup>
+    
+    <ItemGroup>
+      <ProjectReference Include="..\Common\Csharp\CommonDis\CommonDis.csproj" />
+    </ItemGroup>
 
 </Project>
