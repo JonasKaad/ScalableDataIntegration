@@ -101,6 +101,7 @@ public partial class ParserPanel : ComponentBase
             else
             {
                 Snackbar.Add($"Failed to fetch and parse latest dataset for {ParserState.ParserName}", Severity.Error);
+                _logger.LogError("[AUDIT] Failed to fetch and parse latest dataset for {Parser}", ParserState.ParserName);
             }
         }
         
