@@ -3,18 +3,13 @@ using MudBlazor;
 
 namespace SkyPanel.Components.Dialogs;
 
-public partial class BasicDialog : ComponentBase
+public partial class ReparseDialog : ComponentBase
 {
     [Parameter, EditorRequired]
     public required string ContentText { get; set; }
     
     [Parameter]
     public string EmphasizedCenterText { get; set; } = string.Empty;
-    
-    [Parameter]
-    public string SnackbarMessage { get; set; } = string.Empty;
-
-    [Parameter] public Severity SnackbarSeverity { get; set; } = Severity.Normal;
     
     [Parameter]
     public string ConfirmationButtonText { get; set; } = "Ok";
@@ -26,11 +21,7 @@ public partial class BasicDialog : ComponentBase
     private IMudDialogInstance? MudDialog { get; set; }
     private void DialogSubmit()
     {
-        MudDialog?.Close(DialogResult.Ok(true));
-        if (!string.IsNullOrEmpty(SnackbarMessage))
-        {
-            Snackbar.Add(SnackbarMessage, SnackbarSeverity);
-        }
+        MudDialog?.Close(DialogResult.Ok("reparse"));
 
     }
 
