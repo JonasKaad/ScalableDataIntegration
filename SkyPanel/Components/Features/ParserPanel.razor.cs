@@ -154,10 +154,8 @@ public partial class ParserPanel : ComponentBase
                 var authState = await authenticationStateTask;
                 var authUser = authState.User;
                 var user = RoleUtil.GetUserEmail(authUser);
-                foreach (var file in _files)
-                {
-                    _logger.LogInformation( "[AUDIT] {User} uploaded dataset: {file} to {Parser}", user, file.Name, parserName);
-                }
+                var fileNames = string.Join(", ", _files.Select(x => x.Name));
+                _logger.LogInformation( "[AUDIT] {User} uploaded: {files} to {Parser}", user, fileNames, parserName);
                 Snackbar.Add($"Uploaded {_files.Count} files!", Severity.Success);
             }
             else if (response.Result == Result.AlreadyExists)
@@ -171,10 +169,8 @@ public partial class ParserPanel : ComponentBase
             else
             {
                 Snackbar.Add($"Failed to upload files! \n{response.Result} \n{response.Message}", Severity.Error);
-                foreach (var file in _files)
-                {
-                    _logger.LogInformation("{FileName} not uploaded {reason}", file.Name, response.Result);
-                }
+                var fileNames = string.Join(", ", _files.Select(x => x.Name));
+                _logger.LogInformation("{FileName} not uploaded {reason}", fileNames, response.Result);
             }
         }
         
