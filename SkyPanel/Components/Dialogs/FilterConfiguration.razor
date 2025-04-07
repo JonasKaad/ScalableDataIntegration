@@ -1,19 +1,83 @@
-<MudStack>
-    <MudSelect T="string" Label="Available Filters" @bind-Value="selectedFilter">
-        @foreach (var filter in availableFilters)
-        {
-            <MudSelectItem Value="@filter">@filter</MudSelectItem>
-        }
-    </MudSelect>
-    <MudButton OnClick="AddFilter" Variant="Variant.Filled" Disabled="@string.IsNullOrEmpty(selectedFilter)">Add Filter</MudButton>
-</MudStack>
+<MudGrid Class="pa-4">
+    <MudItem xs="12" md="6">
+        <MudPaper Class="pa-4" Elevation="3" Style="height: 400px; display: flex; flex-direction: column;">
+            <MudText Typo="Typo.h5" Class="mb-4">Available Filters</MudText>
 
-<MudList T="string">
-    @foreach (var filter in selectedFilters)
-    {
-        <MudListItem>
-            <MudText Typo="Typo.body1">@filter</MudText>
-            <MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="@(() => RemoveFilter(filter))" />
-        </MudListItem>
-    }
-</MudList>
+            @if (isLoading)
+            {
+                <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-4" />
+            }
+            else if (!availableFilters.Any())
+            {
+                <MudAlert Severity="Severity.Info" Dense="true">No filters available.</MudAlert>
+            }
+            else
+            {
+                <div style="flex-shrink: 0;">
+                    <MudTextField @bind-Value="searchString" Placeholder="Search filters..." Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mb-4"/>
+                </div>
+
+                <div style="overflow-y: auto; flex-grow: 1; display: flex; align-items: flex-start;">
+                    <MudTable Items="@filteredAvailableFilters" Dense="true" Hover="true" FixedHeader="true" Style="width: 100%;">
+                        <HeaderContent>
+                            <MudTh>Filter Name</MudTh>
+                            <MudTh>Action</MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd DataLabel="Filter Name">@context</MudTd>
+                            <MudTd DataLabel="Action">
+                                <MudIconButton
+                                    Icon="@Icons.Material.Filled.Add"
+                                    Color="Color.Success"
+                                    Size="Size.Small"
+                                    OnClick="@(() => AddFilter(context))"/>
+                            </MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                </div>
+            }
+        </MudPaper>
+    </MudItem>
+
+    <MudItem xs="12" md="6">
+        <MudPaper Class="pa-4" Elevation="3" Style="height: 400px; display: flex; flex-direction: column;">
+            <MudText Typo="Typo.h5" Class="mb-4">Selected Filters</MudText>
+            <div style="overflow-y: auto; flex-grow: 1;">
+                <MudDropContainer T="DropItem" @ref="_dropContainer" Items="@dropItems" ItemsSelector="@((item,dropzone) => item.Selector == dropzone)" ItemDropped="ItemUpdated">
+                    <ChildContent>
+                        <MudDropZone T="DropItem" Identifier="0" Class="d-flex flex-column gap-2" AllowReorder="true">
+                            @if (!dropItems.Any())
+                            {
+                                <MudAlert Severity="Severity.Info" Dense="true" Class="my-2">
+                                    No filters selected. Select filters from the available list.
+                                </MudAlert>
+                            }
+                        </MudDropZone>
+                    </ChildContent>
+                    <ItemRenderer>
+                        <MudPaper Elevation="2" Class="pa-2 d-flex align-center" Style="cursor: move;">
+                            <MudIcon Icon="@Icons.Material.Filled.DragIndicator" Class="mr-2" />
+                            <div class="flex-grow-1">@context.Name</div>
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                           Color="Color.Error"
+                                           Size="Size.Small"
+                                           OnClick="@(() => RemoveFilter(context.Name))" />
+                        </MudPaper>
+                    </ItemRenderer>
+                </MudDropContainer>
+            </div>
+        </MudPaper>
+    </MudItem>
+
+    <MudItem xs="12" Class="d-flex justify-end mt-4">
+        <MudButton Variant="Variant.Text"
+                   Color="Color.Default"
+                   OnClick="@(() => MudDialog?.Cancel())"
+                   Class="mr-2">Cancel</MudButton>
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   OnClick="SaveFilters">Save Filters</MudButton>
+        
+    </MudItem>
+</MudGrid>
