@@ -267,6 +267,16 @@ public partial class ConfigurationPanel : ComponentBase
 
         return DialogService.ShowAsync<CredentialsDialog>("Secret Management", parameters, options);
     }
+
+    private async Task OpenFilterDialogAsync()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+        var parameters = new DialogParameters<FilterConfiguration>
+        {
+            { x => x.ParserName, ParserState.ParserName }
+        };
+        var dialogResult = await DialogService.ShowAsync<FilterConfiguration>("Filter configuration", parameters, options);
+    }
     
     private async Task UpdateDialogAsync()
     {

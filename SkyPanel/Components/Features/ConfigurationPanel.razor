@@ -84,50 +84,53 @@
                                 </MudGrid>
                             </div>
                         </MudTabPanel>
-                        <MudTabPanel Text="Days" Disabled="@(ParserState.ParserIsNotSelected())">
-                            <div style="min-height: 120px; margin-top: 0.5em; justify-content: center;">
-                                <MudGrid Style="align-items: start; " Justify="Justify.Center">
-                                    <MudItem xs="3">
-                                        <MudText>Every</MudText>
-                                    </MudItem>
-                                    <MudItem xs="4">
-                                        <MudForm @bind-IsValid="@_success" @ref="@_form">
-                                            <MudTextField T="int" @bind-Value="SelectedDays" @bind-Value:after="UpdatePollingValue"
-                                                          Variant="Variant.Outlined"
-                                                          Immediate="true"
-                                                          Required="true"
-                                                          Disabled="@(ParserState.ParserIsNotSelected())"
-                                                          Validation="@(new Func<int, string>(ValidateDays))"
-                                                          FullWidth="true"
-                                                          Style="height: 30px;"/>
-                                        </MudForm>
-                                    </MudItem>
-                                    <MudItem xs="3">
-                                        <MudText> @(SelectedDays == 1 ? "Day" : "Days") </MudText >
-                                    </MudItem>
-                                </MudGrid>
-                            </div>
-                        </MudTabPanel>
-                    </MudTabs>
-                </MudCardContent>
-            </MudCard>
-        </MudItem>
-    </MudGrid>
-    @if (_awsUsernamePasswordDebug)
-    {
-        <MudText>
-            @Username
-        </MudText>
-        <MudText>
-            @Password
-        </MudText>
-    }
-    <MudGrid Class="d-flex justify-center" Style="margin-top: 0.3em">
-        <MudItem>
-            <MudButton Size="Size.Large" StartIcon="@Icons.Material.Filled.PublishedWithChanges" Disabled="ParserState.ParserIsNotSelected()" OnClick="@(() => TestConnection())" Variant="Variant.Filled" Color="Color.Primary">Test Connection</MudButton>
-        </MudItem>
-        <MudItem>
-            <MudButton Size="Size.Large" Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!_success)" OnClick="@(() => UpdateDialogAsync())">Update</MudButton>
-        </MudItem>
-    </MudGrid>
+                    <MudTabPanel Text="Days" Disabled="@(ParserState.ParserIsNotSelected())">
+                        <div style="min-height: 120px; margin-top: 0.5em; justify-content: center;">
+                            <MudGrid Style="align-items: start; " Justify="Justify.Center">
+                                <MudItem xs="3">
+                                    <MudText>Every</MudText>
+                                </MudItem>
+                                <MudItem xs="4">
+                                    <MudForm @bind-IsValid="@_success" @ref="@_form" >
+                                    <MudTextField T="int" @bind-Value="SelectedDays"  @bind-Value:after="UpdatePollingValue"
+                                                  Variant="Variant.Outlined"
+                                                  Immediate="true"
+                                                  Required="true"
+                                                  Disabled="@(ParserState.ParserIsNotSelected())"
+                                                  Validation="@(new Func<int, string>(ValidateDays))"
+                                                  FullWidth="true"
+                                                  Style="height: 30px;"/>
+                                    </MudForm>
+                                </MudItem>
+                                <MudItem xs="3">
+                                    <MudText> @(SelectedDays == 1 ? "Day" : "Days") </MudText        >                
+                                </MudItem>
+                            </MudGrid>
+                        </div>
+                    </MudTabPanel>
+                </MudTabs>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+@if (_awsUsernamePasswordDebug)
+{
+    <MudText>
+        @Username
+    </MudText>
+    <MudText>
+        @Password
+    </MudText>
+}
+<MudGrid Class="d-flex justify-center" Style="margin-top: 0.3em">
+    <MudItem>
+        <MudButton Size="Size.Large" StartIcon="@Icons.Material.Filled.Android" Disabled="ParserState.ParserIsNotSelected()" OnClick="@(() => OpenFilterDialogAsync())" Variant="Variant.Filled" Color="Color.Primary">Filters</MudButton>
+    </MudItem>
+    <MudItem>
+        <MudButton Size="Size.Large" StartIcon="@Icons.Material.Filled.PublishedWithChanges" Disabled="ParserState.ParserIsNotSelected()" OnClick="@(() => TestConnection())" Variant="Variant.Filled" Color="Color.Primary">Test Connection</MudButton>
+    </MudItem>
+    <MudItem>
+        <MudButton Size="Size.Large" Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!_success)" OnClick="@(() => UpdateDialogAsync())">Update</MudButton>
+    </MudItem>
+</MudGrid>
 </div>
