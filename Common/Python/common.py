@@ -27,9 +27,16 @@ import parser_pb2
 # noinspection PyUnresolvedReferences
 import parser_pb2_grpc
 
+### Classes
+class MyObject:
+    def __init__(self, name, parameters, url):
+        self.name = name
+        self.parameters = parameters
+        self.url = url
+
 ### REGISTRY
 async def send_heartbeat(type="Parser"):
-    baseurl = os.getenv("BASE_URL", "http://do.jonaskaad.com")
+    baseurl = os.getenv("BASE_URL")
     parser_name = os.getenv("PARSER_NAME")
     url = f"{baseurl}/{type}/{parser_name}/heartbeat"
     async with aiohttp.ClientSession() as session:
@@ -53,14 +60,31 @@ async def heartbeat_scheduler(type="Parser"):
 
 async def register(type="Parser"):
     async with aiohttp.ClientSession() as session:
-        baseurl = os.getenv("BASE_URL", "http://do.jonaskaad.com")
-        parser_name = os.getenv("PARSER_NAME")
-        url = f"{baseurl}/{type}/{parser_name}/register"
-        try:
-            async with session.post(url, json=os.getenv("PARSER_URL")) as response:
-                return response.status == 200
-        except aiohttp.ClientConnectorError:
-            return False
+        baseurl = os.getenv("BASE_URL")
+        name = os.getenv("PARSER_NAME")
+        url = f"{baseurl}/{type}/{name}/register"
+        if type == "Filter":
+            data ={
+                "name": name,
+                "parameters": {
+                    "startY": "int",
+                    "startX": "int",
+                    "endY": "int",
+                    "endX": "int"
+                },
+                "url": os.getenv("PARSER_URL")
+            }
+        else:
+            data = os.getenv("PARSER_URL")
+        print(f"Registering at {url} with data: {json.dumps(data)}")
+        # try:
+        headers = {'Content-Type': 'application/json'}
+        async with session.post(url, json=data, headers=headers) as response:
+            print(f"Response status: {response.status}")
+            return response.status == 200
+        # except aiohttp.ClientConnectorError:
+        #     print("failed to connect")
+        #     return False
 
 async def init_parser(injected_loop):
     registered = False
