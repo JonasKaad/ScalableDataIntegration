@@ -1,7 +1,10 @@
+using System.Net.Http.Headers;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Forms;
 using MudBlazor;
 using SkyPanel.Components.Dialogs;
+using SkyPanel.Components.Models;
 using SkyPanel.Components.Services;
 using SkyPanel.Utils;
 
@@ -9,6 +12,14 @@ namespace SkyPanel.Components.Features;
 
 public partial class ParserPanel : ComponentBase
 {
+    private readonly ILogger<ParserPanel> _logger;
+    public ParserPanel (ILogger<ParserPanel> logger)
+    {
+        _logger = logger;
+    }
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
     [Inject] private ParserStateService ParserState { get; set; } = null!;
     [Inject] private BlobManagerService BlobService { get; set; } = null!;
     
