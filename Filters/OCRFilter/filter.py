@@ -1,9 +1,7 @@
-import aiohttp
 import asyncio
 import grpc
 import sys
 import os
-import json
 
 import easyocr
 import cv2
@@ -22,10 +20,13 @@ print(f"Files in {GENCLIENT_PYTHON_PATH}: {os.listdir(GENCLIENT_PYTHON_PATH)}")
 import filter_pb2 # works even though IDE shows error (suppressing the warning)
 # noinspection PyUnresolvedReferences
 import filter_pb2_grpc # works even though IDE shows error (suppressing the warning)
+
+# Import functions from common.py
+COMMON_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../Common/Python"))
+sys.path.insert(0, COMMON_PATH)
+
 # noinspection PyUnresolvedReferences
-import parser_pb2
-# noinspection PyUnresolvedReferences
-import parser_pb2_grpc
+from common import init_filter, get_next_url, read_params, send_to_next_url
 
 class FilterServicer(filter_pb2_grpc.FilterServicer):
     async def FilterCall(self, request, context):
@@ -52,55 +53,9 @@ class FilterServicer(filter_pb2_grpc.FilterServicer):
         raw_data += bytes(';'.join(result), encoding='utf-8')
         (next_url, urls) = get_next_url(request.next_urls.split(";"))
 
-        if next_url:
-            if next_url.startswith("http://"):
-                next_url = next_url[7:]
-            elif next_url.startswith("https://"):
-                next_url = next_url[8:]
-
-        try:
-            # Create channel with timeout options
-            options = [
-                ('grpc.enable_retries', 1),
-                ('grpc.keepalive_time_ms', 10000),
-                ('grpc.dns_resolution_timeout_ms', 5000)
-            ]
-            async with grpc.aio.insecure_channel(next_url, options=options) as channel:
-                if len(parameters) > 0:
-                    stub = filter_pb2_grpc.FilterStub(channel)
-                    response = await stub.FilterCall(
-                        filter_pb2.FilterRequest(raw_data=raw_data, parameters=parameters, next_urls=urls, format="str"))
-                else:
-                    stub = parser_pb2_grpc.ParserStub(channel)
-                    response = await stub.ParseCall(parser_pb2.ParseRequest(raw_data=raw_data))
-
-                if response.success:
-                    success = True
-                    msg = "Filter succeeded sending data to next url"
-                else:
-                    success = False
-                    msg = "Filter failed sending data to next url"
-        except Exception as e:
-            print(f"gRPC connection error: {e}")
-            success = False
-            msg = "gRPC connection error"
+        (success, msg) = await send_to_next_url(next_url, raw_data, parameters, urls)
 
         return filter_pb2.FilterReply(success=success, err_msg=msg)
-
-def read_params(params_list, relevant_string=""):
-    relevant = {}
-    for parameter in params_list:
-        json_acceptable_string = parameter.replace("'", "\"")
-        if relevant_string in json_acceptable_string:
-            relevant = json.loads(json_acceptable_string)
-            params_list.remove(parameter)
-    return relevant, ";".join(params_list)
-
-def get_next_url(urls):
-    if len(urls) == 0:
-        return None
-    url = urls.pop(0)
-    return url, ";".join(urls)
 
 
 async def serve():
@@ -123,5 +78,6 @@ async def serve():
 
 if __name__ == '__main__':
     loop = asyncio.new_event_loop()
+    loop.create_task(init_filter(loop))
     asyncio.set_event_loop(loop)
     loop.run_until_complete(serve())
