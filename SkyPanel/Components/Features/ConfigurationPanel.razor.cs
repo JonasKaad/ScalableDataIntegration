@@ -16,6 +16,7 @@ public partial class ConfigurationPanel : ComponentBase
     {
         _logger = logger;
     }
+    private SnackbarUtil SnackbarUtil { get; set; } = new();
 
     [CascadingParameter] 
     private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
@@ -429,27 +430,18 @@ public partial class ConfigurationPanel : ComponentBase
                 Snackbar.Add("Failed getting a response from downloader", Severity.Error);
                 break;
             case 1:
-                FormatConnectionResponse(response.FirstOrDefault(), "URL", UrlValue);
+                Snackbar.Add(SnackbarUtil.FormatConnectionResponse(response.FirstOrDefault(), "URL", UrlValue).Item1, 
+                    SnackbarUtil.FormatConnectionResponse(response.FirstOrDefault(), "URL", UrlValue).Item2);
                 break;
             case 2:
-                FormatConnectionResponse(response[0], "URL", UrlValue);
-                FormatConnectionResponse(response[1], "Backup URL", BackupUrlValue);
+                Snackbar.Add(SnackbarUtil.FormatConnectionResponse(response[0], "URL", UrlValue).Item1, 
+                    SnackbarUtil.FormatConnectionResponse(response[0], "URL", UrlValue).Item2);
+                
+                Snackbar.Add(SnackbarUtil.FormatConnectionResponse(response[1], "BackupURL", BackupUrlValue).Item1, 
+                    SnackbarUtil.FormatConnectionResponse(response[1], "BackupURL", BackupUrlValue).Item2);
                 break;
             default:
                 Snackbar.Add("Failed getting a correct response from downloader", Severity.Error);
-                break;
-        }
-    }
-
-    private void FormatConnectionResponse(bool responseValue, string urlType, string url)
-    {
-        switch (responseValue)
-        {
-            case false:
-                SnackPop(urlType, url, Severity.Error, "failed connecting");
-                break;
-            case true:
-                SnackPop(urlType, url, Severity.Success, "successfully connected");
                 break;
         }
     }
@@ -463,9 +455,4 @@ public partial class ConfigurationPanel : ComponentBase
         StateHasChanged();
     }
     
-    private void SnackPop(string urlType, string url, Severity severity, string message)
-    {
-        Snackbar.Configuration.ShowCloseIcon = true;
-        Snackbar.Add(new MarkupString($"<div><h3><strong>{urlType}: </strong></h3><h4>[ {url} ] - {message}</h4></div>"),severity);
-    }
 }
