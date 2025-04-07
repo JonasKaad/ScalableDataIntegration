@@ -25,21 +25,21 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
         return [];
     }
 
-    public async Task<Parser> GetDownloaderConfiguration(string downloader)
+    public async Task<DownloaderData?> GetDownloaderConfiguration(string downloader)
     {
         var client = httpClientFactory.CreateClient();
         
         try
         {
             var response = await client.GetAsync($"{baseUrl}/Downloader/{downloader}/configuration");
-            var parser = await response.Content.ReadFromJsonAsync<Parser>();
-            return parser ?? new Parser("", "", "", "", "", "");
+            var parser = await response.Content.ReadFromJsonAsync<DownloaderData>();
+            return parser ?? null;
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
         }
-        return new Parser("", "", "", "", "", "");
+        return null;
     }
 
     public async Task<bool> ConfigureDownloader(string parser, string url, string backupUrl, string secretName, string pollingRate)
