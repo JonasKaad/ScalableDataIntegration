@@ -65,7 +65,7 @@ class ParserServicer(parser_pb2_grpc.ParserServicer):
         raw_data = request.raw_data
         format_type = request.format
         if(format_type == "str"):
-            (strings, raw_data) = get_data(raw_data, format_type="str")
+            (strings, rest) = get_data(raw_data, format_type="str")
 
         tafstrings = []
         for string in strings:
