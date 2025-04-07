@@ -69,7 +69,8 @@ builder.Services
     {
         var httpClientFactory = provider.GetRequiredService<IHttpClientFactory>();
         var baseUrl = Env.GetString("DOWNLOAD_ORCHESTRATOR_URL");
-        return new OrchestratorClientService(httpClientFactory, baseUrl);
+        var logger = provider.GetRequiredService<ILogger<OrchestratorClientService>>();
+        return new OrchestratorClientService(httpClientFactory, baseUrl, logger);
     })
     .AddScoped<BlobManagerService>(_ =>
     {
