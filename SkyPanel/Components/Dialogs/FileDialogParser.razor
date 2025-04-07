@@ -60,14 +60,4 @@
             </MudButton>
         </MudStack>
     </DialogContent>
-        
 </MudDialog>
-
-
-
-@code {
-    [CascadingParameter]
-    private IMudDialogInstance? MudDialog { get; set; }
-    private void DialogSubmit() => MudDialog?.Close(DialogResult.Ok(true));
-    private void DialogCancel() => MudDialog?.Cancel();
-}
