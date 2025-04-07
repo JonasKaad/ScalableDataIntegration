@@ -43,6 +43,23 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
         return null;
     }
 
+    public async Task<bool> Reparse(string parser)
+    {
+        var client = httpClientFactory.CreateClient();
+        try
+        {
+            using HttpResponseMessage response = await client.PostAsync($"{baseUrl}/Downloader/{parser}/reparse", null);
+            var returnStatusCode = response.StatusCode;
+            Console.WriteLine(response);
+            return returnStatusCode == HttpStatusCode.OK;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return false;
+        }
+    }
+
     public async Task<bool> UploadFiles(string parser, MultipartFormDataContent form)
     {
         var client = httpClientFactory.CreateClient();
