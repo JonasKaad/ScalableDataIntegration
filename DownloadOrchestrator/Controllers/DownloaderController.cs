@@ -72,15 +72,15 @@ public class DownloaderController : ControllerBase
             dlToConfigure.Parser = HandleConfiguration(dlToConfigure.Parser, parser!);
             
             var filters = dlConfiguration.Filters
-                .Select(filter => _filterRegistry.GetService(filter.ToLowerInvariant()) ?? "")
+                .Select(filter => _filterRegistry.GetService(filter.Name.ToLowerInvariant()))
                 .ToList();
-            if (dlConfiguration.Filters.Count != 0 && filters.Any(string.IsNullOrEmpty))
+            if (dlConfiguration.Filters.Count != 0 && filters.Any(f => string.IsNullOrEmpty(f.Name)))
             {
                 _logger.LogWarning("Failed to set filters for downloader {Downloader} with filters {Filters}", downloader, dlConfiguration.Filters);
                 return BadRequest("Some or more filters could not be resolved.");
             }
 
-            dlToConfigure.Parameters = dlConfiguration.Parameters;
+            dlToConfigure.Filters = filters!;
             
             dlToConfigure.DownloadUrl = HandleConfiguration(dlToConfigure.DownloadUrl, dlConfiguration.DownloadUrl);
             dlToConfigure.BackUpUrl = HandleConfiguration(dlToConfigure.BackUpUrl, dlConfiguration.BackUpUrl);
@@ -124,7 +124,7 @@ public class DownloaderController : ControllerBase
         }
 
         newDl.Parser = _parserRegistry.GetService(newDl.Parser.ToLowerInvariant()) ?? "";
-        newDl.Filters = newDl.Filters.Select(filter => _filterRegistry.GetService(filter.ToLowerInvariant()) ?? "").ToList();
+        newDl.Filters = newDl.Filters.Select(filter => _filterRegistry.GetService(filter.Name.ToLowerInvariant())).ToList()!;
         
         _downloaders.Add(newDl);
         _downloaderService.ScheduleOrUpdateRecurringDownload(newDl);
@@ -167,9 +167,11 @@ public class DownloaderController : ControllerBase
             }
         }
 
-        var urls = dl.Filters;
+        var parameters = dl.Filters.Select(f => string.Join(",", f.Parameters.Select(p => $"{{'{p.Key}':'{p.Value}'}}"))).ToList();
+        var filterNames = dl.Filters.Select(f => f.Name).ToList();
+        var urls = filterNames.Select(filter => _filterRegistry.GetFilterUrl(filter)).ToList();
         urls.Add(dl.Parser);
-        await BaseDownloaderJob.SendToParser(totalBytes.ToArray(), urls, dl.Parameters);
+        await BaseDownloaderJob.SendToParser(totalBytes.ToArray(), urls, parameters);
         return Ok($"Parsing for {downloader} has been started with uploaded data.");
     }
 

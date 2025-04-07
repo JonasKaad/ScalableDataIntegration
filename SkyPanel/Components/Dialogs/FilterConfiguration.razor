@@ -19,22 +19,29 @@
                 </div>
 
                 <div style="overflow-y: auto; flex-grow: 1; display: flex; align-items: flex-start;">
-                    <MudTable Items="@filteredAvailableFilters" Dense="true" Hover="true" FixedHeader="true" Style="width: 100%;">
-                        <HeaderContent>
-                            <MudTh>Filter Name</MudTh>
-                            <MudTh>Action</MudTh>
-                        </HeaderContent>
-                        <RowTemplate>
-                            <MudTd DataLabel="Filter Name">@context</MudTd>
-                            <MudTd DataLabel="Action">
-                                <MudIconButton
-                                    Icon="@Icons.Material.Filled.Add"
-                                    Color="Color.Success"
-                                    Size="Size.Small"
-                                    OnClick="@(() => AddFilter(context))"/>
-                            </MudTd>
-                        </RowTemplate>
-                    </MudTable>
+                    @if (!filteredAvailableFilters.Any())
+                    {
+                        <MudAlert Severity="Severity.Info" Dense="true">No filters available.</MudAlert>
+                    }
+                    else
+                    {
+                        <MudTable Items="@filteredAvailableFilters" Dense="true" Hover="true" FixedHeader="true" Style="width: 100%;">
+                            <HeaderContent>
+                                <MudTh>Filter Name</MudTh>
+                                <MudTh>Action</MudTh>
+                            </HeaderContent>
+                            <RowTemplate>
+                                <MudTd DataLabel="Filter Name">@context.Name</MudTd>
+                                <MudTd DataLabel="Action">
+                                    <MudIconButton
+                                        Icon="@Icons.Material.Filled.Add"
+                                        Color="Color.Success"
+                                        Size="Size.Small"
+                                        OnClick="@(() => AddFilter(context))"/>
+                                </MudTd>
+                            </RowTemplate>
+                        </MudTable>
+                    }
                 </div>
             }
         </MudPaper>
@@ -44,7 +51,7 @@
         <MudPaper Class="pa-4" Elevation="3" Style="height: 400px; display: flex; flex-direction: column;">
             <MudText Typo="Typo.h5" Class="mb-4">Selected Filters</MudText>
             <div style="overflow-y: auto; flex-grow: 1;">
-                <MudDropContainer T="DropItem" @ref="_dropContainer" Items="@dropItems" ItemsSelector="@((item,dropzone) => item.Selector == dropzone)" ItemDropped="ItemUpdated">
+                <MudDropContainer T="DropItem" @ref="_dropContainer" Items="@dropItems" ItemDropped="ItemUpdated">
                     <ChildContent>
                         <MudDropZone T="DropItem" Identifier="0" Class="d-flex flex-column gap-2" AllowReorder="true">
                             @if (!dropItems.Any())
@@ -53,31 +60,35 @@
                                     No filters selected. Select filters from the available list.
                                 </MudAlert>
                             }
+                            else
+                            {
+                                @foreach (var item in dropItems)
+                                {
+                                    <MudPaper Elevation="2" Class="pa-2 d-flex align-center" Style="cursor: move;">
+                                        <MudIcon Icon="@Icons.Material.Filled.DragIndicator" Class="mr-2" />
+                                        <div class="flex-grow-1">@item.Filter.Name</div>
+                                        <MudIconButton Icon="@Icons.Material.Filled.Settings"
+                                                       Color="Color.Default"
+                                                       Size="Size.Small"
+                                                       OnClick="@(() => OpenFilterSettings(item.Filter))" />
+                                        <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                                       Color="Color.Error"
+                                                       Size="Size.Small"
+                                                       OnClick="@(() => RemoveFilter(item.Filter))" />
+                                    </MudPaper>
+                                    @if (expandedFilters.FirstOrDefault(f => f.Name == item.Filter.Name) is {} filter)
+                                    {
+                                        <MudPaper Class="pa-2" Elevation="1">
+                                            @foreach(var param in filter.Parameters)
+                                            {
+                                                <MudTextField T="string" @bind-Value="filter.Parameters[param.Key]" Label="@param.Key" Variant="Variant.Outlined" />
+                                            }
+                                        </MudPaper>
+                                    }
+                                }
+                            }
                         </MudDropZone>
                     </ChildContent>
-                    <ItemRenderer>
-                        <MudPaper Elevation="2" Class="pa-2 d-flex align-center" Style="cursor: move;">
-                            <MudIcon Icon="@Icons.Material.Filled.DragIndicator" Class="mr-2" />
-                            <div class="flex-grow-1">@context.Name</div>
-                            <MudIconButton Icon="@Icons.Material.Filled.Settings"
-                                           Color="Color.Default"
-                                           Size="Size.Small"
-                                           OnClick="@(() => OpenFilterSettings(context.Name))" />
-                            <MudIconButton Icon="@Icons.Material.Filled.Delete"
-                                           Color="Color.Error"
-                                           Size="Size.Small"
-                                           OnClick="@(() => RemoveFilter(context.Name))" />
-                        </MudPaper>
-                        @if (expandedFilters.FirstOrDefault(f => f.Name == context.Name) is {} filter)
-                        {
-                            <MudPaper Class="pa-2" Elevation="1">
-                                @foreach(var param in filter.Parameters)
-                                {
-                                    <MudTextField T="string" @bind-Value="filter.Parameters[param.Key]" Label="@param.Key" Variant="Variant.Outlined" />
-                                }
-                            </MudPaper>
-                        }
-                    </ItemRenderer>
                 </MudDropContainer>
             </div>
         </MudPaper>

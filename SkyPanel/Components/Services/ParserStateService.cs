@@ -16,9 +16,9 @@ public class ParserStateService
     
     public string ParserUrl => _parser?.Parser ?? string.Empty;
     public string SecretName => _parser?.SecretName ?? string.Empty;
-    public List<string> Filters
+    public List<FilterDto> Filters
     {
-        get => _parser?.Filters ?? new List<string>();
+        get => _parser?.Filters ?? new List<FilterDto>();
         set
         {
             if (_parser == null) return;
@@ -26,8 +26,6 @@ public class ParserStateService
             NotifyStateChanged();
         }
     }
-
-    public List<string> Parameters => _parser?.Parameters ?? new List<string>();
 
     public event Action? OnChange;
     
