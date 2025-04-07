@@ -1,0 +1,37 @@
+name: OCR filter build and push
+
+on:
+  push:
+    branches: [ master ]
+    paths: 
+      - 'Filters/OCRFilter/*'
+  workflow_dispatch:
+
+jobs:
+  deploy-parser:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Azure Container Registry Login
+      uses: Azure/docker-login@v1
+      with:
+        username: ${{ secrets.ACR_USERNAME }}
+        password: ${{ secrets.ACR_PASSWORD }}
+        login-server: parsers.azurecr.io
+          
+  
+    - name: Build and push Docker images
+      uses: docker/build-push-action@v6.15.0
+      with:
+        context: .
+        file: ./Filters/OCRFilter/Dockerfile
+        push: true
+        tags: parsers.azurecr.io/ocr-filter:${{ github.sha }}
+        no-cache: true
+
+    - name: Add command to summary
+      run: |
+        echo "-----------------" >> $GITHUB_STEP_SUMMARY
+        echo "**Image pushed!** Run this in the terminal to deploy the new image: \`az containerapp update --name ocr-filter --resource-group ScalableDataIntegration --image parsers.azurecr.io/ocr-filter:${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "-----------------" >> $GITHUB_STEP_SUMMARY
