@@ -26,7 +26,7 @@ COMMON_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../Com
 sys.path.insert(0, COMMON_PATH)
 
 # noinspection PyUnresolvedReferences
-from common import send_heartbeat, heartbeat_scheduler, register_parser, init_parser, azure_cred_checker, get_data
+from common import send_heartbeat, heartbeat_scheduler, register_parser, init_parser, azure_cred_checker, get_data, save_data_to_azure
 
 class TAFEncoder(json.JSONEncoder):
     def default(self, o):
@@ -85,21 +85,10 @@ class ParserServicer(parser_pb2_grpc.ParserServicer):
         else:
             response = parser_pb2.ParseResponse(success=True, err_msg=f"Parsed {len(tafstrings)} TAFs")
 
-        client = self.azure_cred_checker();
+        raw_data_to_save = raw_data.decode('utf-8')
+        parsed_data_to_save = json.dumps(tafs, cls=TAFEncoder)
         container_name = os.getenv("PARSER_NAME", "python-taf")
-        container_client = client.get_container_client(container_name)
-        if not await container_client.exists():
-            await container_client.create_container()
-
-        now = datetime.datetime.now(datetime.timezone.utc)
-        raw_file_name = f"{now.year}/{now.strftime('%m')}/{now.day}/{now.strftime('%H%M')}-raw.txt"
-        parsed_file_name = f"{now.year}/{now.strftime('%m')}/{now.day}/{now.strftime('%H%M')}-parsed.txt"
-
-        taf_json = json.dumps(tafs, cls=TAFEncoder)
-        await container_client.upload_blob(name=raw_file_name, data=raw_data.decode('utf-8'))
-        await container_client.upload_blob(name=parsed_file_name, data=taf_json)
-
-        await client.close()
+        save_data_to_azure(raw_data_to_save, parsed_data_to_save, container_name)
         return response
 
 async def serve():
