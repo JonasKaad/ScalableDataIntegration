@@ -36,7 +36,7 @@ builder.Services
         var baseUrl = Environment.GetEnvironmentVariable("BASE_URL") ?? "";
         var parserName = Environment.GetEnvironmentVariable("PARSER_NAME") ?? "";
         var parserUrl = Environment.GetEnvironmentVariable("PARSER_URL") ?? "";
-        var interval = TimeSpan.FromMinutes(1);
+        var interval = TimeSpan.FromMinutes(5);
         return new HeartbeatService(logger, baseUrl, parserName, parserUrl, interval);
     })
     .AddGrpc();
@@ -47,25 +47,6 @@ app.MapGrpcService<AusotParserService>();
 app.MapGet("/",
     () =>
         "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
-
-var registered = false;
-while (!registered)
-{
-    var baseUrl = Environment.GetEnvironmentVariable("BASE_URL");
-    var parserName = Environment.GetEnvironmentVariable("PARSER_NAME");
-    var url = $"{baseUrl}/{parserName}/register";
-    var parserUrl = Environment.GetEnvironmentVariable("PARSER_URL") ?? "";
-    var response = await HeartbeatService.RegisterParser(new HttpClient(), url, parserUrl, new Logger<HeartbeatService>(new LoggerFactory()));
-    if(response)
-    {
-        registered = true;
-    }
-    else
-    {
-        Console.WriteLine("Failed to register parser. Retrying in 1 second");
-        await Task.Delay(1000);
-    }
-}
 try
 {
     Log.Information("Starting AusotParser...");
