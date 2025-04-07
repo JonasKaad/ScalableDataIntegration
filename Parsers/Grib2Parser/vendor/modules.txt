@@ -1,0 +1,2 @@
+# github.com/nilsmagnus/grib v1.2.8
+## explicit; go 1.16
