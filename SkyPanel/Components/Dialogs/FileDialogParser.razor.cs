@@ -75,8 +75,6 @@ public partial class FileDialogParser : ComponentBase
             Snackbar.Add("No files selected", Severity.Warning);
             return;
         }
-
-        Console.WriteLine(_files.Count);
         DialogSubmit(_files);
     }
     
