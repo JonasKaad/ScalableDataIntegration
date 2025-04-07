@@ -4,7 +4,6 @@ using System.Text.Json;
 using CommonDis.Models;
 using CommonDis.Models.Auth0;
 using SkyPanel.Components.Models;
-
 namespace SkyPanel.Components.Services;
 
 public sealed class OrchestratorClientService(IHttpClientFactory httpClientFactory, string baseUrl)
@@ -59,21 +58,42 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
             return false;
         }
     }
-
-    public async Task<bool> UploadFiles(string parser, MultipartFormDataContent form)
+    
+    public async Task<UploadResult> UploadFiles(string parser, MultipartFormDataContent content)
     {
+        
         var client = httpClientFactory.CreateClient();
         try
         {
-            using HttpResponseMessage response = await client.PostAsync($"{baseUrl}/Downloader/{parser}/upload", form);
+            var request = new HttpRequestMessage(HttpMethod.Post, $"{baseUrl}/Downloader/{parser}/upload");
+            request.Content = content;
+            var response = await client.SendAsync(request);
+            var res = response.Content;
+            if (res.ReadAsStringAsync().Result.Contains("The specified blob already exists."))
+            {
+                return new UploadResult(false, "The specified blob already exists.", Result.AlreadyExists);
+            }
+            
+            if (res.ReadAsStringAsync().Result.Contains("invalid literal for int() with base 10: '\"E'\""))
+            {
+                return new UploadResult(false, "Wrong file content.", Result.FileFormatError);
+            }
+            
             var returnStatusCode = response.StatusCode;
             Console.WriteLine(response);
-            return returnStatusCode == HttpStatusCode.OK;
+            if (returnStatusCode == HttpStatusCode.OK)
+            {
+                return new UploadResult( true, "", Result.UploadSuccess);
+            }
+            else
+            {
+                return new UploadResult( false, response.Content.ReadAsStringAsync().Result, Result.UploadError);
+            }
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
-            return false;
+            return new UploadResult(false, e.Message, Result.ExceptionOccured);
         }
     }
     
