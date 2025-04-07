@@ -2,8 +2,25 @@ namespace SkyPanel.Components.Models;
 
 public class UploadResult
 {
-    public bool Uploaded { get; set; }
-    public string? FileName { get; set; }
-    public string? StoredFileName { get; set; }
-    public int ErrorCode { get; set; }
+    public string? Message { get; set; }
+    public bool Success { get; set; }
+    
+    public Result? Result { get; set; }
+    
+    public UploadResult(bool success, string? message = "", Result? result = Models.Result.None)
+    {
+        Message = message;
+        Success = success;
+        Result = result;
+    }
+}
+
+public enum Result
+{
+    None,
+    AlreadyExists,
+    ExceptionOccured,
+    UploadSuccess,
+    UploadError,
+    FileFormatError,
 }
