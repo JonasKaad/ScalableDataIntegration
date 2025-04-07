@@ -28,6 +28,7 @@ jobs:
         file: ./Parsers/PythonParser/Dockerfile
         push: true
         tags: parsers.azurecr.io/python-test:${{ github.sha }}
+        no-cache: true
 
     - name: Add command to summary
       run: |

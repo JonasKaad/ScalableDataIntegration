@@ -28,6 +28,7 @@ jobs:
         file: ./DownloadOrchestrator/Dockerfile
         push: true
         tags: parsers.azurecr.io/download_orchestrator:${{ github.sha }}
+        no-cache: true
     - name: Add command to summary
       run: |
         echo "-----------------" >> $GITHUB_STEP_SUMMARY

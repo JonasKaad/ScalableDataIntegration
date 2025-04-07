@@ -28,8 +28,9 @@ jobs:
         file: ./Parsers/AusotParser/Dockerfile
         push: true
         tags: parsers.azurecr.io/ausotparser:${{ github.sha }}
+        no-cache: true
     - name: Add command to summary
       run: |
         echo "-----------------" >> $GITHUB_STEP_SUMMARY
-        echo "**Image pushed!** Run this in the terminal to deploy the new image: \`az containerapp update --name newdis-parser --resource-group ScalableDataIntegration --image parsers.azurecr.io/ausotparser:${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "**Image pushed!** Run this in the terminal to deploy the new image: \`az containerapp update --name ausotparser --resource-group ScalableDataIntegration --image parsers.azurecr.io/ausotparser:${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
         echo "-----------------" >> $GITHUB_STEP_SUMMARY
