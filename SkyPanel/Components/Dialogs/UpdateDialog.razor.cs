@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using SkyPanel.Components.Services;
+using SkyPanel.Utils;
 
 namespace SkyPanel.Components.Dialogs;
 
@@ -18,6 +19,8 @@ public partial class UpdateDialog : ComponentBase
     [Parameter]
     public string PollingRate { get; set; } = string.Empty;
     
+    private SnackbarUtil SnackbarUtil { get; set; } = new();
+    
     private bool _hasChanges;
     private bool HasChanges 
     {
@@ -32,8 +35,64 @@ public partial class UpdateDialog : ComponentBase
         }
     }
     [Inject] private ParserStateService ParserState { get; set; } = null!;
+    [Inject] private OrchestratorClientService OrchestratorClientService { get; set; } = null!;
     
     [CascadingParameter] IMudDialogInstance? MudDialog { get; set; }
+
+    private async Task TestConnection()
+    {
+        if (string.IsNullOrEmpty(ParserState.ParserName))
+        {
+            return;
+        }
+
+        var urlValueToSend = "";
+        var backupUrlValueToSend = "";
+        var secretNameToSend = "";
+        var pollingRateToSend = "";
+        
+        // Check if parser values have changed. If not send a string without a space: ""
+        if (!string.IsNullOrEmpty(Url))
+        {
+            urlValueToSend = Url;
+        }
+        
+        if (!string.IsNullOrEmpty(BackupUrl))
+        {
+            backupUrlValueToSend = BackupUrl;
+        }
+        
+        secretNameToSend = SecretName;
+        
+        pollingRateToSend = PollingRate; 
+        
+        var response = await OrchestratorClientService.TestConnection(ParserState.ParserName, 
+            urlValueToSend, backupUrlValueToSend, secretNameToSend, pollingRateToSend);
+        
+        switch (response.Count)
+        {
+            case 0:
+                Snackbar.Add("Failed getting a response from downloader", Severity.Error);
+                break;
+            case 1:
+                Snackbar.Add(SnackbarUtil.FormatConnectionResponse(response.FirstOrDefault(), "URL", Url).Item1, 
+                    SnackbarUtil.FormatConnectionResponse(response.FirstOrDefault(), "URL", Url).Item2);
+                break;
+            case 2:
+                Snackbar.Add(SnackbarUtil.FormatConnectionResponse(response[0], "URL", Url).Item1, 
+                    SnackbarUtil.FormatConnectionResponse(response[0], "URL", Url).Item2);
+                
+                Snackbar.Add(SnackbarUtil.FormatConnectionResponse(response[1], "BackupURL", BackupUrl).Item1, 
+                    SnackbarUtil.FormatConnectionResponse(response[1], "BackupURL", BackupUrl).Item2);
+                break;
+            default:
+                Snackbar.Add("Failed getting a correct response from downloader", Severity.Error);
+                break;
+        }
+    }
+
+    
+
     
     private void DialogSubmit() => MudDialog?.Close(DialogResult.Ok("update"));
 
