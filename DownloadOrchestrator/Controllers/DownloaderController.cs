@@ -87,7 +87,7 @@ public class DownloaderController : ControllerBase
         return url;
     }
 
-    [Route("{downloader}/add")]
+    [Route("/add")]
     [HttpPost]
     public ActionResult Add(string downloader, [FromBody] DownloaderData newDl)
     {
@@ -108,7 +108,7 @@ public class DownloaderController : ControllerBase
             return BadRequest("The downloader must have a polling rate.");
         }
 
-        newDl.Parser = _parserRegistry.GetService(downloader.ToLowerInvariant()) ?? "";
+        newDl.Parser = _parserRegistry.GetService(newDl.Parser.ToLowerInvariant()) ?? "";
 
 
         _downloaders.Add(newDl);
