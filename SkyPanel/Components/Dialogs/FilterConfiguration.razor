@@ -59,11 +59,24 @@
                         <MudPaper Elevation="2" Class="pa-2 d-flex align-center" Style="cursor: move;">
                             <MudIcon Icon="@Icons.Material.Filled.DragIndicator" Class="mr-2" />
                             <div class="flex-grow-1">@context.Name</div>
+                            <MudIconButton Icon="@Icons.Material.Filled.Settings"
+                                           Color="Color.Default"
+                                           Size="Size.Small"
+                                           OnClick="@(() => OpenFilterSettings(context.Name))" />
                             <MudIconButton Icon="@Icons.Material.Filled.Delete"
                                            Color="Color.Error"
                                            Size="Size.Small"
                                            OnClick="@(() => RemoveFilter(context.Name))" />
                         </MudPaper>
+                        @if (expandedFilters.FirstOrDefault(f => f.Name == context.Name) is {} filter)
+                        {
+                            <MudPaper Class="pa-2" Elevation="1">
+                                @foreach(var param in filter.Parameters)
+                                {
+                                    <MudTextField T="string" @bind-Value="filter.Parameters[param.Key]" Label="@param.Key" Variant="Variant.Outlined" />
+                                }
+                            </MudPaper>
+                        }
                     </ItemRenderer>
                 </MudDropContainer>
             </div>
@@ -78,6 +91,6 @@
         <MudButton Variant="Variant.Filled"
                    Color="Color.Primary"
                    OnClick="SaveFilters">Save Filters</MudButton>
-        
+
     </MudItem>
 </MudGrid>
