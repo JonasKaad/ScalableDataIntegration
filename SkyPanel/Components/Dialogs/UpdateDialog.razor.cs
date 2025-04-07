@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using SkyPanel.Components.Services;
+using SkyPanel.Utils;
 
 namespace SkyPanel.Components.Dialogs;
 
@@ -17,6 +18,8 @@ public partial class UpdateDialog : ComponentBase
     public string SecretName { get; set; } = string.Empty;
     [Parameter]
     public string PollingRate { get; set; } = string.Empty;
+    
+    private SnackbarUtil SnackbarUtil { get; set; } = new();
     
     private bool _hasChanges;
     private bool HasChanges 
@@ -72,11 +75,15 @@ public partial class UpdateDialog : ComponentBase
                 Snackbar.Add("Failed getting a response from downloader", Severity.Error);
                 break;
             case 1:
-                FormatConnectionResponse(response.FirstOrDefault(), "URL", Url);
+                Snackbar.Add(SnackbarUtil.FormatConnectionResponse(response.FirstOrDefault(), "URL", Url).Item1, 
+                    SnackbarUtil.FormatConnectionResponse(response.FirstOrDefault(), "URL", Url).Item2);
                 break;
             case 2:
-                FormatConnectionResponse(response[0], "URL", Url);
-                FormatConnectionResponse(response[1], "Backup URL", BackupUrl);
+                Snackbar.Add(SnackbarUtil.FormatConnectionResponse(response[0], "URL", Url).Item1, 
+                    SnackbarUtil.FormatConnectionResponse(response[0], "URL", Url).Item2);
+                
+                Snackbar.Add(SnackbarUtil.FormatConnectionResponse(response[1], "BackupURL", BackupUrl).Item1, 
+                    SnackbarUtil.FormatConnectionResponse(response[1], "BackupURL", BackupUrl).Item2);
                 break;
             default:
                 Snackbar.Add("Failed getting a correct response from downloader", Severity.Error);
@@ -84,24 +91,7 @@ public partial class UpdateDialog : ComponentBase
         }
     }
 
-    private void FormatConnectionResponse(bool responseValue, string urlType, string url)
-    {
-        switch (responseValue)
-        {
-            case false:
-                SnackPop(urlType, url, Severity.Error, "failed connecting");
-                break;
-            case true:
-                SnackPop(urlType, url, Severity.Success, "successfully connected");
-                break;
-        }
-    }
     
-    private void SnackPop(string urlType, string url, Severity severity, string message)
-    {
-        Snackbar.Configuration.ShowCloseIcon = true;
-        Snackbar.Add(new MarkupString($"<div><h3><strong>{urlType}: </strong></h3><h4>[ {url} ] - {message}</h4></div>"),severity);
-    }
 
     
     private void DialogSubmit() => MudDialog?.Close(DialogResult.Ok("update"));
