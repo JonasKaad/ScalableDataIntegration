@@ -16,7 +16,7 @@ builder.Services
         var baseUrl = Environment.GetEnvironmentVariable("BASE_URL");
         var name = Environment.GetEnvironmentVariable("PARSER_NAME");
         var parserUrl = Environment.GetEnvironmentVariable("PARSER_URL");
-        var interval = TimeSpan.FromSeconds(10);
+        var interval = TimeSpan.FromMinutes(1);
         return new HeartbeatService(logger, baseUrl, name, parserUrl, interval);
     })
     .AddGrpc();
