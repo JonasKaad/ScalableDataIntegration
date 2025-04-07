@@ -270,12 +270,18 @@ public partial class ConfigurationPanel : ComponentBase
 
     private async Task OpenFilterDialogAsync()
     {
-        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Large, FullWidth = true };
         var parameters = new DialogParameters<FilterConfiguration>
         {
             { x => x.ParserName, ParserState.ParserName }
         };
         var dialogResult = await DialogService.ShowAsync<FilterConfiguration>("Filter configuration", parameters, options);
+        
+        var result = await dialogResult?.Result;
+        if (result?.Data is true)
+        {
+            Snackbar.Add($"Filters updated for {ParserState.ParserName}", Severity.Success);
+        }
     }
     
     private async Task UpdateDialogAsync()

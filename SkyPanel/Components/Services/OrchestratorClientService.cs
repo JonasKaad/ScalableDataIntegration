@@ -12,6 +12,7 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
     public async Task<IEnumerable<string>> GetFilters()
     {
         var client = httpClientFactory.CreateClient();
+        return ["hello", "hello2", "hello3", "blahh", "blehh", "bluhh", "jonas", "kaad", "kadd"];
         try
         {
             var response = await client.GetAsync($"{baseUrl}/Filter/filters");
