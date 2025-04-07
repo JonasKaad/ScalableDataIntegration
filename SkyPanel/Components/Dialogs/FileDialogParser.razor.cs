@@ -41,6 +41,7 @@ public partial class FileDialogParser : ComponentBase
     {
         await (_fileUpload?.ClearAsync() ?? Task.CompletedTask);
         _fileNames.Clear();
+        _files.Clear();
         StateHasChanged();
         ClearDragClass();
     }
