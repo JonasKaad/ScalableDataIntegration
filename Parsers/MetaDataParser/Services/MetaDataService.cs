@@ -1,6 +1,7 @@
 using System.Net.Mime;
 using Azure;
 using Azure.Storage.Blobs;
+using CommonDis.Services;
 using Grpc.Core;
 using Microsoft.Extensions.Azure;
 using Sdi.Parser;
@@ -16,10 +17,12 @@ public class MetaDataService : Parser.ParserBase
 {
     private readonly ILogger<MetaDataService> _logger;
     private readonly string _name = "metadataparser";
+    private readonly CommonService _commonService;
 
-    public MetaDataService(ILogger<MetaDataService> logger)
+    public MetaDataService(ILogger<MetaDataService> logger, CommonService commonService)
     {
         _logger = logger;
+        _commonService = commonService;
     }
 
     public override async Task<ParseResponse> ParseCall(ParseRequest request, ServerCallContext context)
@@ -29,7 +32,14 @@ public class MetaDataService : Parser.ParserBase
         var image = Image.Load(data.First());
         var newImage = Image.Load(data.First());
         newImage.Metadata.GetPngMetadata().TextData = new List<PngTextData>() {new PngTextData("valid", text, "en", "")};
-        await SaveDataToBlob(image, newImage);
+        var ogImageSaved = new MemoryStream();
+        await image.SaveAsync(ogImageSaved, PngFormat.Instance);
+        ogImageSaved.Position = 0;
+        var newImageSaved = new MemoryStream();
+        await newImage.SaveAsync(newImageSaved, PngFormat.Instance);
+        newImageSaved.Position = 0;
+        
+        await _commonService.SaveDataToBlob(_name, ogImageSaved, newImageSaved, "png");
         
         return await Task.FromResult(new ParseResponse
         {
@@ -43,7 +53,7 @@ public class MetaDataService : Parser.ParserBase
         var delimiter = "magic"u8.ToArray();
         var result = new List<byte[]>();
     
-        int startIndex = 0;
+        var startIndex = 0;
         int position;
     
         ReadOnlySpan<byte> dataSpan = data;
@@ -57,16 +67,17 @@ public class MetaDataService : Parser.ParserBase
                 break; // No more delimiters found
             
             // Convert position to be relative to the original array
-            position += startIndex;
+            position += startIndex + delimiter.Length - 1;
         
             if (position > startIndex) // Only add non-empty segments
             {
-                var segment = new byte[position - startIndex];
-                Array.Copy(data, startIndex, segment, 0, position - startIndex);
+                var segmentSize = position - startIndex - delimiter.Length;
+                var segment = new byte[segmentSize];
+                Array.Copy(data, startIndex, segment, 0, segmentSize);
                 result.Add(segment);
             }
         
-            startIndex = position + delimiter.Length;
+            startIndex = position;
         }
     
         // Add the last segment if there's data after the last delimiter
@@ -78,35 +89,5 @@ public class MetaDataService : Parser.ParserBase
         }
     
         return result;
-    }
-    
-    private async Task SaveDataToBlob(Image ogImg, Image img)
-    {
-        DotNetEnv.Env.Load();
-        var ogImageSaved = new MemoryStream();
-        await ogImg.SaveAsync(ogImageSaved, PngFormat.Instance);
-        ogImageSaved.Position = 0;
-        var newImageSaved = new MemoryStream();
-        await img.SaveAsync(newImageSaved, PngFormat.Instance);
-        newImageSaved.Position = 0;
-        var connectionString = Environment.GetEnvironmentVariable("blobConnection");
-        var blobServiceClient = new BlobServiceClient(connectionString);
-
-        var container = blobServiceClient.GetBlobContainerClient(_name);
-        await container.CreateIfNotExistsAsync();
-
-        var date = DateTime.UtcNow.Date;
-        var hour = DateTime.UtcNow.Hour;
-        var min = DateTime.UtcNow.Minute;
-
-        try
-        {
-            await container.UploadBlobAsync($"{date:yyyy/MM/dd}/{hour}{min}-tracks_raw.png", ogImageSaved);
-            await container.UploadBlobAsync($"{date:yyyy/MM/dd}/{hour}{min}-tracks_parsed.png", newImageSaved);
-        }
-        catch (RequestFailedException ex)
-        {
-            _logger.LogError("Failed to upload to blob: {Error}", ex);
-        }
     }
 }

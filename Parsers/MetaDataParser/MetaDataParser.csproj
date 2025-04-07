@@ -23,4 +23,8 @@
         <PackageReference Include="SixLabors.ImageSharp" Version="3.1.7" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\..\Common\Csharp\CommonDis\CommonDis.csproj" />
+    </ItemGroup>
+
 </Project>
