@@ -16,14 +16,17 @@ public class DownloaderController : ControllerBase
     private readonly SecretService _secretService;
     private readonly ILogger<DownloaderController> _logger;
     private readonly ParserRegistry _parserRegistry;
+    private readonly FilterRegistry _filterRegistry;
 
-    public DownloaderController(IDownloaderService downloaderService, SecretService secretService, ILogger<DownloaderController> logger, ParserRegistry parserRegistry)
+    public DownloaderController(IDownloaderService downloaderService, SecretService secretService, 
+        ILogger<DownloaderController> logger, ParserRegistry parserRegistry, FilterRegistry filterRegistry)
     {
         _downloaderService = downloaderService;
         _downloaders = downloaderService.GetRecurringJobs();
         _secretService = secretService;
         _logger = logger;
         _parserRegistry = parserRegistry;
+        _filterRegistry = filterRegistry;
     }
 
     [Route("downloaders")]
@@ -67,6 +70,18 @@ public class DownloaderController : ControllerBase
                 return BadRequest("The parser could not be resolved.");
             }
             dlToConfigure.Parser = HandleConfiguration(dlToConfigure.Parser, parser!);
+            
+            var filters = dlConfiguration.Filters
+                .Select(filter => _filterRegistry.GetService(filter.ToLowerInvariant()) ?? "")
+                .ToList();
+            if (dlConfiguration.Filters.Count != 0 && filters.Any(string.IsNullOrEmpty))
+            {
+                _logger.LogWarning("Failed to set filters for downloader {Downloader} with filters {Filters}", downloader, dlConfiguration.Filters);
+                return BadRequest("Some or more filters could not be resolved.");
+            }
+
+            dlToConfigure.Parameters = dlConfiguration.Parameters;
+            
             dlToConfigure.DownloadUrl = HandleConfiguration(dlToConfigure.DownloadUrl, dlConfiguration.DownloadUrl);
             dlToConfigure.BackUpUrl = HandleConfiguration(dlToConfigure.BackUpUrl, dlConfiguration.BackUpUrl);
             dlToConfigure.PollingRate = HandleConfiguration(dlToConfigure.PollingRate, dlConfiguration.PollingRate);
@@ -109,8 +124,8 @@ public class DownloaderController : ControllerBase
         }
 
         newDl.Parser = _parserRegistry.GetService(newDl.Parser.ToLowerInvariant()) ?? "";
-
-
+        newDl.Filters = newDl.Filters.Select(filter => _filterRegistry.GetService(filter.ToLowerInvariant()) ?? "").ToList();
+        
         _downloaders.Add(newDl);
         _downloaderService.ScheduleOrUpdateRecurringDownload(newDl);
         return Ok($"Downloader {downloader} has been added.");
