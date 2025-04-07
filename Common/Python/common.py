@@ -76,8 +76,8 @@ async def save_data_to_azure(raw_file, parsed_file, name):
         await container_client.create_container()
 
     now = datetime.datetime.now(datetime.timezone.utc)
-    raw_file_name = f"{now.year}/{now.strftime('%m')}/{now.day}/{now.strftime('%H%M')}-raw.txt"
-    parsed_file_name = f"{now.year}/{now.strftime('%m')}/{now.day}/{now.strftime('%H%M')}-parsed.txt"
+    raw_file_name = f"{now.year}/{now.strftime('%m')}/{now.strftime('%d')}/{now.strftime('%H%M')}-raw.txt"
+    parsed_file_name = f"{now.year}/{now.strftime('%m')}/{now.strftime('%d')}/{now.strftime('%H%M')}-parsed.txt"
 
     await container_client.upload_blob(name=raw_file_name, data=raw_file)
     await container_client.upload_blob(name=parsed_file_name, data=parsed_file)
