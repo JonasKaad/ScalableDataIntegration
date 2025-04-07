@@ -15,11 +15,7 @@ public class CommonService
 
     public async Task SaveDataToBlob(string parser, BinaryData raw, BinaryData parsed, string format = "txt")
     {
-        var connectionString = Environment.GetEnvironmentVariable("blobConnection");
-        var blobServiceClient = new BlobServiceClient(connectionString);
-
-        var container = blobServiceClient.GetBlobContainerClient(parser);
-        await container.CreateIfNotExistsAsync();
+        var container = await CommonService.GetContainerClient(parser);
 
         var date = DateTime.UtcNow.Date;
         var hour = DateTime.UtcNow.Hour;
@@ -38,11 +34,7 @@ public class CommonService
     
     public async Task SaveDataToBlob(string parser, Stream raw, Stream parsed, string format = "txt")
     {
-        var connectionString = Environment.GetEnvironmentVariable("blobConnection");
-        var blobServiceClient = new BlobServiceClient(connectionString);
-
-        var container = blobServiceClient.GetBlobContainerClient(parser);
-        await container.CreateIfNotExistsAsync();
+        var container = await CommonService.GetContainerClient(parser);
 
         var date = DateTime.UtcNow.Date;
         var hour = DateTime.UtcNow.Hour;
@@ -57,6 +49,16 @@ public class CommonService
         {
             _logger.LogError("Failed to upload to blob: {Error}", ex);
         }
+    }
+
+    private static async Task<BlobContainerClient> GetContainerClient(string parser)
+    {
+        var connectionString = Environment.GetEnvironmentVariable("BLOB_CONNECTION");
+        var blobServiceClient = new BlobServiceClient(connectionString);
+
+        var container = blobServiceClient.GetBlobContainerClient(parser);
+        await container.CreateIfNotExistsAsync();
+        return container;
     }
 }
 
