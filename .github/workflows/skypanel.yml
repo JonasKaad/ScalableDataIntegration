@@ -28,6 +28,7 @@ jobs:
         file: ./SkyPanel/Dockerfile
         push: true
         tags: parsers.azurecr.io/skypanel:${{ github.sha }}
+        no-cache: true
     - name: Add command to summary
       run: |
         echo "-----------------" >> $GITHUB_STEP_SUMMARY
