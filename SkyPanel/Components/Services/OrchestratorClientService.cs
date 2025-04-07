@@ -9,21 +9,44 @@ namespace SkyPanel.Components.Services;
 public sealed class OrchestratorClientService(IHttpClientFactory httpClientFactory, string baseUrl, ILogger<OrchestratorClientService> logger)
 {
     
-    public async Task<IEnumerable<string>> GetFilters()
+    public async Task<IEnumerable<Filter>> GetFilters()
     {
         var client = httpClientFactory.CreateClient();
-        return ["hello", "hello2", "hello3", "blahh", "blehh", "bluhh", "jonas", "kaad", "kadd"];
-        try
+        return new List<Filter>
         {
-            var response = await client.GetAsync($"{baseUrl}/Filter/filters");
-            var elements = await response.Content.ReadFromJsonAsync<IEnumerable<string>>();
-            return elements ?? [];
-        } 
-        catch (Exception e)
-        {
-            logger.LogError("Failed to get filters with error: {error}", e.Message);
-        }
-        return [];
+            new Filter { Name = "Filter1", Parameters = new Dictionary<string, string> { { "Param1", "Value1" }, { "Param2", "Value2" } } },
+            new Filter { Name = "Filter2", Parameters = new Dictionary<string, string> { { "Param1", "Value1" }, { "Param2", "Value2" } } },
+            new Filter { Name = "Filter3", Parameters = new Dictionary<string, string> { { "Param1", "Value1" }, { "Param2", "Value2" } } }
+        };
+        
+        // try
+        // {
+        //     var response = await client.GetAsync($"{baseUrl}/Filter/filters");
+        //     var elements = await response.Content.ReadFromJsonAsync<IEnumerable<string>>();
+        //     return elements ?? [];
+        // } 
+        // catch (Exception e)
+        // {
+        //     logger.LogError("Failed to get filters with error: {error}", e.Message);
+        // }
+        // return [];
+    }
+    
+    public async Task<Dictionary<string, string>> GetFilterParameters(string filterName)
+    {
+        var client = httpClientFactory.CreateClient();
+        return new Dictionary<string, string> { { "key1", "int" }, { "key2", "int" }, { "key3", "int" }, { "key4", "int" } };
+        // try
+        // {
+        //     var response = await client.GetAsync($"{baseUrl}/Filter/filters");
+        //     var elements = await response.Content.ReadFromJsonAsync<IEnumerable<string>>();
+        //     return elements ?? [];
+        // } 
+        // catch (Exception e)
+        // {
+        //     logger.LogError("Failed to get filters with error: {error}", e.Message);
+        // }
+        // return [];
     }
     public async Task<IEnumerable<string>> GetDownloaders()
     {

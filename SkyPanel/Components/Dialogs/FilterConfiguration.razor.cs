@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using CommonDis.Models;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using SkyPanel.Components.Services;
@@ -10,9 +11,10 @@ public partial class FilterConfiguration : ComponentBase
     [Parameter, Required]
     public string ParserName { get; set; } = string.Empty;
     
-    private List<string> availableFilters = new();
+    private List<Filter> availableFilters = new();
     private List<DropItem> dropItems = new();
-    private List<string> selectedFilters = new();
+    private List<Filter> selectedFilters = new();
+    private List<Filter> expandedFilters = new();
     private bool isLoading = true;
     private string searchString = string.Empty;
 
@@ -21,28 +23,47 @@ public partial class FilterConfiguration : ComponentBase
     [Inject] private ParserStateService ParserState { get; set; } = null!;
     [Inject] private OrchestratorClientService _orchestratorClientService { get; set; } = null!;
     [CascadingParameter] IMudDialogInstance? MudDialog { get; set; }
-
-    private IEnumerable<string> filteredAvailableFilters => string.IsNullOrWhiteSpace(searchString)
-        ? availableFilters.Except(selectedFilters)
-        : availableFilters.Except(selectedFilters)
-            .Where(f => f.Contains(searchString, StringComparison.OrdinalIgnoreCase));
-
+    
     protected override async Task OnInitializedAsync()
     {
         isLoading = true;
         var filters = await _orchestratorClientService.GetFilters();
         availableFilters = filters.ToList();
-        selectedFilters = ParserState.Filters;
-        dropItems = selectedFilters.Select(f => new DropItem { Name = f }).ToList();
+        selectedFilters = ParserState.Filters.Where(t => !string.IsNullOrWhiteSpace(t)).Select(f => new Filter { Name = f }).ToList();
+        dropItems = selectedFilters.Select(f => new DropItem { Name = f.Name }).ToList();
         isLoading = false;
     }
+    
+    private void OpenFilterSettings(string filterName)
+    {
+        if (expandedFilters.Any(f => f.Name == filterName))
+        {
+            expandedFilters.RemoveAll(f => f.Name == filterName);
+        }
+        else
+        {
+            var param = _orchestratorClientService.GetFilterParameters(filterName).Result;
+            expandedFilters.Add(new Filter()
+            {
+                Name = filterName,
+                Parameters = param
+            });
+        }
+    }
+
+    private IEnumerable<string> filteredAvailableFilters => string.IsNullOrWhiteSpace(searchString)
+        ? availableFilters.Except(selectedFilters).Select(f => f.Name)
+        : availableFilters.Except(selectedFilters)
+            .Where(f => f.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase)).Select(f => f.Name);
+
+
 
 // Update AddFilter method
     private void AddFilter(string filter)
     {
-        if (!selectedFilters.Contains(filter))
+        if (selectedFilters.All(f => f.Name != filter))
         {
-            selectedFilters.Add(filter);
+            selectedFilters.Add(new (){Name = filter});
             dropItems.Add(new DropItem { Name = filter });
             _dropContainer.Refresh();
         }
@@ -51,7 +72,7 @@ public partial class FilterConfiguration : ComponentBase
 // Update RemoveFilter method
     private void RemoveFilter(string filter)
     {
-        selectedFilters.Remove(filter);
+        selectedFilters.RemoveAll(f => f.Name == filter);
         dropItems.RemoveAll(item => item.Name == filter);
         _dropContainer.Refresh();
     }
@@ -59,7 +80,7 @@ public partial class FilterConfiguration : ComponentBase
     private void SaveFilters()
     {
         // Save the selected filters to the parser state
-        ParserState.Filters = selectedFilters;
+        ParserState.Filters = selectedFilters.Select(f => f.Name).ToList();
         MudDialog?.Close(DialogResult.Ok(true));
     }
     
@@ -76,7 +97,7 @@ public partial class FilterConfiguration : ComponentBase
             dropItems.Insert(newIndex, dropItem.Item);
     
         // Update the selectedFilters list to match
-        selectedFilters = dropItems.Select(item => item.Name).ToList();
+        selectedFilters = dropItems.Select(item => new Filter(){Name = item.Name}).ToList();
         _dropContainer.Refresh();
     }
     
