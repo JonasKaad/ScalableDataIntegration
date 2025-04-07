@@ -13,11 +13,15 @@ namespace SkyPanel.Components.Dialogs;
 public partial class FileDialogParser : ComponentBase
 {
     private readonly ILogger<FileDialogParser> _logger;
-    
-    public FileDialogParser (ILogger<FileDialogParser> logger)
+    [CascadingParameter]
+    private IMudDialogInstance? MudDialog { get; set; }
+
+    private void DialogSubmit(IList<IBrowserFile> files)
     {
-        _logger = logger;
+        MudDialog?.Close(DialogResult.Ok(files));
     }
+
+    private void DialogCancel() => MudDialog?.Cancel();
 
     [CascadingParameter] 
     private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
