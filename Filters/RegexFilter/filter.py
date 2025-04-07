@@ -41,7 +41,6 @@ class FilterServicer(filter_pb2_grpc.FilterServicer):
             if re.search(json_parameters["regex"], string):
                 match = string
 
-
         (next_url, urls) = get_next_url(request.next_urls.split(";"))
 
         data_to_send = raw[0]
