@@ -6,9 +6,9 @@ using DotNetEnv;
 using DotNetEnv.Configuration;
 using DownloadOrchestrator.Downloaders;
 using DownloadOrchestrator.Services;
-using Microsoft.EntityFrameworkCore;
 using Hangfire;
 using Hangfire.PostgreSql;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.Datadog.Logs;
@@ -57,6 +57,7 @@ builder.Services.AddSwaggerGen();
 builder.Services
     .AddSerilog()
     .AddSingleton<ParserRegistry>()
+    .AddSingleton<FilterRegistry>()
     .AddDbContextFactory<StatisticsDatabaseService>(options =>
         options.UseNpgsql(connectionString))
     .AddScoped<SecretService>(s =>
