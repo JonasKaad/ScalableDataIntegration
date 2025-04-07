@@ -32,8 +32,77 @@ public partial class UpdateDialog : ComponentBase
         }
     }
     [Inject] private ParserStateService ParserState { get; set; } = null!;
+    [Inject] private OrchestratorClientService OrchestratorClientService { get; set; } = null!;
     
     [CascadingParameter] IMudDialogInstance? MudDialog { get; set; }
+
+    private async Task TestConnection()
+    {
+        if (string.IsNullOrEmpty(ParserState.ParserName))
+        {
+            return;
+        }
+
+        var urlValueToSend = "";
+        var backupUrlValueToSend = "";
+        var secretNameToSend = "";
+        var pollingRateToSend = "";
+        
+        // Check if parser values have changed. If not send a string without a space: ""
+        if (!string.IsNullOrEmpty(Url))
+        {
+            urlValueToSend = Url;
+        }
+        
+        if (!string.IsNullOrEmpty(BackupUrl))
+        {
+            backupUrlValueToSend = BackupUrl;
+        }
+        
+        secretNameToSend = SecretName;
+        
+        pollingRateToSend = PollingRate; 
+        
+        var response = await OrchestratorClientService.TestConnection(ParserState.ParserName, 
+            urlValueToSend, backupUrlValueToSend, secretNameToSend, pollingRateToSend);
+        
+        switch (response.Count)
+        {
+            case 0:
+                Snackbar.Add("Failed getting a response from downloader", Severity.Error);
+                break;
+            case 1:
+                FormatConnectionResponse(response.FirstOrDefault(), "URL", Url);
+                break;
+            case 2:
+                FormatConnectionResponse(response[0], "URL", Url);
+                FormatConnectionResponse(response[1], "Backup URL", BackupUrl);
+                break;
+            default:
+                Snackbar.Add("Failed getting a correct response from downloader", Severity.Error);
+                break;
+        }
+    }
+
+    private void FormatConnectionResponse(bool responseValue, string urlType, string url)
+    {
+        switch (responseValue)
+        {
+            case false:
+                SnackPop(urlType, url, Severity.Error, "failed connecting");
+                break;
+            case true:
+                SnackPop(urlType, url, Severity.Success, "successfully connected");
+                break;
+        }
+    }
+    
+    private void SnackPop(string urlType, string url, Severity severity, string message)
+    {
+        Snackbar.Configuration.ShowCloseIcon = true;
+        Snackbar.Add(new MarkupString($"<div><h3><strong>{urlType}: </strong></h3><h4>[ {url} ] - {message}</h4></div>"),severity);
+    }
+
     
     private void DialogSubmit() => MudDialog?.Close(DialogResult.Ok("update"));
 
