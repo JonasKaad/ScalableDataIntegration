@@ -21,6 +21,7 @@ public class HeartbeatService : BackgroundService
         _parserName = name;
         _parserUrl = parserUrl;
         _heartbeatInterval = interval;
+        _ = RegisterParser(_httpClient, _baseUrl + $"/Parser/{_parserName}/register", _parserUrl, _logger);
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -51,7 +52,7 @@ public class HeartbeatService : BackgroundService
         try
         {
        
-            var response =      await client.PostAsJsonAsync(url, parserUrl);
+            var response = await client.PostAsJsonAsync(url, parserUrl);
             return response.IsSuccessStatusCode;
         }
         catch (Exception ex)
