@@ -98,14 +98,16 @@ def get_data(raw_data, format_type):
                 except UnicodeDecodeError:
                     print(f"Warning: Could not decode part of data as UTF-8")
                     raw.append(data)
-            if format_type == "img":
+            elif format_type == "img":
                 ##TODO: Do some more checks to see if data is actually image
                 relevant.append(data)
             else:
                 raw.append(data)
-
-    # Flatten potential multidimensional list instead
-    return relevant[0], raw
+    flattened_relevant = [item for sublist in relevant for item in sublist]
+    if flattened_relevant:
+        return flattened_relevant, raw
+    else:
+        return [], raw
 
 def get_next_url(urls):
     if len(urls) == 0:
