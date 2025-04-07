@@ -8,7 +8,7 @@ public class HeartbeatService : BackgroundService
 {
     private readonly ILogger<HeartbeatService> _logger;
     private readonly HttpClient _httpClient;
-    private readonly TimeSpan _heartbeatInterval;
+    private readonly TimeSpan _heartbeatInterval = TimeSpan.FromMinutes(5);
     private readonly string _baseUrl;
     private readonly string _parserUrl;
     private readonly string _parserName;
