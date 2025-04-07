@@ -49,7 +49,6 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
         {
             using HttpResponseMessage response = await client.PostAsync($"{baseUrl}/Downloader/{parser}/reparse", null);
             var returnStatusCode = response.StatusCode;
-            Console.WriteLine(response);
             return returnStatusCode == HttpStatusCode.OK;
         }
         catch (Exception e)
