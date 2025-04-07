@@ -2,7 +2,6 @@ import asyncio
 import grpc
 import sys
 import os
-import json
 import re
 
 GENCLIENT_PYTHON_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../GeneratedClients/python"))
