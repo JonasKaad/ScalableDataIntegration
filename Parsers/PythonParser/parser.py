@@ -85,7 +85,7 @@ class ParserServicer(parser_pb2_grpc.ParserServicer):
         else:
             response = parser_pb2.ParseResponse(success=True, err_msg=f"Parsed {len(tafstrings)} TAFs")
 
-        raw_data_to_save = raw_data.decode('utf-8')
+        raw_data_to_save = raw_data
         parsed_data_to_save = json.dumps(tafs, cls=TAFEncoder)
         container_name = os.getenv("PARSER_NAME", "python-taf")
         await save_data_to_azure(raw_data_to_save, parsed_data_to_save, container_name)
