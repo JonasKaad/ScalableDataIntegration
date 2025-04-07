@@ -6,7 +6,7 @@ using CommonDis.Models.Auth0;
 using SkyPanel.Components.Models;
 namespace SkyPanel.Components.Services;
 
-public sealed class OrchestratorClientService(IHttpClientFactory httpClientFactory, string baseUrl)
+public sealed class OrchestratorClientService(IHttpClientFactory httpClientFactory, string baseUrl, ILogger<OrchestratorClientService> logger)
 {
     public async Task<IEnumerable<string>> GetDownloaders()
     {
@@ -19,7 +19,7 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
         } 
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            logger.LogError("Failed to get downloaders with error: {error}", e.Message);
         }
         return [];
     }
@@ -36,7 +36,7 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            logger.LogError("Failed to get downloader configuration with error: {error}", e.Message);
         }
 
         return null;
@@ -53,7 +53,7 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            logger.LogError("Failed to reparse with error: {error}", e.Message);
             return false;
         }
     }
@@ -80,7 +80,6 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
             }
             
             var returnStatusCode = response.StatusCode;
-            Console.WriteLine(response);
             if (returnStatusCode == HttpStatusCode.OK)
             {
                 return new UploadResult( true, "", Result.UploadSuccess);
@@ -92,7 +91,7 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            logger.LogError("Failed to upload file with error: {error}", e.Message);
             return new UploadResult(false, e.Message, Result.ExceptionOccured);
         }
     }
@@ -111,7 +110,7 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            logger.LogError("Failed to configure downloader with error: {error}", e.Message);
         }
         return false;
     }
@@ -129,7 +128,7 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            logger.LogError("Failed to test connection with error: {error}", e.Message);
         }
         return [];
     }
@@ -171,7 +170,7 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            logger.LogError("Failed to get users with error: {error}", e.Message);
         }
         return [];
     }
@@ -187,7 +186,7 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            logger.LogError("Failed to get user's roles with error: {error}", e.Message);
         }
         return [];
     }
@@ -209,7 +208,7 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            logger.LogError("Failed to remove user's role with error: {error}", e.Message);
             return false;
         }
     }
@@ -232,7 +231,7 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            logger.LogError("Failed to get update user's role with error: {error}", e.Message);
         }
         return false;
     }
@@ -247,7 +246,7 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            logger.LogError("Failed to get roles with error: {error}", e.Message);
         }
         return [];
     }
