@@ -11,8 +11,8 @@ service Filter {
 message FilterRequest {
 	bytes raw_data = 1;
 	string format = 2;
-    string parameters = 3;
-    string next_urls = 4;
+	string parameters = 3;
+	string next_urls = 4;
 }
 
 message FilterReply {
