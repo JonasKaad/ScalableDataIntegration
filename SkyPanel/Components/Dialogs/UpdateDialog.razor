@@ -63,7 +63,7 @@
     <DialogActions>
         <MudButton OnClick="@DialogCancel" Variant="Variant.Filled">Cancel</MudButton>
         <MudSpacer/>
-        <MudButton StartIcon="@Icons.Material.Filled.PublishedWithChanges" Disabled="true" Variant="Variant.Filled" Color="Color.Primary">Test Connection</MudButton>
+        <MudButton StartIcon="@Icons.Material.Filled.PublishedWithChanges" Disabled="@(!HasChanges)" OnClick="@TestConnection" Variant="Variant.Filled" Color="Color.Primary">Test Connection</MudButton>
         <MudButton Color="@Color.Success" OnClick="@DialogSubmit" Disabled="@(!HasChanges)" Variant="Variant.Filled">Confirm</MudButton>
     </DialogActions>
 </MudDialog>
