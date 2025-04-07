@@ -71,11 +71,13 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
             var responseString = await res.ReadAsStringAsync();
             if (responseString.Contains("The specified blob already exists."))
             {
+                logger.LogWarning("Failed to upload file with error: {error}", Result.AlreadyExists);
                 return new UploadResult(false, "The specified blob already exists.", Result.AlreadyExists);
             }
             
             if (responseString.Contains("invalid literal for int() with base 10: '\"E'\""))
             {
+                logger.LogWarning("Failed to upload file with error: {error}", Result.FileFormatError);
                 return new UploadResult(false, "Wrong file content.", Result.FileFormatError);
             }
             
