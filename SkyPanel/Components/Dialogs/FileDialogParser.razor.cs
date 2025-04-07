@@ -1,19 +1,27 @@
+using System.Net;
+using System.Net.Http.Headers;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Forms;
 using MudBlazor;
 using SkyPanel.Utils;
+using SkyPanel.Components.Models;
+using SkyPanel.Components.Services;
 
 namespace SkyPanel.Components.Dialogs;
 
 public partial class FileDialogParser : ComponentBase
 {
     private readonly ILogger<FileDialogParser> _logger;
-    
-    public FileDialogParser (ILogger<FileDialogParser> logger)
+    [CascadingParameter]
+    private IMudDialogInstance? MudDialog { get; set; }
+
+    private void DialogSubmit(IList<IBrowserFile> files)
     {
-        _logger = logger;
+        MudDialog?.Close(DialogResult.Ok(files));
     }
+
+    private void DialogCancel() => MudDialog?.Cancel();
 
     [CascadingParameter] 
     private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
@@ -21,15 +29,19 @@ public partial class FileDialogParser : ComponentBase
     [Parameter]
     public required string ParserName { get; set; }
     
+    [Inject] private OrchestratorClientService OrchestratorClient { get; set; } = null!;
+    
     private const string DefaultDragClass = "relative rounded-lg border-2 border-dashed pa-4 mt-4 mud-width-full mud-height-full";
     private string _dragClass = DefaultDragClass;
     private readonly List<string> _fileNames = new();
+    IList<IBrowserFile> _files = new List<IBrowserFile>();
     private MudFileUpload<IReadOnlyList<IBrowserFile>>? _fileUpload;
     
     private async Task ClearAsync()
     {
         await (_fileUpload?.ClearAsync() ?? Task.CompletedTask);
         _fileNames.Clear();
+        _files.Clear();
         StateHasChanged();
         ClearDragClass();
     }
@@ -55,20 +67,30 @@ public partial class FileDialogParser : ComponentBase
             FilePopUp(files);
         }
     }
-    
-    private async Task Upload()
+
+    private void Upload()
     {
-        // TODO: Implement logic for handling file uploads
-        DialogSubmit();
-        var authState = await AuthenticationStateTask;
-        var authUser = authState.User;
-        var user = RoleUtil.GetUserEmail(authUser);
-        foreach (var file in _fileNames)
+        if (_files.Count == 0)
         {
-            _logger.LogInformation( "[AUDIT] {User} uploaded dataset: {file} to {Parser}", user, file, ParserName);
+            Snackbar.Add("No files selected", Severity.Warning);
+            return;
         }
-        Snackbar.Add("Uploaded your files!");
+        DialogSubmit(_files);
     }
+    
+    private void UploadFiles(IReadOnlyList<IBrowserFile>? files)
+    {
+        // If files are null return so it can be cleared?
+        if (files == null) return;
+        
+        // Add files to the list
+        foreach (var file in files)
+        {
+            _files.Add(file);
+        }
+    }
+    
+    
     
     private void SetDragClass()
     {

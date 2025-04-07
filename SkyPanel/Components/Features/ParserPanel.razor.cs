@@ -1,7 +1,10 @@
+using System.Net.Http.Headers;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Forms;
 using MudBlazor;
 using SkyPanel.Components.Dialogs;
+using SkyPanel.Components.Models;
 using SkyPanel.Components.Services;
 using SkyPanel.Utils;
 
@@ -9,6 +12,14 @@ namespace SkyPanel.Components.Features;
 
 public partial class ParserPanel : ComponentBase
 {
+    private readonly ILogger<ParserPanel> _logger;
+    public ParserPanel (ILogger<ParserPanel> logger)
+    {
+        _logger = logger;
+    }
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
     [Inject] private ParserStateService ParserState { get; set; } = null!;
     [Inject] private BlobManagerService BlobService { get; set; } = null!;
     
@@ -48,7 +59,7 @@ public partial class ParserPanel : ComponentBase
         ParserState.OnChange += StateHasChanged;
     }
     
-    private Task OpenFileDialogAsync()
+    private async Task OpenFileDialogAsync()
     {
         var parameters = new DialogParameters<FileDialogParser>
         {
@@ -57,26 +68,113 @@ public partial class ParserPanel : ComponentBase
         };
         var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small, FullWidth = true };
 
-        return DialogService.ShowAsync<FileDialogParser>("Upload Dataset", parameters, options);
+        var dialogResult = await (await DialogService.ShowAsync<FileDialogParser>("Upload dataset", parameters, options)).Result;
+        
+        var result = dialogResult?.Data as IList<IBrowserFile> ?? [];
+        
+        if (result.Count > 0)
+        {
+            await Upload(result, ParserState.ParserName);
+        }
     }
 
-    private Task OpenReparseDialogAsync()
+    private async Task OpenReparseDialogAsync()
     {
-        var parameters = new DialogParameters<BasicDialog>
+        var parameters = new DialogParameters<ReparseDialog>
         {
             { x => x.ContentText, "Do you want to fetch and parse the latest dataset for:" },
             { x => x.ConfirmationButtonText, "Confirm" },
             { x => x.EmphasizedCenterText, ParserState.ParserName },
-            { x => x.SnackbarMessage, $"Started fetching and parsing latest dataset for {ParserState.ParserName}"},
-            { x => x.SnackbarSeverity, Severity.Info },
         };
         
         var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.ExtraSmall, FullWidth = true };
-        return DialogService.ShowAsync<BasicDialog>("Fetch and parse latest dataset", parameters, options);
+        var dialogResult = await (await DialogService.ShowAsync<ReparseDialog>("Fetch and parse latest dataset", parameters, options)).Result;
+        var result = dialogResult?.Data as string ?? string.Empty;
+        
+        if (result == "reparse")
+        {
+            var reparseResult = await OrchestratorClient.Reparse(ParserState.ParserName);
+            if (reparseResult)
+            {
+                Snackbar.Add($"Started fetching and parsing latest dataset for {ParserState.ParserName}",  Severity.Info);
+            }
+            else
+            {
+                Snackbar.Add($"Failed to fetch and parse latest dataset for {ParserState.ParserName}", Severity.Error);
+                _logger.LogError("[AUDIT] Failed to fetch and parse latest dataset for {Parser}", ParserState.ParserName);
+            }
+        }
+        
+    }
+    private List<UploadResult> uploadResults = new();
+    private List<File> _files = new();
+    
+    private async Task Upload(IList<IBrowserFile> files, string parserName)
+    {
+        // 30 MB
+        long maxFileSize = 30 * 1000000;
+        var upload = false;
+        _files.Clear();
+        
+        using var content = new MultipartFormDataContent();
+
+        foreach (var file in files)
+        {
+            try
+            {
+                _files.Add(new() { Name = file.Name });
+
+                var fileContent = new StreamContent(file.OpenReadStream(maxFileSize));
+                    fileContent.Headers.ContentType =
+                    new MediaTypeHeaderValue(file.ContentType);
+
+                content.Add(
+                    content: fileContent,
+                    name: "\"formFiles\"",
+                    fileName: file.Name);
+
+                upload = true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogInformation(
+                    "{FileName} not uploaded: {Message}",
+                    file.Name, ex.Message);
+                Snackbar.Add($"Failed to upload {file.Name} \n{ex.Message}", Severity.Error);
+            }
+            
+        }
+        if (upload)
+        {
+            var response = await OrchestratorClient.UploadFiles(parserName, content);
+
+            if (response.Success)
+            {
+                var authState = await authenticationStateTask;
+                var authUser = authState.User;
+                var user = RoleUtil.GetUserEmail(authUser);
+                var fileNames = string.Join(", ", _files.Select(x => x.Name));
+                _logger.LogInformation( "[AUDIT] {User} uploaded: {files} to {Parser}", user, fileNames, parserName);
+                Snackbar.Add($"Uploaded {_files.Count} files!", Severity.Success);
+            }
+            else if (response.Result == Result.AlreadyExists)
+            {
+                Snackbar.Add($"Blob with same timestamp already exists! \n\nWait a minute and try again.", Severity.Warning);
+            }
+            else if (response.Result == Result.FileFormatError)
+            {
+                Snackbar.Add($"Wrong file format! Check the content of the file and try again.", Severity.Error);
+            }
+            else
+            {
+                Snackbar.Add($"Failed to upload files! \n{response.Result} \n{response.Message}", Severity.Error);
+                var fileNames = string.Join(", ", _files.Select(x => x.Name));
+                _logger.LogInformation("{FileName} not uploaded {reason}", fileNames, response.Result);
+            }
+        }
+        
     }
     
-    [CascadingParameter]
-    private Task<AuthenticationState> authenticationStateTask { get; set; }
     
     private async Task<IEnumerable<string>> Search(string value, CancellationToken token)
     {
@@ -106,5 +204,10 @@ public partial class ParserPanel : ComponentBase
             return downloadersToReturn;
         }
         return downloadersToReturn.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+    }
+
+    private class File
+    {
+        public string? Name { get; set; }
     }
 }

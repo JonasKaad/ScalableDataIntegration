@@ -8,7 +8,8 @@
         </MudStack>
         <MudFileUpload T="IReadOnlyList<IBrowserFile>"
                        @ref="@_fileUpload"
-                       OnFilesChanged="OnInputFileChanged"
+                       OnFilesChanged="OnInputFileChanged" 
+                       FilesChanged="UploadFiles"
                        AppendMultipleFiles
                        Hidden="@false"
                        InputClass="absolute mud-width-full mud-height-full overflow-hidden z-10"
@@ -59,14 +60,4 @@
             </MudButton>
         </MudStack>
     </DialogContent>
-        
 </MudDialog>
-
-
-
-@code {
-    [CascadingParameter]
-    private IMudDialogInstance? MudDialog { get; set; }
-    private void DialogSubmit() => MudDialog?.Close(DialogResult.Ok(true));
-    private void DialogCancel() => MudDialog?.Cancel();
-}
