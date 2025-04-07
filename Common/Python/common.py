@@ -8,7 +8,7 @@ from azure.storage.blob.aio import BlobServiceClient
 async def send_heartbeat():
     baseurl = os.getenv("BASE_URL", "http://do.jonaskaad.com")
     parser_name = os.getenv("PARSER_NAME")
-    url = f"{baseurl}/{parser_name}/Parser/heartbeat"
+    url = f"{baseurl}/Parser/{parser_name}/heartbeat"
     async with aiohttp.ClientSession() as session:
         async with session.post(url) as response:
             return response.status == 200
@@ -66,6 +66,22 @@ def get_data(raw_data, format_type):
                 raw.append(data)
 
     return strings, raw
+
+async def save_data_to_azure(raw_file, parsed_file, name):
+    client = azure_cred_checker()
+    container_name = os.getenv("PARSER_NAME", name)
+    container_client = client.get_container_client(container_name)
+    if not await container_client.exists():
+        await container_client.create_container()
+
+    now = datetime.datetime.now(datetime.timezone.utc)
+    raw_file_name = f"{now.year}/{now.strftime('%m')}/{now.day}/{now.strftime('%H%M')}-raw.txt"
+    parsed_file_name = f"{now.year}/{now.strftime('%m')}/{now.day}/{now.strftime('%H%M')}-parsed.txt"
+
+    await container_client.upload_blob(name=raw_file_name, data=raw_file)
+    await container_client.upload_blob(name=parsed_file_name, data=parsed_file)
+
+    await client.close()
 
 def azure_cred_checker():
     credential = DefaultAzureCredential()

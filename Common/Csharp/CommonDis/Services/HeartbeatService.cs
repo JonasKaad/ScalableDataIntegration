@@ -32,11 +32,11 @@ public class HeartbeatService : BackgroundService
             await Task.Delay(_heartbeatInterval, stoppingToken);
             try
             {
-                var response = await _httpClient.PostAsync(_baseUrl + $"/{_parserName}/heartbeat", null, stoppingToken);
+                var response = await _httpClient.PostAsync(_baseUrl + $"/Parser/{_parserName}/heartbeat", null, stoppingToken);
                 _logger.LogInformation("Heartbeat sent. Status: {StatusCode}", response.StatusCode);
                 if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
                 {
-                    await RegisterParser(_httpClient,_baseUrl + $"/{_parserName}/register", _parserUrl, _logger);
+                    await RegisterParser(_httpClient,_baseUrl + $"/Parser/{_parserName}/register", _parserUrl, _logger);
                 }
             }
             catch (Exception ex)
