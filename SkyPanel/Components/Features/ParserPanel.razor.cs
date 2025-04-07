@@ -60,19 +60,33 @@ public partial class ParserPanel : ComponentBase
         return DialogService.ShowAsync<FileDialogParser>("Upload Dataset", parameters, options);
     }
 
-    private Task OpenReparseDialogAsync()
+    private async Task OpenReparseDialogAsync()
     {
-        var parameters = new DialogParameters<BasicDialog>
+        var parameters = new DialogParameters<ReparseDialog>
         {
             { x => x.ContentText, "Do you want to fetch and parse the latest dataset for:" },
             { x => x.ConfirmationButtonText, "Confirm" },
             { x => x.EmphasizedCenterText, ParserState.ParserName },
-            { x => x.SnackbarMessage, $"Started fetching and parsing latest dataset for {ParserState.ParserName}"},
-            { x => x.SnackbarSeverity, Severity.Info },
         };
         
         var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.ExtraSmall, FullWidth = true };
-        return DialogService.ShowAsync<BasicDialog>("Fetch and parse latest dataset", parameters, options);
+        var dialogResult = await (await DialogService.ShowAsync<ReparseDialog>("Fetch and parse latest dataset", parameters, options)).Result;
+        var result = dialogResult?.Data as string ?? string.Empty;
+        
+        if (result == "reparse")
+        {
+            var reparseResult = await OrchestratorClient.Reparse(ParserState.ParserName);
+            if (reparseResult)
+            {
+                Snackbar.Add($"Started fetching and parsing latest dataset for {ParserState.ParserName}",  Severity.Info);
+            }
+            else
+            {
+                Snackbar.Add($"Failed to fetch and parse latest dataset for {ParserState.ParserName}", Severity.Error);
+            }
+            
+        }
+        
     }
     
     [CascadingParameter]
