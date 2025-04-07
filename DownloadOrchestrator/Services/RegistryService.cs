@@ -92,7 +92,7 @@ public abstract class RegistryService
     
     public string? GetService(string serviceName)
     {
-        var service = _services.FirstOrDefault(a => a.Key.Equals(serviceName)).Value;
+        var service = _services.FirstOrDefault(a => a.Key.Equals(serviceName, StringComparison.InvariantCultureIgnoreCase)).Value;
         return service ?? null;
     }
 
