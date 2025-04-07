@@ -1,0 +1,19 @@
+<MudStack>
+    <MudSelect T="string" Label="Available Filters" @bind-Value="selectedFilter">
+        @foreach (var filter in availableFilters)
+        {
+            <MudSelectItem Value="@filter">@filter</MudSelectItem>
+        }
+    </MudSelect>
+    <MudButton OnClick="AddFilter" Variant="Variant.Filled" Disabled="@string.IsNullOrEmpty(selectedFilter)">Add Filter</MudButton>
+</MudStack>
+
+<MudList T="string">
+    @foreach (var filter in selectedFilters)
+    {
+        <MudListItem>
+            <MudText Typo="Typo.body1">@filter</MudText>
+            <MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="@(() => RemoveFilter(filter))" />
+        </MudListItem>
+    }
+</MudList>

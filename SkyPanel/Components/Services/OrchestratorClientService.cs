@@ -8,6 +8,22 @@ namespace SkyPanel.Components.Services;
 
 public sealed class OrchestratorClientService(IHttpClientFactory httpClientFactory, string baseUrl, ILogger<OrchestratorClientService> logger)
 {
+    
+    public async Task<IEnumerable<string>> GetFilters()
+    {
+        var client = httpClientFactory.CreateClient();
+        try
+        {
+            var response = await client.GetAsync($"{baseUrl}/Filter/filters");
+            var elements = await response.Content.ReadFromJsonAsync<IEnumerable<string>>();
+            return elements ?? [];
+        } 
+        catch (Exception e)
+        {
+            logger.LogError("Failed to get filters with error: {error}", e.Message);
+        }
+        return [];
+    }
     public async Task<IEnumerable<string>> GetDownloaders()
     {
         var client = httpClientFactory.CreateClient();
