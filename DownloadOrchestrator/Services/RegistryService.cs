@@ -3,7 +3,7 @@ namespace DownloadOrchestrator.Services;
 public abstract class RegistryService
 {
     private Dictionary<string, string> _services = new Dictionary<string, string>();
-    private Dictionary<string, DateTime> _serviceDateTimes = new Dictionary<string, DateTime>();
+    protected Dictionary<string, DateTime> _serviceDateTimes = new Dictionary<string, DateTime>();
     private CancellationTokenSource _cts = new CancellationTokenSource();
 
 

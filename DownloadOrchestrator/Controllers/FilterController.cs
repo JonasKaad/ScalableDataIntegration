@@ -1,3 +1,4 @@
+using CommonDis.Models;
 using DownloadOrchestrator.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -23,11 +24,18 @@ public class FilterController : ControllerBase
         return _filterRegistry.GetServices();
     }
 
+    [Route("{filter}")]
+    [HttpGet]
+    public ActionResult<FilterDto> GetFilterData(string filter)
+    {
+        return _filterRegistry.GetService(filter);
+    }
+
     [Route("{filter}/register")]
     [HttpPost]
-    public ActionResult RegisterFilter(string filter, [FromBody] string url)
+    public ActionResult RegisterFilter(string filter, [FromBody] FilterData settings)
     {
-        _filterRegistry.RegisterService(filter, url);
+        _filterRegistry.RegisterService(filter, settings);
         return Ok($"Filter {filter} has been registered.");
     }
 

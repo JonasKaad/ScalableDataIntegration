@@ -1,5 +1,6 @@
 using CommonDis.Models;
 using CommonDis.Services;
+using DownloadOrchestrator.Services;
 using DownloadOrchestrator.Utils;
 using FluentFTP.Helpers;
 using Google.Protobuf;
@@ -13,12 +14,14 @@ public class BaseDownloaderJob : IDownloaderJob
 {
     private readonly StatisticsDatabaseService _context;
     protected readonly SecretService SecretService;
+    protected readonly FilterRegistry _filterRegistry;
     private readonly ILogger<IDownloaderJob> _logger;
     
-    public BaseDownloaderJob(ILogger<BaseDownloaderJob> logger, StatisticsDatabaseService context, SecretService secretService)
+    public BaseDownloaderJob(ILogger<BaseDownloaderJob> logger, StatisticsDatabaseService context, SecretService secretService, FilterRegistry filterRegistry)
     {
         _context = context; 
         SecretService = secretService;
+        _filterRegistry = filterRegistry;
         _logger = logger;
     }
 
@@ -38,9 +41,11 @@ public class BaseDownloaderJob : IDownloaderJob
                 return;
             }
             Log(data.Name, bytes.Length, DateTime.UtcNow);
-            var urls = data.Filters;
+            var parameters = data.Filters.Select(f => string.Join(",", f.Parameters.Select(p => $"{{'{p.Key}':'{p.Value}'}}"))).ToList();
+            var filterNames = data.Filters.Select(f => f.Name).ToList();
+            var urls = filterNames.Select(filter => _filterRegistry.GetFilterUrl(filter)).ToList();
             urls.Add(data.Parser);
-            await SendToParser(bytes, urls, data.Parameters);
+            await SendToParser(bytes, urls, parameters);
         }
         catch (Exception e)
         {
