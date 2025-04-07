@@ -125,8 +125,7 @@ public partial class ParserPanel : ComponentBase
                 _files.Add(new() { Name = file.Name });
 
                 var fileContent = new StreamContent(file.OpenReadStream(maxFileSize));
-                Console.WriteLine(file.Size);
-                fileContent.Headers.ContentType =
+                    fileContent.Headers.ContentType =
                     new MediaTypeHeaderValue(file.ContentType);
 
                 content.Add(
