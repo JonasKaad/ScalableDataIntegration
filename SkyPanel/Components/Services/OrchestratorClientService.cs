@@ -69,12 +69,13 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
             request.Content = content;
             var response = await client.SendAsync(request);
             var res = response.Content;
-            if (res.ReadAsStringAsync().Result.Contains("The specified blob already exists."))
+            var responseString = await res.ReadAsStringAsync();
+            if (responseString.Contains("The specified blob already exists."))
             {
                 return new UploadResult(false, "The specified blob already exists.", Result.AlreadyExists);
             }
             
-            if (res.ReadAsStringAsync().Result.Contains("invalid literal for int() with base 10: '\"E'\""))
+            if (responseString.Contains("invalid literal for int() with base 10: '\"E'\""))
             {
                 return new UploadResult(false, "Wrong file content.", Result.FileFormatError);
             }
