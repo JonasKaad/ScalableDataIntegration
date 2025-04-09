@@ -105,7 +105,7 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
         
         try
         {
-            using var jsonContent = SetupJsonContent(parser, url, backupUrl, secretName, pollingRate);
+            using var jsonContent = SetupJsonContent(parser, url, backupUrl, secretName, pollingRate, [], []);
             using HttpResponseMessage response = await client.PutAsync($"{baseUrl}/Downloader/{parser}/configure", jsonContent);
             var returnStatusCode = response.StatusCode;
             return returnStatusCode == HttpStatusCode.OK;
@@ -122,8 +122,9 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
         var client = httpClientFactory.CreateClient();
         try
         {
-            using var jsonContent = SetupJsonContent(parser, url, backupUrl, secretName, pollingRate);
-            using HttpResponseMessage response  = await client.PostAsync($"{baseUrl}/Downloader/test", jsonContent);
+            using var jsonContent = SetupJsonContent(parser, url, backupUrl, secretName, pollingRate, [], []);
+            Console.WriteLine(jsonContent.ReadAsStringAsync().Result);
+            using HttpResponseMessage response  = await client.PostAsync($"{baseUrl}/test", jsonContent);
             
             var jsonResponse = await response.Content.ReadFromJsonAsync<List<bool>>();
             return jsonResponse ?? [];
@@ -135,12 +136,12 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
         return [];
     }
     
-    private static StringContent SetupJsonContent(string parser, string url, string backupUrl, string secretName, string pollingRate)
+    private static StringContent SetupJsonContent(string parser, string url, string backupUrl, string secretName, string pollingRate, List<string> parameters, List<string> filters)
     {
         StringContent? jsonContent = null;
         try
         {
-            jsonContent = new(
+            jsonContent = new StringContent(
                 JsonSerializer.Serialize(new DownloaderData()
                 {
                     Name = parser,
@@ -149,6 +150,8 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
                     BackUpUrl = backupUrl ?? "",
                     SecretName = secretName ?? "",
                     PollingRate = pollingRate ?? "",
+                    Filters =  [],
+                    Parameters = [],
                 }),
                 Encoding.UTF8,
                 "application/json");
