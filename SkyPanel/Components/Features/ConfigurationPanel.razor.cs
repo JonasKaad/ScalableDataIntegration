@@ -238,21 +238,24 @@ public partial class ConfigurationPanel : ComponentBase
             // Parse polling value when a parser is selected
             ParsePollingValue(ParserState.Polling);
         }
-        await CheckForCredentials(ParserState.SecretName);
+        if (!string.IsNullOrEmpty(ParserState.SecretName))
+        {
+            _isLoading = true;
+            StateHasChanged();
         
-        StateHasChanged();
+            try
+            {
+                await CheckForCredentials(ParserState.SecretName);
+            }
+            finally
+            {
+                _isLoading = false;
+                StateHasChanged();
+            }
+        }
     }
     
     private string _parserNameSelection = string.Empty;
-    
-    private async Task CheckForCredentials(string parserSecret)
-    {
-        var secret = await CredentialsService.GetSecret(parserSecret);
-        _secretName = parserSecret ?? "";
-        Username = secret.TokenName ?? "";
-        Password = secret.Token ?? "";
-        StateHasChanged();
-    }
     
     private Task OpenSecretManagementDialog()
     {
@@ -447,12 +450,45 @@ public partial class ConfigurationPanel : ComponentBase
     }
 
 
+    private bool _waitingForSecret = false;
+    private bool _isLoading = false;
+    
+    private async Task CheckForCredentials(string parserSecret)
+    {
+        _isLoading = true;
+        StateHasChanged();
+    
+        try 
+        {
+            var secret = await CredentialsService.GetSecret(parserSecret);
+            _secretName = parserSecret ?? "";
+            Username = secret.TokenName ?? "";
+            Password = secret.Token ?? "";
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+    
+    
     private async Task OnParserChanged()
     {
         if (string.IsNullOrEmpty(ParserState.ParserName)) return;
-        var secretExists = await CredentialsService.HasSecret(ParserState.SecretName);
-        PlaceholderText = !secretExists ? "No Secret Found!" : "No Secret Selected";
+        _isLoading = true;
         StateHasChanged();
+        try
+        {
+            var secretExists = await CredentialsService.HasSecret(ParserState.SecretName);
+            _waitingForSecret = false;
+            PlaceholderText = !secretExists ? "No Secret Found!" : "No Secret Selected";
+        }
+        finally
+        {
+            _isLoading = false; 
+            StateHasChanged();
+        }
     }
     
 }
