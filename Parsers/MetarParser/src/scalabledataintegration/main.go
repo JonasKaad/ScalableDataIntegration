@@ -10,5 +10,5 @@ import (
 func main() {
 	p := parser.New()
 	report, _ := p.Parse("EKCH 061620Z 32009KT 290V360 9999 OVC082/// 09/M04 Q1025 NOSIG=")
-	fmt.Println(report.Wind)
+	fmt.Println(report)
 }
