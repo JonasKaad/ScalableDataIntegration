@@ -88,6 +88,7 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
             }
             else
             {
+                logger.LogError("Failed to upload file with error: {error}", responseString);
                 return new UploadResult( false, response.Content.ReadAsStringAsync().Result, Result.UploadError);
             }
         }
