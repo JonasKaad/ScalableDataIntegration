@@ -1,12 +1,15 @@
 package server
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/JonasKaad/ScalableDataIntegration/GeneratedClients/go/filter"
 	"github.com/JonasKaad/ScalableDataIntegration/GeneratedClients/go/parser"
 	"google.golang.org/grpc"
 	"log"
 	"net"
+	"strings"
+	"unicode/utf8"
 )
 
 // ServerConfig holds configuration for the gRPC server
@@ -41,6 +44,59 @@ func NewServer(config ServerConfig) *Server {
 		grpcServer: grpc.NewServer(),
 	}
 	return s
+}
+
+func GetData(raw_data []byte, format_type string) ([]string, [][]byte) {
+	// Split on "magic" and create a slice for each
+	data_list := bytes.Split(raw_data, []byte("magic"))
+
+	var relevant [][]string
+	var raw [][]byte
+
+	// Process each section based on format type
+	for _, data := range data_list {
+		if len(data) == 0 {
+			continue
+		}
+
+		if format_type == "str" {
+			// Try to decode as UTF-8
+			dataStr, err := utf8DecodeString(data)
+			if err != nil {
+				log.Printf("Warning: Could not decode part of data as UTF-8")
+				raw = append(raw, data)
+			} else {
+				// Split by semicolon
+				splitData := strings.Split(dataStr, ";")
+				relevant = append(relevant, splitData)
+			}
+		} else if format_type == "img" {
+			// TODO: Like in python, do some more checks to see if data is actually image
+			relevant = append(relevant, []string{string(data)})
+		} else {
+			raw = append(raw, data)
+		}
+	}
+
+	// flatten slices, like in the python parser
+	var flattenedRelevant []string
+	for _, sublist := range relevant {
+		flattenedRelevant = append(flattenedRelevant, sublist...)
+	}
+
+	if len(flattenedRelevant) > 0 {
+		return flattenedRelevant, raw
+	} else {
+		return []string{}, raw
+	}
+}
+
+// Helper function for decoding
+func utf8DecodeString(b []byte) (string, error) {
+	if !utf8.Valid(b) {
+		return "", fmt.Errorf("invalid UTF-8 sequence")
+	}
+	return string(b), nil
 }
 
 // RegisterParserService registers a parser service implementation
