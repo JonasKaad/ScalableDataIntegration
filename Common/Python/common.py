@@ -43,7 +43,7 @@ async def send_heartbeat(type="Parser"):
         async with session.post(url) as response:
             return response.status == 200
 
-async def heartbeat_scheduler(type="Parser"):
+async def heartbeat_scheduler(type="Parser", filter_params=None):
     alive = True
     while True:
         await asyncio.sleep(1 * 60)
@@ -54,7 +54,7 @@ async def heartbeat_scheduler(type="Parser"):
                 print(e)
         else:
             try:
-                alive = await register(type)
+                alive = await register(type, filter_params)
             except Exception as e:
                 print(e)
 
@@ -97,7 +97,7 @@ async def init_filter(injected_loop, parameters):
     while not registered:
         registered = await register("Filter", parameters)
         if registered:
-            injected_loop.create_task(heartbeat_scheduler("Filter"))
+            injected_loop.create_task(heartbeat_scheduler("Filter", parameters))
             return
         else:
             print("Failed to register, retrying in 10 seconds...")
