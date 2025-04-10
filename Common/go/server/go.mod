@@ -3,8 +3,8 @@ module github.com/JonasKaad/ScalableDataIntegration/Common/go/server
 go 1.23.3
 
 require (
-	github.com/JonasKaad/ScalableDataIntegration/GeneratedClients/go/filter v0.0.0-00010101000000-000000000000
-	github.com/JonasKaad/ScalableDataIntegration/GeneratedClients/go/parser v0.0.0-00010101000000-000000000000
+	github.com/JonasKaad/ScalableDataIntegration/GeneratedClients/go/filter v0.0.0
+	github.com/JonasKaad/ScalableDataIntegration/GeneratedClients/go/parser v0.0.0
 	google.golang.org/grpc v1.58.3
 )
 

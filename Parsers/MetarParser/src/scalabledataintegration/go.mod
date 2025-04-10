@@ -3,12 +3,12 @@ module github.com/JonasKaad/ScalableDataIntegration/Parsers/MetarParser/pkg/scal
 go 1.23.3
 
 require (
-	github.com/JonasKaad/ScalableDataIntegration/Common/go/server v0.0.0-00010101000000-000000000000
-	github.com/JonasKaad/ScalableDataIntegration/GeneratedClients/go/parser v0.0.0-00010101000000-000000000000
+	github.com/JonasKaad/ScalableDataIntegration/Common/go/server v0.0.0
+	github.com/JonasKaad/ScalableDataIntegration/GeneratedClients/go/parser v0.0.0
 )
 
 require (
-	github.com/JonasKaad/ScalableDataIntegration/GeneratedClients/go/filter v0.0.0-00010101000000-000000000000 // indirect
+	github.com/JonasKaad/ScalableDataIntegration/GeneratedClients/go/filter v0.0.0 // indirect
 	golang.org/x/net v0.39.0 // indirect
 	golang.org/x/sys v0.32.0 // indirect
 	golang.org/x/text v0.24.0 // indirect
