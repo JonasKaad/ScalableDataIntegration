@@ -5,9 +5,13 @@ import (
 	"fmt"
 	"github.com/JonasKaad/ScalableDataIntegration/GeneratedClients/go/filter"
 	"github.com/JonasKaad/ScalableDataIntegration/GeneratedClients/go/parser"
+	"github.com/parnurzeal/gorequest"
 	"google.golang.org/grpc"
+	"io"
 	"log"
 	"net"
+	"net/http"
+	"os"
 	"strings"
 	"unicode/utf8"
 )
@@ -46,7 +50,102 @@ func NewServer(config ServerConfig) *Server {
 	return s
 }
 
-func GetData(raw_data []byte, format_type string) ([]string, [][]byte) {
+func SendHeartbeat(heartbeatTypeOptional ...string) {
+	heartbeatType := "Parser"
+	if len(heartbeatTypeOptional) > 0 {
+		heartbeatType = heartbeatTypeOptional[0]
+	}
+
+	baseurl := os.Getenv("BASE_URL")
+	parserName := os.Getenv("PARSER_NAME")
+	url := fmt.Sprintf("%s/%s/%s/heartbeat", baseurl, heartbeatType, parserName)
+	log.Printf("Sending heartbeat to %s", url)
+	r, err := http.NewRequest("POST", url, nil)
+	if err != nil {
+		log.Printf("Error creating heartbeat request: %v", err)
+		return
+	}
+	r.Header.Add("Content-Type", "application/json")
+	client := &http.Client{}
+
+	resp, err := client.Do(r)
+	if err != nil {
+		log.Printf("Error sending heartbeat request: %v", err)
+		return
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			log.Printf("Error closing body: %v", err)
+		}
+	}(resp.Body)
+
+	if resp.StatusCode != http.StatusOK {
+		log.Printf("Heartbeat failed with status code: %d", resp.StatusCode)
+		return
+	}
+}
+
+func RegisterParser(registerTypeOptional ...string) {
+	// Register the parser service
+
+	registerType := "Parser"
+	if len(registerTypeOptional) > 0 {
+		registerType = registerTypeOptional[0]
+	}
+
+	baseurl := os.Getenv("BASE_URL")
+	parserName := os.Getenv("PARSER_NAME")
+	url := fmt.Sprintf("%s/%s/%s/register", baseurl, registerType, parserName)
+	log.Printf("Registering parser at %s", url)
+
+	parserUrl := os.Getenv("PARSER_URL")
+	fmt.Printf(parserUrl)
+	sendBody := fmt.Sprintf(`{"url":"%s"}`, parserUrl)
+	request := gorequest.New()
+	resp, _, errs := request.Post(url).
+		Type("json").
+		Send(sendBody).
+		End()
+
+	if errs != nil {
+		log.Printf("Error registering parser: %v", errs)
+		return
+	}
+
+	//
+	//postBody := []byte(parserUrl)
+	//postBodyReader := bytes.NewReader(postBody)
+	//
+	//r, err := http.NewRequest("POST", url, postBodyReader)
+	//
+	//fmt.Print(postBody)
+	//if err != nil {
+	//	log.Printf("Error registering parser: %v", err)
+	//	return
+	//}
+	//
+	//r.Header.Add("Content-Type", "application/json")
+	//
+	//client := &http.Client{}
+	//resp, err := client.Do(r)
+	//if err != nil {
+	//	log.Printf("Error sending register request: %v", err)
+	//	return
+	//}
+	//defer func(Body io.ReadCloser) {
+	//	err := Body.Close()
+	//	if err != nil {
+	//		log.Printf("Error closing body: %v", err)
+	//	}
+	//}(resp.Body)
+
+	if resp.StatusCode != http.StatusOK {
+		log.Printf("Registering failed with status code: %d", resp.StatusCode)
+		return
+	}
+}
+
 // GetData processes raw data and returns relevant data in string format or the raw data as byte slices
 func GetData(rawData []byte, formatType string) ([]string, [][]byte) {
 	// Split on "magic" and create a slice for each

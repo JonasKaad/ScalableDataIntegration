@@ -18,7 +18,6 @@ type MetarParserImpl struct {
 }
 
 func (m *MetarParserImpl) ParseCall(_ context.Context, req *parser.ParseRequest) (*parser.ParseResponse, error) {
-
 	data, _ := server.GetData(req.GetRawData(), req.Format)
 	if len(data) == 0 {
 		errMsg := "No data received"
@@ -67,6 +66,9 @@ func (m *MetarParserImpl) ParseCall(_ context.Context, req *parser.ParseRequest)
 		log.Printf("Error writing output file: %v", err)
 	}
 	log.Printf("Saved %d METAR reports to %s", count, outputPath)
+
+	log.Printf("Sending heartbeat")
+	server.RegisterParser()
 
 	return &parser.ParseResponse{
 		Success: true,
