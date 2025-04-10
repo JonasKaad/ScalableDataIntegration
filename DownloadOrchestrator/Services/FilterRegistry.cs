@@ -43,4 +43,17 @@ public class FilterRegistry : RegistryService
         _serviceDateTimes.Add(serviceName, DateTime.Now);
         _services.Add(serviceName, settings);
     }
+
+    public new void DeRegisterService(string serviceName)
+    {
+        if (_services.ContainsKey(serviceName))
+        {
+            _serviceDateTimes.Remove(serviceName);
+            _services.Remove(serviceName);
+        }
+        else
+        {
+            throw new KeyNotFoundException($"{serviceName} not found");
+        }
+    }
 }

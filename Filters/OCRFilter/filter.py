@@ -77,7 +77,13 @@ async def serve():
 
 
 if __name__ == '__main__':
+    parameters = {
+        "startX": "0",
+        "startY": "0",
+        "endX": "100",
+        "endY": "100"
+    }
     loop = asyncio.new_event_loop()
-    loop.create_task(init_filter(loop))
+    loop.create_task(init_filter(loop, parameters))
     asyncio.set_event_loop(loop)
     loop.run_until_complete(serve())
