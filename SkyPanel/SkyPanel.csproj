@@ -23,6 +23,7 @@
 
     <ItemGroup>
         <None Include="wwwroot\images\foreflight_logo.png" />
+        <Content Update="**\*.css" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
 
     <ItemGroup>
