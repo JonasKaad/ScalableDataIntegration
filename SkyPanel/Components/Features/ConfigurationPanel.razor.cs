@@ -238,21 +238,19 @@ public partial class ConfigurationPanel : ComponentBase
             // Parse polling value when a parser is selected
             ParsePollingValue(ParserState.Polling);
         }
-        if (!string.IsNullOrEmpty(ParserState.SecretName))
+        _isLoading = true;
+        StateHasChanged();
+    
+        try
         {
-            _isLoading = true;
-            StateHasChanged();
-        
-            try
-            {
-                await CheckForCredentials(ParserState.SecretName);
-            }
-            finally
-            {
-                _isLoading = false;
-                StateHasChanged();
-            }
+            await CheckForCredentials(ParserState.SecretName);
         }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
+        
     }
     
     private string _parserNameSelection = string.Empty;
