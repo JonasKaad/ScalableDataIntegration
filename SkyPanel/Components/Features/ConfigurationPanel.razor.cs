@@ -1,7 +1,9 @@
 using System.ComponentModel;
+using CommonDis.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using MudBlazor;
+using MudBlazor.Charts;
 using SkyPanel.Components.Dialogs;
 using SkyPanel.Components.Services;
 using SkyPanel.Utils;
@@ -33,6 +35,8 @@ public partial class ConfigurationPanel : ComponentBase
     private string Username { get; set; } = string.Empty;
     private string Password { get; set; } = string.Empty;
     private string PlaceholderText { get; set; } = "No Secret Selected";
+    
+    private List<FilterDto> CurrentFilters { get; set; } = new List<FilterDto>();
     
     // Properties for the polling frequency selector
     private int _activeTabIndex = 0;
@@ -224,6 +228,7 @@ public partial class ConfigurationPanel : ComponentBase
         // Update UI components with values from ParserState
         UrlValue = ParserState.DownloadUrl;
         BackupUrlValue = ParserState.BackupUrl;
+        CurrentFilters = ParserState.Filters;
         if (ParserState.ParserIsNotSelected())
         {
             // Reset to default values when no parser is selected
@@ -273,7 +278,7 @@ public partial class ConfigurationPanel : ComponentBase
         var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Large, FullWidth = true };
         var parameters = new DialogParameters<FilterConfiguration>
         {
-            { x => x.ParserName, ParserState.ParserName }
+            { x => x.SelectedFilters, CurrentFilters }
         };
         var dialogResult = await DialogService.ShowAsync<FilterConfiguration>("Filter configuration", parameters, options);
         
@@ -378,9 +383,17 @@ public partial class ConfigurationPanel : ComponentBase
         {
             changes.Add($"Polling rate changed from '{ParserState.Polling ?? "empty"}' to '{pollingRateToSend}'");
         }
+
+        var filters = CurrentFilters;
+        if (!filters.Equals(ParserState.Filters))
+        {
+            var oldFilterNames = string.Join(", ",CurrentFilters.Select(f => f.Name));
+            var newFilterNames = string.Join(", ",filters.Select(f => f.Name));
+            changes.Add($"Filters changed from '{oldFilterNames}' to '{newFilterNames}'");
+        }
         
         var response = await OrchestratorClientService.ConfigureDownloader(ParserState.ParserName, 
-            urlValueToSend, backupUrlValueToSend, secretNameToSend, pollingRateToSend);
+            urlValueToSend, backupUrlValueToSend, secretNameToSend, pollingRateToSend, filters);
         if (response)
         {
             var authState = await AuthenticationStateTask;
@@ -438,8 +451,10 @@ public partial class ConfigurationPanel : ComponentBase
         
         pollingRateToSend = PollingValue; 
         
+        var filters = ParserState.Filters;
+        
         var response = await OrchestratorClientService.TestConnection(ParserState.ParserName, 
-            urlValueToSend, backupUrlValueToSend, secretNameToSend, pollingRateToSend);
+            urlValueToSend, backupUrlValueToSend, secretNameToSend, pollingRateToSend, filters);
         
         switch (response.Count)
         {
