@@ -28,9 +28,9 @@ namespace Sdi.Parser {
             "CHJhd19kYXRhGAEgASgMEg4KBmZvcm1hdBgCIAEoCSJCCg1QYXJzZVJlc3Bv",
             "bnNlEg8KB3N1Y2Nlc3MYASABKAgSFAoHZXJyX21zZxgCIAEoCUgAiAEBQgoK",
             "CF9lcnJfbXNnMkoKBlBhcnNlchJACglQYXJzZUNhbGwSGC5zZGkucGFyc2Vy",
-            "LlBhcnNlUmVxdWVzdBoZLnNkaS5wYXJzZXIuUGFyc2VSZXNwb25zZUI8Wjpn",
-            "aXRodWIuY29tL0pvbmFzS2FhZC9TY2FsYWJsZURhdGFJbnRlZ3JhdGlvbi9w",
-            "cm90b3MvcGFyc2VyYgZwcm90bzM="));
+            "LlBhcnNlUmVxdWVzdBoZLnNkaS5wYXJzZXIuUGFyc2VSZXNwb25zZUJJWkdn",
+            "aXRodWIuY29tL0pvbmFzS2FhZC9TY2FsYWJsZURhdGFJbnRlZ3JhdGlvbi9H",
+            "ZW5lcmF0ZWRDbGllbnRzL2dvL3BhcnNlcmIGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {

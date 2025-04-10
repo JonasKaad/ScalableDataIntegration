@@ -1614,9 +1614,9 @@ public final class FilterOuterClass {
       "FilterReply\022\017\n\007success\030\001 \001(\010\022\024\n\007err_msg\030" +
       "\002 \001(\tH\000\210\001\001B\n\n\010_err_msg2J\n\006Filter\022@\n\nFilt" +
       "erCall\022\031.sdi.filter.FilterRequest\032\027.sdi." +
-      "filter.FilterReplyB<Z:github.com/JonasKa" +
-      "ad/ScalableDataIntegration/protos/filter" +
-      "b\006proto3"
+      "filter.FilterReplyBIZGgithub.com/JonasKa" +
+      "ad/ScalableDataIntegration/GeneratedClie" +
+      "nts/go/filterb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
