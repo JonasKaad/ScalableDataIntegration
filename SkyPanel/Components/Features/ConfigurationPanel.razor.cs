@@ -228,7 +228,11 @@ public partial class ConfigurationPanel : ComponentBase
         // Update UI components with values from ParserState
         UrlValue = ParserState.DownloadUrl;
         BackupUrlValue = ParserState.BackupUrl;
-        CurrentFilters = ParserState.Filters;
+        CurrentFilters = ParserState.Filters.Select(f => new FilterDto
+        {
+            Name = f.Name,
+            Parameters = new Dictionary<string, string>(f.Parameters)
+        }).ToList();
         if (ParserState.ParserIsNotSelected())
         {
             // Reset to default values when no parser is selected
@@ -283,8 +287,9 @@ public partial class ConfigurationPanel : ComponentBase
         var dialogResult = await DialogService.ShowAsync<FilterConfiguration>("Filter configuration", parameters, options);
         
         var result = await dialogResult?.Result;
-        if (result?.Data is true)
+        if (result?.Data is List<FilterDto> updatedFilters)
         {
+            CurrentFilters = updatedFilters;
             Snackbar.Add($"Filters updated for {ParserState.ParserName}", Severity.Success);
         }
     }
@@ -298,7 +303,8 @@ public partial class ConfigurationPanel : ComponentBase
             { x => x.Url, UrlValue},
             { x => x.BackupUrl, BackupUrlValue},
             { x => x.SecretName, SecretName},
-            { x => x.PollingRate, PollingValue}
+            { x => x.PollingRate, PollingValue},
+            { x => x.Filters, CurrentFilters}
         };
         var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small, FullWidth = true };
         var dialogResult = await (await DialogService.ShowAsync<UpdateDialog>("Update confirmation", parameters, options)).Result;
@@ -385,7 +391,7 @@ public partial class ConfigurationPanel : ComponentBase
         }
 
         var filters = CurrentFilters;
-        if (!filters.Equals(ParserState.Filters))
+        if (!AreFiltersEqual(filters, ParserState.Filters))
         {
             var oldFilterNames = string.Join(", ",CurrentFilters.Select(f => f.Name));
             var newFilterNames = string.Join(", ",filters.Select(f => f.Name));
@@ -417,11 +423,39 @@ public partial class ConfigurationPanel : ComponentBase
                     user, ParserState.ParserName);
             }
             Snackbar.Add("Successfully updated configuration", Severity.Success);
+            _ = UpdateFromParserState();
         }
         else
         {
             Snackbar.Add("Failed updating configuration", Severity.Error);
         }
+    }
+    
+    private bool AreFiltersEqual(List<FilterDto> list1, List<FilterDto> list2)
+    {
+        if (list1.Count != list2.Count)
+            return false;
+        
+        for (int i = 0; i < list1.Count; i++)
+        {
+            if (list1[i].Name != list2[i].Name)
+                return false;
+            
+            // Compare parameters if needed
+            var params1 = list1[i].Parameters;
+            var params2 = list2[i].Parameters;
+        
+            if (params1.Count != params2.Count)
+                return false;
+            
+            foreach (var key in params1.Keys)
+            {
+                if (!params2.ContainsKey(key) || params1[key] != params2[key])
+                    return false;
+            }
+        }
+    
+        return true;
     }
 
     private async Task TestConnection()

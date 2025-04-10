@@ -4,7 +4,9 @@ using Cropper.Blazor.Components;
 using Cropper.Blazor.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.JSInterop;
 using MudBlazor;
+using MudBlazor.Charts;
 using SkyPanel.Components.Services;
 
 namespace SkyPanel.Components.Dialogs;
@@ -82,11 +84,6 @@ public partial class FilterConfiguration : ComponentBase
         }
         StateHasChanged();
     }
-
-    private decimal GetDecimalFromString(string decimalString, decimal alternative)
-    {
-        return decimal.TryParse(decimalString, out decimal decimalValue) ? decimalValue : alternative;
-    }
     
     private async Task SaveCrop()
     {
@@ -120,21 +117,21 @@ public partial class FilterConfiguration : ComponentBase
         _dropContainer.Refresh();
     }
     
-    private async Task SaveFilters()
+    private void SaveFilters()
     {
+        var newFilters = new List<FilterDto>();
+        newFilters = SelectedFilters;
         if (_cropper != null)
         {
-            var imageData = await _cropper.GetDataAsync(false, CancellationToken.None);
-            Console.WriteLine($"{imageData.Y}, {imageData.X}, {imageData.Height}, {imageData.Width}");
             var coordinates = new Dictionary<string, decimal?>
             {
-                { "startX", imageData.X },
-                { "startY", imageData.Y },
-                { "endX", imageData.X + imageData.Width },
-                { "endY", imageData.Y + imageData.Height }
+                { "startX", _cropBoxLeft },
+                { "startY", _cropBoxTop},
+                { "endX", _cropBoxWidth + _cropBoxLeft },
+                { "endY", _cropBoxTop + _cropBoxHeight }
             };
 
-            foreach (var filter in SelectedFilters)
+            foreach (var filter in newFilters)
             {
                 // This might have place unintended values if multiple filters use startX/Y or endX/Y
                 foreach (var key in coordinates.Keys.Intersect(filter.Parameters.Keys))
@@ -144,7 +141,7 @@ public partial class FilterConfiguration : ComponentBase
             }
         }
     
-        MudDialog?.Close(DialogResult.Ok(true));
+        MudDialog?.Close(DialogResult.Ok(newFilters));
     }
     
     private async Task HandleImageUpload(InputFileChangeEventArgs e)
