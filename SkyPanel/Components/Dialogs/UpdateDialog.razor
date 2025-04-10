@@ -21,7 +21,7 @@
                 new (){ Label = "BackupURL", Name = BackupUrl, State = ParserState.BackupUrl, Unchanged = (String.Compare(BackupUrl, ParserState.BackupUrl, StringComparison.Ordinal) == 0) },
                 new (){ Label = "Secret", Name = SecretName, State = ParserState.SecretName, Unchanged = (String.Compare(SecretName, ParserState.SecretName, StringComparison.Ordinal) == 0) },
                 new (){ Label = "Polling Rate", Name = PollingRate, State = ParserState.Polling, Unchanged = (String.Compare(PollingRate, ParserState.Polling, StringComparison.Ordinal) == 0) },
-                new (){ Label = "Filters", Name = ParserState.Filters, State = Filters, Unchanged = string.Compare(string.Join(",",ParserState.Filters), Filters, StringComparison.InvariantCultureIgnoreCase) == 0 },
+                new (){ Label = "Filters", Name = Filters, State = ParserState.Filters, Unchanged = AreFiltersEqual(Filters, ParserState.Filters) },
             };
             var changedParams = parameters.Where(p => !p.Unchanged).ToList();
             var unchangedParams = parameters.Where(p => p.Unchanged).ToList();
