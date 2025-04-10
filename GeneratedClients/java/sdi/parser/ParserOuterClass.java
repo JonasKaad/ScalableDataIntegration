@@ -1317,9 +1317,9 @@ public final class ParserOuterClass {
       "ParseResponse\022\017\n\007success\030\001 \001(\010\022\024\n\007err_ms" +
       "g\030\002 \001(\tH\000\210\001\001B\n\n\010_err_msg2J\n\006Parser\022@\n\tPa" +
       "rseCall\022\030.sdi.parser.ParseRequest\032\031.sdi." +
-      "parser.ParseResponseB<Z:github.com/Jonas" +
-      "Kaad/ScalableDataIntegration/protos/pars" +
-      "erb\006proto3"
+      "parser.ParseResponseBIZGgithub.com/Jonas" +
+      "Kaad/ScalableDataIntegration/GeneratedCl" +
+      "ients/go/parserb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

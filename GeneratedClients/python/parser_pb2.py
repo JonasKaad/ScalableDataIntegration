@@ -24,14 +24,14 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0cparser.proto\x12\nsdi.parser\"0\n\x0cParseRequest\x12\x10\n\x08raw_data\x18\x01 \x01(\x0c\x12\x0e\n\x06\x66ormat\x18\x02 \x01(\t\"B\n\rParseResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x14\n\x07\x65rr_msg\x18\x02 \x01(\tH\x00\x88\x01\x01\x42\n\n\x08_err_msg2J\n\x06Parser\x12@\n\tParseCall\x12\x18.sdi.parser.ParseRequest\x1a\x19.sdi.parser.ParseResponseB<Z:github.com/JonasKaad/ScalableDataIntegration/protos/parserb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0cparser.proto\x12\nsdi.parser\"0\n\x0cParseRequest\x12\x10\n\x08raw_data\x18\x01 \x01(\x0c\x12\x0e\n\x06\x66ormat\x18\x02 \x01(\t\"B\n\rParseResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x14\n\x07\x65rr_msg\x18\x02 \x01(\tH\x00\x88\x01\x01\x42\n\n\x08_err_msg2J\n\x06Parser\x12@\n\tParseCall\x12\x18.sdi.parser.ParseRequest\x1a\x19.sdi.parser.ParseResponseBIZGgithub.com/JonasKaad/ScalableDataIntegration/GeneratedClients/go/parserb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'parser_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   _globals['DESCRIPTOR']._loaded_options = None
-  _globals['DESCRIPTOR']._serialized_options = b'Z:github.com/JonasKaad/ScalableDataIntegration/protos/parser'
+  _globals['DESCRIPTOR']._serialized_options = b'ZGgithub.com/JonasKaad/ScalableDataIntegration/GeneratedClients/go/parser'
   _globals['_PARSEREQUEST']._serialized_start=28
   _globals['_PARSEREQUEST']._serialized_end=76
   _globals['_PARSERESPONSE']._serialized_start=78
