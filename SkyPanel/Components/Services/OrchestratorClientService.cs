@@ -124,7 +124,6 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
         try
         {
             using var jsonContent = SetupJsonContent(parser, url, backupUrl, secretName, pollingRate, [], []);
-            Console.WriteLine(jsonContent.ReadAsStringAsync().Result);
             using HttpResponseMessage response  = await client.PostAsync($"{baseUrl}/test", jsonContent);
             
             var jsonResponse = await response.Content.ReadFromJsonAsync<List<bool>>();
