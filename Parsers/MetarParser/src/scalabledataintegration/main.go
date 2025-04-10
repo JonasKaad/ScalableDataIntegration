@@ -1,41 +1,35 @@
 package main
 
 import (
-	"fmt"
-	filterPb "github.com/JonasKaad/ScalableDataIntegration/GeneratedClients/go/filter"
-	parserPb "github.com/JonasKaad/ScalableDataIntegration/GeneratedClients/go/parser"
-	"google.golang.org/grpc"
+	"context"
+	"github.com/JonasKaad/ScalableDataIntegration/Common/go/server"
+	"github.com/JonasKaad/ScalableDataIntegration/GeneratedClients/go/parser"
 	"log"
-	"net"
 )
 
-type metarParserServer struct {
-	parserPb.UnimplementedParserServer
-	parser *parserPb.ParseRequest
+type MetarParserImpl struct {
+	parser.UnimplementedParserServer
 }
 
-type filterServerImpl struct {
-	filterPb.UnimplementedFilterServer
-	filter *filterPb.FilterRequest
+func (m *MetarParserImpl) ParseCall(ctx context.Context, req *parser.ParseRequest) (*parser.ParseResponse, error) {
+
+	log.Printf("Received parse request with format: %s", req.Format)
+
+	return &parser.ParseResponse{
+		Success: true,
+	}, nil
 }
 
 func main() {
-	// Create a gRPC server
-	lis, err := net.Listen("tcp", ":50051")
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
-	}
+	srv := server.NewServer(server.ServerConfig{
+		Port:                50051,
+		EnableParserService: true,
+		EnableFilterService: false,
+	})
 
-	s := grpc.NewServer()
+	srv.RegisterParserService(&MetarParserImpl{})
 
-	// Register your service implementation
-	parserPb.RegisterParserServer(s, &metarParserServer{})
-	filterPb.RegisterFilterServer(s, &filterServerImpl{})
-
-	fmt.Println("gRPC server listening on :50051")
-	if err := s.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
-	}
+	log.Fatal(srv.Start())
 }
 
 //// https://api.met.no/weatherapi/tafmetar/1.0/metar.txt?icao=EKCH
