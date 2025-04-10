@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "github.com/JonasKaad/ScalableDataIntegration/protos/filter";
+option go_package = "github.com/JonasKaad/ScalableDataIntegration/GeneratedClients/go/filter";
 
 package sdi.filter;
 
