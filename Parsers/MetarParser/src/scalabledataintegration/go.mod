@@ -5,6 +5,7 @@ go 1.23.3
 require (
 	github.com/JonasKaad/ScalableDataIntegration/Common/go/server v0.0.0
 	github.com/JonasKaad/ScalableDataIntegration/GeneratedClients/go/parser v0.0.0
+	github.com/eugecm/gometar v0.0.0-20191013165408-b5d7ae8fbd5e
 )
 
 require (
