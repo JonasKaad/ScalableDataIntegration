@@ -1,4 +1,5 @@
-﻿using DownloadOrchestrator.Services;
+﻿using CommonDis.Models;
+using DownloadOrchestrator.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DownloadOrchestrator.Controllers;
@@ -25,9 +26,9 @@ public class ParserController : ControllerBase
 
     [Route("{parser}/register")]
     [HttpPost]
-    public ActionResult RegisterParser(string parser, [FromBody] string url)
+    public ActionResult RegisterParser(string parser, [FromBody] ParserModel model)
     {
-        _parserRegistry.RegisterService(parser, url);
+        _parserRegistry.RegisterService(parser, model.Url);
         return Ok($"Parser {parser} has been registered.");
     }
 
