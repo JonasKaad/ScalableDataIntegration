@@ -8,12 +8,10 @@ namespace SkyPanel.Components.Dialogs;
 
 public partial class FilterConfiguration : ComponentBase
 {
-    [Parameter, Required]
-    public string ParserName { get; set; } = string.Empty;
-    
     private List<FilterDto> availableFilters = new();
     private List<DropItem> dropItems = new();
-    private List<FilterDto> selectedFilters = new();
+    [Parameter, Required]
+    public List<FilterDto> SelectedFilters { get; set; } = new();
     private List<FilterDto> expandedFilters = new();
     private bool isLoading = true;
     private string searchString = string.Empty;
@@ -40,8 +38,7 @@ public partial class FilterConfiguration : ComponentBase
             });
         }
 
-        selectedFilters = ParserState.Filters.Where(t => !string.IsNullOrWhiteSpace(t.Name)).ToList();
-        dropItems = selectedFilters.Select(f => new DropItem { Filter = f }).ToList();
+        dropItems = SelectedFilters.Select(f => new DropItem { Filter = f }).ToList();
         isLoading = false;
         StateHasChanged();
     }
@@ -56,26 +53,24 @@ public partial class FilterConfiguration : ComponentBase
     }
 
     private IEnumerable<FilterDto> filteredAvailableFilters => string.IsNullOrWhiteSpace(searchString)
-        ? availableFilters.Where(f => selectedFilters.All(sf => sf.Name != f.Name))
-        : availableFilters.Where(f => selectedFilters.All(sf => sf.Name != f.Name) &&
+        ? availableFilters.Where(f => SelectedFilters.All(sf => sf.Name != f.Name))
+        : availableFilters.Where(f => SelectedFilters.All(sf => sf.Name != f.Name) &&
                                       f.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase));
 
     private void AddFilter(FilterDto filter)
     {
-        if (selectedFilters.All(f => f.Name != filter.Name))
+        if (SelectedFilters.All(f => f.Name != filter.Name))
         {
-            selectedFilters.Add(filter);
+            SelectedFilters.Add(filter);
             dropItems.Add(new DropItem() { Filter = filter });
-            //availableFilters.Remove(filter); // Remove from available filters
             _dropContainer.Refresh();
             StateHasChanged(); // Trigger re-render
         }
     }
 
-// Update RemoveFilter method
     private void RemoveFilter(FilterDto filter)
     {
-        selectedFilters.Remove(filter);
+        SelectedFilters.Remove(filter);
         dropItems.RemoveAll(item => item.Filter == filter);
         _dropContainer.Refresh();
     }
@@ -83,7 +78,6 @@ public partial class FilterConfiguration : ComponentBase
     private void SaveFilters()
     {
         // Save the selected filters to the parser state
-        ParserState.Filters = selectedFilters.ToList();
         MudDialog?.Close(DialogResult.Ok(true));
     }
     
@@ -99,8 +93,8 @@ public partial class FilterConfiguration : ComponentBase
         else
             dropItems.Insert(newIndex, dropItem.Item);
     
-        // Update the selectedFilters list to match
-        selectedFilters = dropItems.Select(d => d.Filter).ToList();
+        // Update the SelectedFilters list to match
+        SelectedFilters = dropItems.Select(d => d.Filter).ToList();
         _dropContainer.Refresh();
     }
     

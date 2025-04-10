@@ -131,14 +131,14 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
         }
     }
     
-    public async Task<bool> ConfigureDownloader(string parser, string url, string backupUrl, string secretName, string pollingRate)
+    public async Task<bool> ConfigureDownloader(string parser, string url, string backupUrl, string secretName, string pollingRate, List<FilterDto> filters)
     {
         
         var client = httpClientFactory.CreateClient();
         
         try
         {
-            using var jsonContent = SetupJsonContent(parser, url, backupUrl, secretName, pollingRate, [], []);
+            using var jsonContent = SetupJsonContent(parser, url, backupUrl, secretName, pollingRate, filters);
             using HttpResponseMessage response = await client.PutAsync($"{baseUrl}/Downloader/{parser}/configure", jsonContent);
             var returnStatusCode = response.StatusCode;
             return returnStatusCode == HttpStatusCode.OK;
@@ -150,13 +150,13 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
         return false;
     }
 
-    public async Task<List<bool>> TestConnection(string parser, string url, string backupUrl, string secretName, string pollingRate)
+    public async Task<List<bool>> TestConnection(string parser, string url, string backupUrl, string secretName, string pollingRate, List<FilterDto> filters)
     {
         var client = httpClientFactory.CreateClient();
         try
         {
-            using var jsonContent = SetupJsonContent(parser, url, backupUrl, secretName, pollingRate, [], []);
-            using HttpResponseMessage response  = await client.PostAsync($"{baseUrl}/test", jsonContent);
+            using var jsonContent = SetupJsonContent(parser, url, backupUrl, secretName, pollingRate, filters);
+            using HttpResponseMessage response  = await client.PostAsync($"{baseUrl}/Downloader/test", jsonContent);
             
             var jsonResponse = await response.Content.ReadFromJsonAsync<List<bool>>();
             return jsonResponse ?? [];
@@ -168,22 +168,21 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
         return [];
     }
     
-    private static StringContent SetupJsonContent(string parser, string url, string backupUrl, string secretName, string pollingRate, List<string> parameters, List<string> filters)
+    private static StringContent SetupJsonContent(string parser, string url, string backupUrl, string secretName, string pollingRate, List<FilterDto> filters)
     {
         StringContent? jsonContent = null;
         try
         {
-            jsonContent = new StringContent(
+            jsonContent = new(
                 JsonSerializer.Serialize(new DownloaderData()
                 {
                     Name = parser,
                     DownloadUrl = url ?? "",
                     Parser = "",
+                    Filters = filters,
                     BackUpUrl = backupUrl ?? "",
                     SecretName = secretName ?? "",
                     PollingRate = pollingRate ?? "",
-                    Filters =  [],
-                    Parameters = [],
                 }),
                 Encoding.UTF8,
                 "application/json");

@@ -72,7 +72,13 @@ public class DownloaderController : ControllerBase
             dlToConfigure.Parser = HandleConfiguration(dlToConfigure.Parser, parser!);
             
             var filters = dlConfiguration.Filters
-                .Select(filter => _filterRegistry.GetService(filter.Name.ToLowerInvariant()))
+                .Select(filter =>
+                {
+                    var temp = _filterRegistry.GetService(filter.Name.ToLowerInvariant());
+                    if (temp is null) return null;
+                    temp.Parameters = filter.Parameters;
+                    return temp;
+                })
                 .ToList();
             if (dlConfiguration.Filters.Count != 0 && filters.Any(f => string.IsNullOrEmpty(f.Name)))
             {
@@ -102,7 +108,7 @@ public class DownloaderController : ControllerBase
         return url;
     }
 
-    [Route("/add")]
+    [Route("add")]
     [HttpPost]
     public ActionResult Add(string downloader, [FromBody] DownloaderData newDl)
     {
@@ -178,7 +184,7 @@ public class DownloaderController : ControllerBase
 
     private DownloaderData? GetDownloader(string downloader) =>  _downloaders.FirstOrDefault(d => d.Name.Equals(downloader));
 
-    [Route("/test")]
+    [Route("test")]
     [HttpPost]
     public async Task<ActionResult<List<bool>>> TestConnection([FromBody]DownloaderData downloader)
     {
