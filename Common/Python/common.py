@@ -55,9 +55,18 @@ async def register(type="Parser"):
     async with aiohttp.ClientSession() as session:
         baseurl = os.getenv("BASE_URL", "http://do.jonaskaad.com")
         parser_name = os.getenv("PARSER_NAME")
-        url = f"{baseurl}/{type}/{parser_name}/register"
+        posturl = f"{baseurl}/{type}/{parser_name}/register"
         try:
-            async with session.post(url, json=os.getenv("PARSER_URL")) as response:
+            if type == "Parser":
+                json_data = {
+                    'url': os.getenv("PARSER_URL"),
+                }
+            else :
+                json_data = os.getenv("PARSER_URL")
+
+            print(f"Registering {type} with URL: {json_data}")
+            print(f"POST URL: {posturl}")
+            async with session.post(posturl, json=json_data) as response:
                 return response.status == 200
         except aiohttp.ClientConnectorError:
             return False
