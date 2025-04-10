@@ -275,7 +275,7 @@ public partial class ConfigurationPanel : ComponentBase
 
     private async Task OpenFilterDialogAsync()
     {
-        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Large, FullWidth = true };
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.ExtraLarge, FullWidth = true };
         var parameters = new DialogParameters<FilterConfiguration>
         {
             { x => x.SelectedFilters, CurrentFilters }

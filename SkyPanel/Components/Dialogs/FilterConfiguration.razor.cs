@@ -1,6 +1,9 @@
 using System.ComponentModel.DataAnnotations;
 using CommonDis.Models;
+using Cropper.Blazor.Components;
+using Cropper.Blazor.Models;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
 using MudBlazor;
 using SkyPanel.Components.Services;
 
@@ -15,6 +18,24 @@ public partial class FilterConfiguration : ComponentBase
     private List<FilterDto> expandedFilters = new();
     private bool isLoading = true;
     private string searchString = string.Empty;
+    private string? uploadedImageSrc;
+    private bool hasUploadedImage = false;
+    private CropperComponent? _cropper = null;
+
+    private Options CropperOptions = new Options()
+    {
+        SetDataOptions = new SetDataOptions()
+        {
+            Width = 400,
+            Height = 400
+        },
+        ViewMode = ViewMode.Vm1
+    };
+    
+    decimal _cropBoxWidth = 400;
+    decimal _cropBoxHeight = 400;
+    decimal _cropBoxLeft = 400;
+    decimal _cropBoxTop = 400;
 
     private MudDropContainer<DropItem> _dropContainer;
 
@@ -49,7 +70,31 @@ public partial class FilterConfiguration : ComponentBase
         {
             expandedFilters.Add(filter);
         }
+
+        var filterWithParameters = expandedFilters.FirstOrDefault(f => 
+            f.Parameters.ContainsKey("startX") && f.Parameters.ContainsKey("startY")
+            && f.Parameters.ContainsKey("endX") && f.Parameters.ContainsKey("endY"));
+
+        var canUpdateCrop = filterWithParameters != null;
+        if (canUpdateCrop && _cropper is not null)
+        {
+            SetCropBox(filterWithParameters.Parameters);
+        }
         StateHasChanged();
+    }
+
+    private decimal GetDecimalFromString(string decimalString, decimal alternative)
+    {
+        return decimal.TryParse(decimalString, out decimal decimalValue) ? decimalValue : alternative;
+    }
+    
+    private async Task SaveCrop()
+    {
+        var cropData = await _cropper.GetDataAsync(false, CancellationToken.None);
+        _cropBoxHeight = cropData.Height ?? new decimal(0);
+        _cropBoxWidth = cropData.Width ?? new decimal(0);
+        _cropBoxLeft = cropData.X ?? new decimal(0);
+        _cropBoxTop = cropData.Y ?? new decimal(0);
     }
 
     private IEnumerable<FilterDto> filteredAvailableFilters => string.IsNullOrWhiteSpace(searchString)
@@ -64,7 +109,7 @@ public partial class FilterConfiguration : ComponentBase
             SelectedFilters.Add(filter);
             dropItems.Add(new DropItem() { Filter = filter });
             _dropContainer.Refresh();
-            StateHasChanged(); // Trigger re-render
+            StateHasChanged();
         }
     }
 
@@ -75,12 +120,79 @@ public partial class FilterConfiguration : ComponentBase
         _dropContainer.Refresh();
     }
     
-    private void SaveFilters()
+    private async Task SaveFilters()
     {
-        // Save the selected filters to the parser state
+        if (_cropper != null)
+        {
+            var imageData = await _cropper.GetDataAsync(false, CancellationToken.None);
+            Console.WriteLine($"{imageData.Y}, {imageData.X}, {imageData.Height}, {imageData.Width}");
+            var coordinates = new Dictionary<string, decimal?>
+            {
+                { "startX", imageData.X },
+                { "startY", imageData.Y },
+                { "endX", imageData.X + imageData.Width },
+                { "endY", imageData.Y + imageData.Height }
+            };
+
+            foreach (var filter in SelectedFilters)
+            {
+                // This might have place unintended values if multiple filters use startX/Y or endX/Y
+                foreach (var key in coordinates.Keys.Intersect(filter.Parameters.Keys))
+                {
+                    filter.Parameters[key] = coordinates[key]?.ToString();
+                }
+            }
+        }
+    
         MudDialog?.Close(DialogResult.Ok(true));
     }
     
+    private async Task HandleImageUpload(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null)
+        {
+            await using var stream = file.OpenReadStream();
+            using var memoryStream = new MemoryStream();
+            await stream.CopyToAsync(memoryStream);
+            var base64Image = Convert.ToBase64String(memoryStream.ToArray());
+            uploadedImageSrc = $"data:{file.ContentType};base64,{base64Image}";
+            hasUploadedImage = true;
+            StateHasChanged();
+            if (_cropper is not null)
+            {
+                var filterWithParameters = expandedFilters.FirstOrDefault(f => 
+                    f.Parameters.ContainsKey("startX") && f.Parameters.ContainsKey("startY")
+                    && f.Parameters.ContainsKey("endX") && f.Parameters.ContainsKey("endY"));
+                SetCropBox(filterWithParameters.Parameters);
+            }
+        }
+    }
+
+    private void SetCropBox(Dictionary<string, string> filterParameters)
+    {
+        var startY = filterParameters["startY"];
+        var startX = filterParameters["startX"];
+        var endY = filterParameters["endY"];
+        var endX = filterParameters["endX"];
+        
+        var x = decimal.TryParse(startX, out var xVal) ? xVal : _cropBoxLeft;
+        var y = decimal.TryParse(startY, out var yVal) ? yVal : _cropBoxTop;
+        
+        var height = decimal.TryParse(startY, out var startYValue) && decimal.TryParse(endY, out var endYVal)
+            ? endYVal - startYValue
+            : _cropBoxHeight;
+        
+        var width = decimal.TryParse(startX, out var startXValue) && decimal.TryParse(endX, out var endXVal)
+            ? endXVal - startXValue
+            : _cropBoxWidth;
+        
+        _cropper.Options.SetDataOptions.Height = height;
+        _cropper.Options.SetDataOptions.Width = width;
+        _cropper.Options.SetDataOptions.X = x;
+        _cropper.Options.SetDataOptions.Y = y;
+    }
+
     private void ItemUpdated(MudItemDropInfo<DropItem> dropItem)
     {
         // Rearrange the DropItems list

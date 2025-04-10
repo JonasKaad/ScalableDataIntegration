@@ -3,6 +3,7 @@ using Azure.Core;
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 using CommonDis.Services;
+using Cropper.Blazor.Extensions;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
 using SkyPanel.Components;
@@ -37,6 +38,7 @@ else
 }
 
 builder.Services
+    .AddCropper()
     .AddSerilog()
     .AddMudServices(config =>
     {

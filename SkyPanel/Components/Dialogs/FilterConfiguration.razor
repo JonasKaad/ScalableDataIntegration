@@ -1,6 +1,8 @@
-<MudGrid Class="pa-4">
+@using Cropper.Blazor.Components
+
+<MudGrid Class="pa-4" Style="height: 1000px">
     <MudItem xs="12" md="6">
-        <MudPaper Class="pa-4" Elevation="3" Style="height: 400px; display: flex; flex-direction: column;">
+        <MudPaper Class="pa-4" Elevation="3" Style="height: 850px; display: flex; flex-direction: column;">
             <MudText Typo="Typo.h5" Class="mb-4">Available Filters</MudText>
 
             @if (isLoading)
@@ -48,7 +50,7 @@
     </MudItem>
 
     <MudItem xs="12" md="6">
-        <MudPaper Class="pa-4" Elevation="3" Style="height: 400px; display: flex; flex-direction: column;">
+        <MudPaper Class="pa-4" Elevation="3" Style="height: 850px; display: flex; flex-direction: column;">
             <MudText Typo="Typo.h5" Class="mb-4">Selected Filters</MudText>
             <div style="overflow-y: auto; flex-grow: 1;">
                 <MudDropContainer T="DropItem" @ref="_dropContainer" Items="@dropItems" ItemDropped="ItemUpdated">
@@ -78,12 +80,29 @@
                                     </MudPaper>
                                     @if (expandedFilters.FirstOrDefault(f => f.Name == item.Filter.Name) is {} filter)
                                     {
-                                        <MudPaper Class="pa-2" Elevation="1">
-                                            @foreach(var param in filter.Parameters)
+                                        @if (filter.Parameters.ContainsKey("startX") && filter.Parameters.ContainsKey("startY"))
+                                        {
+                                            <MudPaper Class="pa-2" Elevation="1" Style=@(hasUploadedImage ? "height: 500px" : "height: 100px")>
+                                            <MudText Typo="Typo.body1" Class="mb-2">Choose a sample image to set bounds for OCR</MudText>
+                                            <InputFile OnChange="HandleImageUpload" />
+                                            @if (!string.IsNullOrEmpty(uploadedImageSrc))
                                             {
-                                                <MudTextField T="string" @bind-Value="filter.Parameters[param.Key]" Label="@param.Key" Variant="Variant.Outlined" />
+                                                <div style="height: 380px" class="ma-1">
+                                                    <CropperComponent @ref="_cropper" Class="cropper-example" Src="@uploadedImageSrc" Options="CropperOptions" />
+                                                </div>
+                                                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveCrop">Save</MudButton>
                                             }
-                                        </MudPaper>
+                                            </MudPaper>
+                                        }
+                                        else
+                                        {
+                                            <MudPaper Class="pa-2" Elevation="1" Style="height: 100px">
+                                            @foreach (var param in filter.Parameters)
+                                            {
+                                                <MudTextField T="string" @bind-Value="filter.Parameters[param.Key]" Label="@param.Key" Variant="Variant.Outlined"/>
+                                            }
+                                            </MudPaper>
+                                        }
                                     }
                                 }
                             }
@@ -105,3 +124,10 @@
 
     </MudItem>
 </MudGrid>
+
+<style>
+    .cropper-example {
+        max-width: 100%;
+        width: 100%;
+    }
+</style>
