@@ -47,19 +47,21 @@ func NewServer(config ServerConfig) *Server {
 }
 
 func GetData(raw_data []byte, format_type string) ([]string, [][]byte) {
+// GetData processes raw data and returns relevant data in string format or the raw data as byte slices
+func GetData(rawData []byte, formatType string) ([]string, [][]byte) {
 	// Split on "magic" and create a slice for each
-	data_list := bytes.Split(raw_data, []byte("magic"))
+	dataList := bytes.Split(rawData, []byte("magic"))
 
 	var relevant [][]string
 	var raw [][]byte
 
 	// Process each section based on format type
-	for _, data := range data_list {
+	for _, data := range dataList {
 		if len(data) == 0 {
 			continue
 		}
 
-		if format_type == "str" {
+		if formatType == "str" {
 			// Try to decode as UTF-8
 			dataStr, err := utf8DecodeString(data)
 			if err != nil {
@@ -70,7 +72,7 @@ func GetData(raw_data []byte, format_type string) ([]string, [][]byte) {
 				splitData := strings.Split(dataStr, ";")
 				relevant = append(relevant, splitData)
 			}
-		} else if format_type == "img" {
+		} else if formatType == "img" {
 			// TODO: Like in python, do some more checks to see if data is actually image
 			relevant = append(relevant, []string{string(data)})
 		} else {
