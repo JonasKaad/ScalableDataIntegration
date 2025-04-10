@@ -7,6 +7,7 @@ import (
 	"github.com/JonasKaad/ScalableDataIntegration/GeneratedClients/go/parser"
 	"github.com/eugecm/gometar/metar"
 	goMetarParser "github.com/eugecm/gometar/metar/parser"
+	_ "github.com/joho/godotenv/autoload"
 	"log"
 	"os"
 	"strings"
