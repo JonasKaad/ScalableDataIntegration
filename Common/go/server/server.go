@@ -250,6 +250,59 @@ func utf8DecodeString(b []byte) (string, error) {
 }
 
 /* -- Azure -- */
+
+// SaveData saves raw and parsed data to Azure Blob Storage
+func SaveData(rawFile []byte, parsedFile []byte) {
+	client, ctx := AzureCredentialChecker()
+
+	containerName := strings.ToLower(os.Getenv("PARSER_NAME"))
+	log.Printf("Container name: %s", containerName)
+
+	// First check if container exists
+	containerExists := false
+
+	pager := client.NewListContainersPager(&azblob.ListContainersOptions{
+		Prefix: &containerName,
+	})
+
+	for pager.More() {
+		resp, err := pager.NextPage(context.Background())
+		if err != nil {
+			log.Printf("Failed to list containers: %v", err)
+			return
+		}
+
+		for _, container := range resp.ContainerItems {
+			if *container.Name == containerName {
+				containerExists = true
+				log.Printf("Container name: %s already exists. Skipping creating it.", *container.Name)
+			}
+		}
+	}
+	if !containerExists {
+		_, err := client.CreateContainer(ctx, containerName, nil)
+		if err != nil {
+			log.Printf("Failed to create container: %v", err)
+			return
+		}
+	}
+	now := time.Now().UTC()
+	formattedTime := now.Format("2006/01/02/1504")
+	RawFileName := formattedTime + "-raw.txt"
+	ParsedFileName := formattedTime + "-parsed.txt"
+	log.Printf("Raw file name: %s", RawFileName)
+	log.Printf("Parsed file name: %s", ParsedFileName)
+
+	_, err := client.UploadBuffer(ctx, containerName, RawFileName, rawFile, &azblob.UploadBufferOptions{})
+	if err != nil {
+		return
+	}
+
+	_, err = client.UploadBuffer(ctx, containerName, ParsedFileName, parsedFile, &azblob.UploadBufferOptions{})
+	if err != nil {
+		return
+	}
+}
 func AzureCredentialChecker() (*azblob.Client, context.Context) {
 	url := "https://parserstorage.blob.core.windows.net/"
 	ctx := context.Background()
