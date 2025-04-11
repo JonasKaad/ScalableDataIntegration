@@ -67,9 +67,6 @@ func (m *MetarParserImpl) ParseCall(_ context.Context, req *parser.ParseRequest)
 	}
 	log.Printf("Saved %d METAR reports to %s", count, outputPath)
 
-	log.Printf("Sending heartbeat")
-	server.RegisterParser()
-
 	return &parser.ParseResponse{
 		Success: true,
 	}, nil
@@ -84,5 +81,6 @@ func main() {
 
 	srv.RegisterParserService(&MetarParserImpl{})
 
+	server.Initialize()
 	log.Fatal(srv.Start())
 }
