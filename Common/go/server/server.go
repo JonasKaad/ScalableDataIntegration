@@ -103,7 +103,7 @@ func HeartbeatScheduler(registerTypeOptional ...string) {
 	}
 }
 
-func RegisterParser(registerTypeOptional ...string) {
+func RegisterService(registerTypeOptional ...string) bool {
 	// Register the parser service
 
 	registerType := "Parser"
@@ -114,11 +114,8 @@ func RegisterParser(registerTypeOptional ...string) {
 	baseurl := os.Getenv("BASE_URL")
 	parserName := os.Getenv("PARSER_NAME")
 	url := fmt.Sprintf("%s/%s/%s/register", baseurl, registerType, parserName)
-	log.Printf("Registering parser at %s", url)
 
-	parserUrl := os.Getenv("PARSER_URL")
-	fmt.Printf(parserUrl)
-	sendBody := fmt.Sprintf(`{"url":"%s"}`, parserUrl)
+	sendBody := fmt.Sprintf(`{"url":"%s"}`, os.Getenv("PARSER_URL"))
 	request := gorequest.New()
 	resp, _, errs := request.Post(url).
 		Type("json").
@@ -127,18 +124,18 @@ func RegisterParser(registerTypeOptional ...string) {
 
 	if errs != nil {
 		log.Printf("Error registering parser: %v", errs)
-		return
+		return false
 	}
 
-	//
-	//postBody := []byte(parserUrl)
-	//postBodyReader := bytes.NewReader(postBody)
-	//
-	//r, err := http.NewRequest("POST", url, postBodyReader)
-	//
-	//fmt.Print(postBody)
-	//if err != nil {
-	//	log.Printf("Error registering parser: %v", err)
+	if resp.StatusCode == http.StatusOK {
+		log.Printf("Successfully registered %s of type: %s", parserName, strings.ToLower(registerType))
+		return true
+	}
+
+	log.Printf("Registering failed with status code: %d", resp.StatusCode)
+	return false
+}
+
 func Initialize() {
 	for registered := false; !registered; {
 		registered = RegisterService()
