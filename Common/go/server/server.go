@@ -139,27 +139,17 @@ func RegisterParser(registerTypeOptional ...string) {
 	//fmt.Print(postBody)
 	//if err != nil {
 	//	log.Printf("Error registering parser: %v", err)
-	//	return
-	//}
-	//
-	//r.Header.Add("Content-Type", "application/json")
-	//
-	//client := &http.Client{}
-	//resp, err := client.Do(r)
-	//if err != nil {
-	//	log.Printf("Error sending register request: %v", err)
-	//	return
-	//}
-	//defer func(Body io.ReadCloser) {
-	//	err := Body.Close()
-	//	if err != nil {
-	//		log.Printf("Error closing body: %v", err)
-	//	}
-	//}(resp.Body)
-
-	if resp.StatusCode != http.StatusOK {
-		log.Printf("Registering failed with status code: %d", resp.StatusCode)
-		return
+func Initialize() {
+	for registered := false; !registered; {
+		registered = RegisterService()
+		if registered {
+			log.Println("Registering succeeded")
+			go HeartbeatScheduler()
+			return
+		} else {
+			log.Printf("Registering failed. Retrying in 10 seconds...")
+			time.Sleep(10 * time.Second)
+		}
 	}
 }
 
@@ -221,14 +211,14 @@ func utf8DecodeString(b []byte) (string, error) {
 func (s *Server) RegisterParserService(impl ParserImpl) {
 	s.parserImpl = impl
 	parser.RegisterParserServer(s.grpcServer, impl)
-	log.Println("Parser service registered")
+	log.Println("Parser service implementation registered")
 }
 
 // RegisterFilterService registers a filter service implementation
 func (s *Server) RegisterFilterService(impl FilterImpl) {
 	s.filterImpl = impl
 	filter.RegisterFilterServer(s.grpcServer, impl)
-	log.Println("Filter service registered")
+	log.Println("Filter service implementation registered")
 }
 
 // Start starts the gRPC server
