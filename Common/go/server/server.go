@@ -50,6 +50,40 @@ func NewServer(config ServerConfig) *Server {
 	return s
 }
 
+// RegisterParserService registers a parser service implementation
+func (s *Server) RegisterParserService(impl ParserImpl) {
+	s.parserImpl = impl
+	parser.RegisterParserServer(s.grpcServer, impl)
+	log.Println("Parser service implementation registered")
+}
+
+// RegisterFilterService registers a filter service implementation
+func (s *Server) RegisterFilterService(impl FilterImpl) {
+	s.filterImpl = impl
+	filter.RegisterFilterServer(s.grpcServer, impl)
+	log.Println("Filter service implementation registered")
+}
+
+// Start starts the gRPC server
+func (s *Server) Start() error {
+	addr := fmt.Sprintf(":%d", s.config.Port)
+	lis, err := net.Listen("tcp", addr)
+	if err != nil {
+		return fmt.Errorf("failed to listen: %v", err)
+	}
+
+	log.Printf("Server listening on %s", addr)
+	return s.grpcServer.Serve(lis)
+}
+
+// Stop gracefully stops the server
+func (s *Server) Stop() {
+	s.grpcServer.GracefulStop()
+}
+
+/* - Service Registry - */
+
+// SendHeartbeat Sends a heartbeat to the service registry
 func SendHeartbeat(heartbeatTypeOptional ...string) ([]error, bool) {
 	heartbeatType := "Parser"
 	if len(heartbeatTypeOptional) > 0 {
@@ -81,6 +115,9 @@ func SendHeartbeat(heartbeatTypeOptional ...string) ([]error, bool) {
 }
 
 var retryInterval = 60
+
+// HeartbeatScheduler sets up a scheduler to send heartbeats to the service registry or register the service again if
+// it fails to get a response on the heartbeat
 func HeartbeatScheduler(registerTypeOptional ...string) {
 	registerType := "Parser"
 	if len(registerTypeOptional) > 0 {
@@ -106,9 +143,8 @@ func HeartbeatScheduler(registerTypeOptional ...string) {
 	}
 }
 
+// RegisterService registers the service with the service registry endpoint
 func RegisterService(registerTypeOptional ...string) bool {
-	// Register the parser service
-
 	registerType := "Parser"
 	if len(registerTypeOptional) > 0 {
 		registerType = registerTypeOptional[0]
@@ -139,6 +175,7 @@ func RegisterService(registerTypeOptional ...string) bool {
 	return false
 }
 
+// Initialize registers the service and starts the heartbeat scheduler
 func Initialize() {
 	for {
 		var registered = RegisterService()
@@ -152,6 +189,8 @@ func Initialize() {
 		}
 	}
 }
+
+/* -- Data Processing -- */
 
 // GetData processes raw data and returns relevant data in string format or the raw data as byte slices
 func GetData(rawData []byte, formatType string) ([]string, [][]byte) {
@@ -207,33 +246,4 @@ func utf8DecodeString(b []byte) (string, error) {
 	return string(b), nil
 }
 
-// RegisterParserService registers a parser service implementation
-func (s *Server) RegisterParserService(impl ParserImpl) {
-	s.parserImpl = impl
-	parser.RegisterParserServer(s.grpcServer, impl)
-	log.Println("Parser service implementation registered")
-}
-
-// RegisterFilterService registers a filter service implementation
-func (s *Server) RegisterFilterService(impl FilterImpl) {
-	s.filterImpl = impl
-	filter.RegisterFilterServer(s.grpcServer, impl)
-	log.Println("Filter service implementation registered")
-}
-
-// Start starts the gRPC server
-func (s *Server) Start() error {
-	addr := fmt.Sprintf(":%d", s.config.Port)
-	lis, err := net.Listen("tcp", addr)
-	if err != nil {
-		return fmt.Errorf("failed to listen: %v", err)
-	}
-
-	log.Printf("Server listening on %s", addr)
-	return s.grpcServer.Serve(lis)
-}
-
-// Stop gracefully stops the server
-func (s *Server) Stop() {
-	s.grpcServer.GracefulStop()
-}
+/* -- Azure -- */
