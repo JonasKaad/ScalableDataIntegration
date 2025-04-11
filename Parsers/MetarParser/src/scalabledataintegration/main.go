@@ -9,7 +9,6 @@ import (
 	goMetarParser "github.com/eugecm/gometar/metar/parser"
 	_ "github.com/joho/godotenv/autoload"
 	"log"
-	"os"
 	"strings"
 )
 
@@ -48,7 +47,6 @@ func (m *MetarParserImpl) ParseCall(_ context.Context, req *parser.ParseRequest)
 					ErrMsg:  &errMsg,
 				}, nil
 			}
-
 			allReports = append(allReports, &report)
 			count++
 		}
@@ -60,12 +58,7 @@ func (m *MetarParserImpl) ParseCall(_ context.Context, req *parser.ParseRequest)
 		log.Print(errMsg)
 	}
 
-	outputPath := "output.txt"
-	err = os.WriteFile(outputPath, jsonData, 0644)
-	if err != nil {
-		log.Printf("Error writing output file: %v", err)
-	}
-	log.Printf("Saved %d METAR reports to %s", count, outputPath)
+	server.SaveData(req.RawData, jsonData)
 
 	return &parser.ParseResponse{
 		Success: true,
