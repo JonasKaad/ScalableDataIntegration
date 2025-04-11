@@ -1,18 +1,29 @@
-FROM ubuntu:latest
-LABEL authors="jonaskaad"
+FROM golang:1.23.3-alpine
 
-ENTRYPOINT ["top", "-b"]
-
-# Set the working directory in the container
 WORKDIR /app
 
-# Copy the current directory contents into the container at /app
-COPY Parsers/MetarParser/ /app/Parsers/MetarParser
+# Copy go mod files
+COPY Parsers/MetarParser/src/scalabledataintegration/go.mod Parsers/MetarParser/src/scalabledataintegration/
+COPY Parsers/MetarParser/src/scalabledataintegration/go.sum Parsers/MetarParser/src/scalabledataintegration/
 
-# Copy the GeneratedClients directory
+# Copy shared dependencies
 COPY GeneratedClients/go/ /app/GeneratedClients/go
-COPY Common/Go/ /app/Common/go
+COPY Common/go/ /app/Common/go
 
+# Copy main source code
+COPY Parsers/MetarParser/src/scalabledataintegration/ Parsers/MetarParser/src/scalabledataintegration/
 
-# Expose the port that the gRPC server will be listening on
+# Set working directory for building
+WORKDIR /app/Parsers/MetarParser/src/scalabledataintegration
+
+# Download dependencies
+RUN go mod download
+
+# Build the application
+RUN go build -o metarparser main.go
+
+# Expose the port
 EXPOSE 50051
+
+# Run the application
+CMD ["./metarparser"]
