@@ -81,6 +81,7 @@ func SendHeartbeat(heartbeatTypeOptional ...string) ([]error, bool) {
 	}
 }
 
+var retryInterval = 60
 func HeartbeatScheduler(registerTypeOptional ...string) {
 	registerType := "Parser"
 	if len(registerTypeOptional) > 0 {
@@ -91,7 +92,7 @@ func HeartbeatScheduler(registerTypeOptional ...string) {
 	var errors []error = nil
 
 	for {
-		time.Sleep(10 * time.Second)
+		time.Sleep(time.Duration(retryInterval) * time.Second)
 		if alive {
 			errors, alive = SendHeartbeat()
 			if errors != nil {
@@ -99,6 +100,9 @@ func HeartbeatScheduler(registerTypeOptional ...string) {
 			}
 		} else {
 			alive = RegisterService(registerType)
+			if !alive {
+				log.Printf("Registering failed. Retrying in %d seconds...", retryInterval)
+			}
 		}
 	}
 }
@@ -137,15 +141,15 @@ func RegisterService(registerTypeOptional ...string) bool {
 }
 
 func Initialize() {
-	for registered := false; !registered; {
-		registered = RegisterService()
+	for {
+		var registered = RegisterService()
 		if registered {
 			log.Println("Registering succeeded")
 			go HeartbeatScheduler()
 			return
 		} else {
-			log.Printf("Registering failed. Retrying in 10 seconds...")
-			time.Sleep(10 * time.Second)
+			log.Printf("Registering failed. Retrying in %d seconds...", retryInterval)
+			time.Sleep(time.Duration(retryInterval) * time.Second)
 		}
 	}
 }
