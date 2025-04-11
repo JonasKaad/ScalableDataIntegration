@@ -2,7 +2,10 @@ package server
 
 import (
 	"bytes"
+	"context"
 	"fmt"
+	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
+	"github.com/Azure/azure-sdk-for-go/sdk/storage/azblob"
 	"github.com/JonasKaad/ScalableDataIntegration/GeneratedClients/go/filter"
 	"github.com/JonasKaad/ScalableDataIntegration/GeneratedClients/go/parser"
 	"github.com/parnurzeal/gorequest"
@@ -247,3 +250,18 @@ func utf8DecodeString(b []byte) (string, error) {
 }
 
 /* -- Azure -- */
+func AzureCredentialChecker() (*azblob.Client, context.Context) {
+	url := "https://parserstorage.blob.core.windows.net/"
+	ctx := context.Background()
+
+	credential, err := azidentity.NewDefaultAzureCredential(nil)
+	if err != nil {
+		log.Printf("Failed to create credential: %v", err)
+	}
+
+	client, err := azblob.NewClient(url, credential, nil)
+	if err != nil {
+		log.Printf("Failed to create client: %v", err)
+	}
+	return client, ctx
+}
