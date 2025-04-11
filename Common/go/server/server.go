@@ -253,7 +253,11 @@ func utf8DecodeString(b []byte) (string, error) {
 
 // SaveData saves raw and parsed data to Azure Blob Storage
 func SaveData(rawFile []byte, parsedFile []byte) {
-	client, ctx := AzureCredentialChecker()
+	client, ctx, err := AzureCredentialChecker()
+	if err != nil {
+		log.Printf("Failed to initialize Azure client: %v", err)
+		return
+	}
 
 	containerName := strings.ToLower(os.Getenv("PARSER_NAME"))
 	log.Printf("Container name: %s", containerName)
@@ -293,28 +297,41 @@ func SaveData(rawFile []byte, parsedFile []byte) {
 	log.Printf("Raw file name: %s", RawFileName)
 	log.Printf("Parsed file name: %s", ParsedFileName)
 
-	_, err := client.UploadBuffer(ctx, containerName, RawFileName, rawFile, &azblob.UploadBufferOptions{})
+	_, err = client.UploadBuffer(ctx, containerName, RawFileName, rawFile, &azblob.UploadBufferOptions{})
 	if err != nil {
-		return
+		log.Printf("Failed to upload file: %v", err)
 	}
 
 	_, err = client.UploadBuffer(ctx, containerName, ParsedFileName, parsedFile, &azblob.UploadBufferOptions{})
 	if err != nil {
-		return
+		log.Printf("Failed to upload file: %v", err)
 	}
 }
-func AzureCredentialChecker() (*azblob.Client, context.Context) {
+func AzureCredentialChecker() (*azblob.Client, context.Context, error) {
 	url := "https://parserstorage.blob.core.windows.net/"
 	ctx := context.Background()
+	connectionString := os.Getenv("BLOB_CONNECTION_STRING")
 
-	credential, err := azidentity.NewDefaultAzureCredential(nil)
-	if err != nil {
-		log.Printf("Failed to create credential: %v", err)
-	}
+	var client *azblob.Client
+	var err error
 
-	client, err := azblob.NewClient(url, credential, nil)
-	if err != nil {
-		log.Printf("Failed to create client: %v", err)
+	if connectionString != "" {
+		// Try connection string first if available
+		client, err = azblob.NewClientFromConnectionString(connectionString, nil)
+		if err != nil {
+			log.Printf("Failed to create client from connection string: %v", err)
+		}
+	} else {
+		// Fall back to DefaultAzureCredential
+		credential, err := azidentity.NewDefaultAzureCredential(nil)
+		if err != nil {
+			return nil, ctx, fmt.Errorf("failed to create credential: %v", err)
+		}
+
+		client, err = azblob.NewClient(url, credential, nil)
+		if err != nil {
+			return nil, ctx, fmt.Errorf("failed to create client: %v", err)
+		}
 	}
-	return client, ctx
+	return client, ctx, err
 }
