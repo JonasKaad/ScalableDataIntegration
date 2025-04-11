@@ -7,12 +7,12 @@ import (
 	"github.com/JonasKaad/ScalableDataIntegration/GeneratedClients/go/parser"
 	"github.com/parnurzeal/gorequest"
 	"google.golang.org/grpc"
-	"io"
 	"log"
 	"net"
 	"net/http"
 	"os"
 	"strings"
+	"time"
 	"unicode/utf8"
 )
 
@@ -50,7 +50,7 @@ func NewServer(config ServerConfig) *Server {
 	return s
 }
 
-func SendHeartbeat(heartbeatTypeOptional ...string) {
+func SendHeartbeat(heartbeatTypeOptional ...string) ([]error, bool) {
 	heartbeatType := "Parser"
 	if len(heartbeatTypeOptional) > 0 {
 		heartbeatType = heartbeatTypeOptional[0]
@@ -59,30 +59,47 @@ func SendHeartbeat(heartbeatTypeOptional ...string) {
 	baseurl := os.Getenv("BASE_URL")
 	parserName := os.Getenv("PARSER_NAME")
 	url := fmt.Sprintf("%s/%s/%s/heartbeat", baseurl, heartbeatType, parserName)
-	log.Printf("Sending heartbeat to %s", url)
-	r, err := http.NewRequest("POST", url, nil)
-	if err != nil {
-		log.Printf("Error creating heartbeat request: %v", err)
-		return
-	}
-	r.Header.Add("Content-Type", "application/json")
-	client := &http.Client{}
 
-	resp, err := client.Do(r)
-	if err != nil {
-		log.Printf("Error sending heartbeat request: %v", err)
-		return
-	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			log.Printf("Error closing body: %v", err)
+	request := gorequest.New()
+	resp, _, errs := request.Post(url).
+		Type("json").
+		Send(nil).
+		End()
+	if errs != nil {
+		if resp != nil {
+			log.Printf("Heartbeat failed. Status: %d", resp.Status)
 		}
-	}(resp.Body)
+		return errs, false
+	}
+	if resp.StatusCode == http.StatusOK {
+		// if it is statuscode 200, it should say OK
+		log.Printf("Heartbeat sent. Status: %s", resp.Status)
+		return nil, true
+	} else {
+		log.Printf("Heartbeat failed. Status: %d", resp.Status)
+		return nil, false
+	}
+}
 
-	if resp.StatusCode != http.StatusOK {
-		log.Printf("Heartbeat failed with status code: %d", resp.StatusCode)
-		return
+func HeartbeatScheduler(registerTypeOptional ...string) {
+	registerType := "Parser"
+	if len(registerTypeOptional) > 0 {
+		registerType = registerTypeOptional[0]
+	}
+
+	alive := true
+	var errors []error = nil
+
+	for {
+		time.Sleep(10 * time.Second)
+		if alive {
+			errors, alive = SendHeartbeat()
+			if errors != nil {
+				log.Printf("Error sending heartbeat: %v", errors)
+			}
+		} else {
+			alive = RegisterService(registerType)
+		}
 	}
 }
 
