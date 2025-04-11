@@ -67,16 +67,15 @@ func SendHeartbeat(heartbeatTypeOptional ...string) ([]error, bool) {
 		End()
 	if errs != nil {
 		if resp != nil {
-			log.Printf("Heartbeat failed. Status: %d", resp.Status)
+			log.Printf("Heartbeat failed. Status: %s", resp.Status)
 		}
 		return errs, false
 	}
 	if resp.StatusCode == http.StatusOK {
-		// if it is statuscode 200, it should say OK
 		log.Printf("Heartbeat sent. Status: %s", resp.Status)
 		return nil, true
 	} else {
-		log.Printf("Heartbeat failed. Status: %d", resp.Status)
+		log.Printf("Heartbeat failed. Status: %s", resp.Status)
 		return nil, false
 	}
 }
