@@ -70,7 +70,9 @@ async def register(type="Parser", filter_params=None):
                 "url": os.getenv("PARSER_URL")
             }
         else:
-            data = os.getenv("PARSER_URL")
+            data = {
+                "url": os.getenv("PARSER_URL"),
+            }
         print(f"Registering at {url} with data: {json.dumps(data)}")
         try:
             headers = {'Content-Type': 'application/json'}
