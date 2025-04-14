@@ -1,4 +1,4 @@
-@page "/role-management"
+﻿@page "/role-management"
 @using SkyPanel.Components.Services
 @attribute [Authorize(Roles = "Admin")]
 @inject OrchestratorClientService OrchestratorClient
@@ -111,7 +111,7 @@
 
                     @if (_isLoadingRoles)
                     {
-                        <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-4" />
+                        <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-4"/>
                     }
                     else
                     {
@@ -129,12 +129,22 @@
                                     <MudTh>Action</MudTh>
                                 </HeaderContent>
                                 <RowTemplate>
-                                    <MudTd DataLabel="Role">@context.name</MudTd>
+                                    <MudTd DataLabel="Role">
+                                        @context.name
+                                        @if (context.name == "Admin")
+                                        {
+                                            <MudChip T="string" Size="Size.Small" Color="Color.Error" Class="ml-2">Admin</MudChip>
+                                        }
+                                        else if (context.name.Contains(("Parser"), StringComparison.InvariantCultureIgnoreCase))
+                                        {
+                                            <MudChip T="string" Size="Size.Small" Color="Color.Info" Class="ml-2">Parser</MudChip>
+                                        }
+                                    </MudTd>
                                     <MudTd DataLabel="Description">@context.description</MudTd>
                                     <MudTd DataLabel="Action">
-                                        <MudIconButton 
-                                            Icon="@Icons.Material.Filled.Delete" 
-                                            Color="Color.Error" 
+                                        <MudIconButton
+                                            Icon="@Icons.Material.Filled.Delete"
+                                            Color="Color.Error"
                                             Size="Size.Small"
                                             OnClick="@(() => RemoveRole(context))"/>
                                     </MudTd>
@@ -156,12 +166,22 @@
                                     <MudTh>Action</MudTh>
                                 </HeaderContent>
                                 <RowTemplate>
-                                    <MudTd DataLabel="Role">@context.name</MudTd>
+                                    <MudTd DataLabel="Role">
+                                        @context.name
+                                        @if (context.name == "Admin")
+                                        {
+                                            <MudChip T="string" Size="Size.Small" Color="Color.Error" Class="ml-2">Admin</MudChip>
+                                        }
+                                        else if (context.name.Contains(("Parser"), StringComparison.InvariantCultureIgnoreCase))
+                                        {
+                                            <MudChip T="string" Size="Size.Small" Color="Color.Info" Class="ml-2">Parser</MudChip>
+                                        }
+                                    </MudTd>
                                     <MudTd DataLabel="Description">@context.description</MudTd>
                                     <MudTd DataLabel="Action">
-                                        <MudIconButton 
-                                            Icon="@Icons.Material.Filled.Add" 
-                                            Color="Color.Success" 
+                                        <MudIconButton
+                                            Icon="@Icons.Material.Filled.Add"
+                                            Color="Color.Success"
                                             Size="Size.Small"
                                             OnClick="@(() => AddRole(context))"/>
                                     </MudTd>
