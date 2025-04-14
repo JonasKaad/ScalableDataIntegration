@@ -50,7 +50,41 @@ public class AuthController : ControllerBase
             return StatusCode((int)HttpStatusCode.InternalServerError);
         }
     }
-    
+    [Route("add-role")]
+    [HttpPost]
+    public async Task<ActionResult<bool>> AddRole([FromBody] Role role)
+    {
+        try
+        {
+            var token = await _tokenCacheService.GetTokenAsync();
+            
+            var client = new HttpClient();
+            var request = new HttpRequestMessage(HttpMethod.Post, $"https://{AuthService.GetDomain()}/api/v2/roles");
+            request.Headers.Add("Accept", "application/json");
+            request.Headers.Add("Authorization", $"Bearer {token}");
+            request.Content = new StringContent($"{{\"name\":\"{role.name}\",\"description\":\"{role.description}\"}}", null, "application/json");
+            var response = await client.SendAsync(request);
+            
+            if(response.StatusCode == HttpStatusCode.NoContent || response.StatusCode == HttpStatusCode.OK)
+            {
+                return Ok($"Added role!");
+            }
+            if(response.StatusCode == HttpStatusCode.Conflict) 
+            {
+                return Ok($"Role already exists!");
+            }
+            else 
+            {
+                var errorMessage = await response.Content.ReadAsStringAsync();
+                return BadRequest("Failed to update user's roles. " + response.StatusCode + errorMessage);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to obtain roles");
+            return StatusCode((int)HttpStatusCode.InternalServerError);
+        }
+    }
     
     [Route("users/{userId}/roles")]
     [HttpGet]
