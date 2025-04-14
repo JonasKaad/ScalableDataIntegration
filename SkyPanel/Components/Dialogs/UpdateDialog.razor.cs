@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using CommonDis.Models;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using SkyPanel.Components.Services;
@@ -18,6 +19,8 @@ public partial class UpdateDialog : ComponentBase
     public string SecretName { get; set; } = string.Empty;
     [Parameter]
     public string PollingRate { get; set; } = string.Empty;
+    [Parameter]
+    public List<FilterDto> Filters { get; set; } = new List<FilterDto>();
     
     private SnackbarUtil SnackbarUtil { get; set; } = new();
     
@@ -64,10 +67,11 @@ public partial class UpdateDialog : ComponentBase
         
         secretNameToSend = SecretName;
         
-        pollingRateToSend = PollingRate; 
+        pollingRateToSend = PollingRate;
+        var filters = ParserState.Filters;
         
         var response = await OrchestratorClientService.TestConnection(ParserState.ParserName, 
-            urlValueToSend, backupUrlValueToSend, secretNameToSend, pollingRateToSend);
+            urlValueToSend, backupUrlValueToSend, secretNameToSend, pollingRateToSend, filters);
         
         switch (response.Count)
         {
@@ -91,24 +95,69 @@ public partial class UpdateDialog : ComponentBase
         }
     }
 
+    private bool AreFiltersEqual(List<FilterDto> list1, List<FilterDto> list2)
+    {
+        if (list1.Count != list2.Count)
+            return false;
+        
+        for (int i = 0; i < list1.Count; i++)
+        {
+            if (list1[i].Name != list2[i].Name)
+                return false;
+            
+            // Compare parameters if needed
+            var params1 = list1[i].Parameters;
+            var params2 = list2[i].Parameters;
+        
+            if (params1.Count != params2.Count)
+                return false;
+            
+            foreach (var key in params1.Keys)
+            {
+                if (!params2.ContainsKey(key) || params1[key] != params2[key])
+                    return false;
+            }
+        }
     
+        return true;
+    }
 
     
     private void DialogSubmit() => MudDialog?.Close(DialogResult.Ok("update"));
 
     private void DialogCancel() => MudDialog?.Cancel();
     
-    private string HighlightChangedContent(string? oldValue, string? newValue, string color)
+    private string HighlightChangedContent(object? oldValue, object? newValue, string color)
     {
-        
-        if (oldValue == newValue)
+        var correctOldVal = GetCorrectedVal(oldValue);
+        var correctNewVal = GetCorrectedVal(newValue);
+        if (correctOldVal == correctNewVal)
         {
-            return oldValue;
+            return correctOldVal;
         }
-        var (prefix, changed, suffix) = FindDiff(oldValue, newValue);
+        var (prefix, changed, suffix) = FindDiff(correctOldVal, correctNewVal);
         return $"{prefix}<span style=\"background-color: {color}; font-weight: bold;\">{changed}</span>{suffix}";
     }
-    
+
+    private static string GetCorrectedVal(object? val)
+    {
+        var correctVal = "";
+        if (val is List<FilterDto> filters)
+        {
+            correctVal = string.Join(", ",filters.Select(f => f.Name));
+        }
+        else if (val is string old)
+        {
+            correctVal = old;
+        }
+        else
+        {
+            throw new InvalidCastException($"Can't cast {val?.GetType()} to string");
+        }
+
+        return correctVal;
+    }
+
     // Inspired by @https://github.com/google/diff-match-patch/blob/master/csharp/DiffMatchPatch.cs
     private static (string prefix, string changed, string suffix) FindDiff(string oldValue, string newValue)
     {

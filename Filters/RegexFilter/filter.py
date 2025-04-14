@@ -2,7 +2,6 @@ import asyncio
 import grpc
 import sys
 import os
-import json
 import re
 
 GENCLIENT_PYTHON_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../GeneratedClients/python"))
@@ -69,7 +68,10 @@ async def serve():
 
 
 if __name__ == '__main__':
+    parameters = {
+        "regex": "*"
+    }
     loop = asyncio.new_event_loop()
-    loop.create_task(init_filter(loop))
+    loop.create_task(init_filter(loop, parameters))
     asyncio.set_event_loop(loop)
     loop.run_until_complete(serve())

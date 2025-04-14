@@ -25,7 +25,7 @@ COMMON_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../Com
 sys.path.insert(0, COMMON_PATH)
 
 # noinspection PyUnresolvedReferences
-from common import send_heartbeat, heartbeat_scheduler, init_parser, azure_cred_checker, get_data, save_data_to_azure
+from common import init_parser, get_data, save_data_to_azure
 
 class TAFEncoder(json.JSONEncoder):
     def default(self, o):

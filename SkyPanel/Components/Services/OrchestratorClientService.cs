@@ -8,6 +8,38 @@ namespace SkyPanel.Components.Services;
 
 public sealed class OrchestratorClientService(IHttpClientFactory httpClientFactory, string baseUrl, ILogger<OrchestratorClientService> logger)
 {
+    
+    public async Task<IEnumerable<string>> GetFilters()
+    {
+        var client = httpClientFactory.CreateClient();
+        try
+        {
+            var response = await client.GetAsync($"{baseUrl}/Filter/filters");
+            var elements = await response.Content.ReadFromJsonAsync<IEnumerable<string>>();
+            return elements ?? [];
+        } 
+        catch (Exception e)
+        {
+            logger.LogError("Failed to get filters with error: {error}", e.Message);
+        }
+        return [];
+    }
+    
+    public async Task<Dictionary<string, string>> GetFilterParameters(string filterName)
+    {
+        var client = httpClientFactory.CreateClient();
+        try
+        {
+            var response = await client.GetAsync($"{baseUrl}/Filter/{filterName}");
+            var elements = await response.Content.ReadFromJsonAsync<FilterDto>();
+            return elements.Parameters;
+        } 
+        catch (Exception e)
+        {
+            logger.LogError("Failed to get filters with error: {error}", e.Message);
+        }
+        return [];
+    }
     public async Task<IEnumerable<string>> GetDownloaders()
     {
         var client = httpClientFactory.CreateClient();
@@ -88,6 +120,7 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
             }
             else
             {
+                logger.LogError("Failed to upload file with error: {error}", responseString);
                 return new UploadResult( false, response.Content.ReadAsStringAsync().Result, Result.UploadError);
             }
         }
@@ -98,14 +131,14 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
         }
     }
     
-    public async Task<bool> ConfigureDownloader(string parser, string url, string backupUrl, string secretName, string pollingRate)
+    public async Task<bool> ConfigureDownloader(string parser, string url, string backupUrl, string secretName, string pollingRate, List<FilterDto> filters)
     {
         
         var client = httpClientFactory.CreateClient();
         
         try
         {
-            using var jsonContent = SetupJsonContent(parser, url, backupUrl, secretName, pollingRate);
+            using var jsonContent = SetupJsonContent(parser, url, backupUrl, secretName, pollingRate, filters);
             using HttpResponseMessage response = await client.PutAsync($"{baseUrl}/Downloader/{parser}/configure", jsonContent);
             var returnStatusCode = response.StatusCode;
             return returnStatusCode == HttpStatusCode.OK;
@@ -117,12 +150,12 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
         return false;
     }
 
-    public async Task<List<bool>> TestConnection(string parser, string url, string backupUrl, string secretName, string pollingRate)
+    public async Task<List<bool>> TestConnection(string parser, string url, string backupUrl, string secretName, string pollingRate, List<FilterDto> filters)
     {
         var client = httpClientFactory.CreateClient();
         try
         {
-            using var jsonContent = SetupJsonContent(parser, url, backupUrl, secretName, pollingRate);
+            using var jsonContent = SetupJsonContent(parser, url, backupUrl, secretName, pollingRate, filters);
             using HttpResponseMessage response  = await client.PostAsync($"{baseUrl}/Downloader/test", jsonContent);
             
             var jsonResponse = await response.Content.ReadFromJsonAsync<List<bool>>();
@@ -135,7 +168,7 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
         return [];
     }
     
-    private static StringContent SetupJsonContent(string parser, string url, string backupUrl, string secretName, string pollingRate)
+    private static StringContent SetupJsonContent(string parser, string url, string backupUrl, string secretName, string pollingRate, List<FilterDto> filters)
     {
         StringContent? jsonContent = null;
         try
@@ -146,6 +179,7 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
                     Name = parser,
                     DownloadUrl = url ?? "",
                     Parser = "",
+                    Filters = filters,
                     BackUpUrl = backupUrl ?? "",
                     SecretName = secretName ?? "",
                     PollingRate = pollingRate ?? "",

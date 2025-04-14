@@ -1,13 +1,27 @@
+@using MudBlazor.Charts
 @inject ISnackbar Snackbar
+
+@code{
+
+    class Parameter
+    {
+        public string Label { get; set; }
+        public object Name { get; set; }
+        public object State { get; set; }
+        public bool Unchanged { get; set; }
+    }
+
+}
 
 <MudDialog>
     <DialogContent>
         @{
-            var parameters = new[] {
-                new { Label = "URL", Name = Url, State = ParserState.DownloadUrl, Unchanged = (String.Compare(Url, ParserState.DownloadUrl, StringComparison.Ordinal) == 0)},
-                new { Label = "BackupURL", Name = BackupUrl, State = ParserState.BackupUrl, Unchanged = (String.Compare(BackupUrl, ParserState.BackupUrl, StringComparison.Ordinal) == 0) },
-                new { Label = "Secret", Name = SecretName, State = ParserState.SecretName, Unchanged = (String.Compare(SecretName, ParserState.SecretName, StringComparison.Ordinal) == 0) },
-                new { Label = "Polling Rate", Name = PollingRate, State = ParserState.Polling, Unchanged = (String.Compare(PollingRate, ParserState.Polling, StringComparison.Ordinal) == 0) }
+            var parameters = new List<Parameter> {
+                new (){ Label = "URL", Name = Url, State = ParserState.DownloadUrl, Unchanged = (String.Compare(Url, ParserState.DownloadUrl, StringComparison.Ordinal) == 0)},
+                new (){ Label = "BackupURL", Name = BackupUrl, State = ParserState.BackupUrl, Unchanged = (String.Compare(BackupUrl, ParserState.BackupUrl, StringComparison.Ordinal) == 0) },
+                new (){ Label = "Secret", Name = SecretName, State = ParserState.SecretName, Unchanged = (String.Compare(SecretName, ParserState.SecretName, StringComparison.Ordinal) == 0) },
+                new (){ Label = "Polling Rate", Name = PollingRate, State = ParserState.Polling, Unchanged = (String.Compare(PollingRate, ParserState.Polling, StringComparison.Ordinal) == 0) },
+                new (){ Label = "Filters", Name = Filters, State = ParserState.Filters, Unchanged = AreFiltersEqual(Filters, ParserState.Filters) },
             };
             var changedParams = parameters.Where(p => !p.Unchanged).ToList();
             var unchangedParams = parameters.Where(p => p.Unchanged).ToList();
@@ -30,7 +44,7 @@
                     <MudListItem>
                         <div class="d-flex flex-column">
                             <MudText Typo="Typo.subtitle1">@parameter.Label</MudText>
-                            @if (string.IsNullOrEmpty(parameter.State))
+                            @if ((parameter.State is string stateString && !string.IsNullOrEmpty(stateString)) || (parameter.State is List<object> stateList && stateList.Any()))
                             {
                                 <MudText Typo="Typo.body2">From: None</MudText>
                             }

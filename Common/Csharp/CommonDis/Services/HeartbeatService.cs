@@ -22,7 +22,7 @@ public class HeartbeatService : BackgroundService
         _parserName = name;
         _parserUrl = parserUrl;
         _heartbeatInterval = interval;
-        _ = RegisterParser(_httpClient, _baseUrl + $"/Parser/{_parserName}/register", new ParserModel(url: _parserUrl), _logger);
+        _ = RegisterParser(_httpClient, _baseUrl + $"/Parser/{_parserName}/register", new() {Url = _parserUrl}, _logger);
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -38,7 +38,7 @@ public class HeartbeatService : BackgroundService
                 _logger.LogInformation("Heartbeat sent. Status: {StatusCode}", response.StatusCode);
                 if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
                 {
-                    await RegisterParser(_httpClient,_baseUrl + $"/Parser/{_parserName}/register", new ParserModel(url: _parserUrl), _logger);
+                    await RegisterParser(_httpClient,_baseUrl + $"/Parser/{_parserName}/register", new(){ Url = _parserUrl}, _logger);
                 }
             }
             catch (Exception ex)

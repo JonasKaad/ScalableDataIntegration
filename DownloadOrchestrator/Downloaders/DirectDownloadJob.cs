@@ -1,6 +1,7 @@
 using Azure.Storage.Blobs;
 using CommonDis.Models;
 using CommonDis.Services;
+using DownloadOrchestrator.Services;
 
 namespace DownloadOrchestrator.Downloaders;
 
@@ -8,7 +9,7 @@ public class DirectDownloadJob : BaseDownloaderJob
 {
     private readonly ILogger<DirectDownloadJob> _logger;
 
-    public DirectDownloadJob(ILogger<DirectDownloadJob> logger, StatisticsDatabaseService statisticsContext, SecretService secretService) : base(logger, statisticsContext, secretService)
+    public DirectDownloadJob(ILogger<DirectDownloadJob> logger, StatisticsDatabaseService statisticsContext, SecretService secretService, FilterRegistry filterRegistry) : base(logger, statisticsContext, secretService, filterRegistry)
     {
         _logger = logger;
     }

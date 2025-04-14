@@ -27,16 +27,23 @@ import parser_pb2
 # noinspection PyUnresolvedReferences
 import parser_pb2_grpc
 
+### Classes
+class MyObject:
+    def __init__(self, name, parameters, url):
+        self.name = name
+        self.parameters = parameters
+        self.url = url
+
 ### REGISTRY
 async def send_heartbeat(type="Parser"):
-    baseurl = os.getenv("BASE_URL", "http://do.jonaskaad.com")
+    baseurl = os.getenv("BASE_URL")
     parser_name = os.getenv("PARSER_NAME")
     url = f"{baseurl}/{type}/{parser_name}/heartbeat"
     async with aiohttp.ClientSession() as session:
         async with session.post(url) as response:
             return response.status == 200
 
-async def heartbeat_scheduler(type="Parser"):
+async def heartbeat_scheduler(type="Parser", filter_params=None):
     alive = True
     while True:
         await asyncio.sleep(1 * 60)
@@ -47,25 +54,33 @@ async def heartbeat_scheduler(type="Parser"):
                 print(e)
         else:
             try:
-                alive = await register(type)
+                alive = await register(type, filter_params)
             except Exception as e:
                 print(e)
 
-async def register(type="Parser"):
+async def register(type="Parser", filter_params=None):
     async with aiohttp.ClientSession() as session:
-        baseurl = os.getenv("BASE_URL", "http://do.jonaskaad.com")
-        parser_name = os.getenv("PARSER_NAME")
-        posturl = f"{baseurl}/{type}/{parser_name}/register"
+        baseurl = os.getenv("BASE_URL")
+        name = os.getenv("PARSER_NAME")
+        url = f"{baseurl}/{type}/{name}/register"
+        if type == "Filter":
+            data = {
+                "name": name,
+                "parameters": filter_params,
+                "url": os.getenv("PARSER_URL")
+            }
+        else:
+            data = {
+                "url": os.getenv("PARSER_URL"),
+            }
+        print(f"Registering at {url} with data: {json.dumps(data)}")
         try:
-            if type == "Parser":
-                json_data = {
-                    'url': os.getenv("PARSER_URL"),
-                }
-            else :
-                json_data = os.getenv("PARSER_URL")
-            async with session.post(posturl, json=json_data) as response:
+            headers = {'Content-Type': 'application/json'}
+            async with session.post(url, json=data, headers=headers) as response:
+                print(f"Response status: {response.status}")
                 return response.status == 200
         except aiohttp.ClientConnectorError:
+            print("failed to connect")
             return False
 
 async def init_parser(injected_loop):
@@ -79,12 +94,12 @@ async def init_parser(injected_loop):
             print("Failed to register, retrying in 10 seconds...")
             await asyncio.sleep(10)
 
-async def init_filter(injected_loop):
+async def init_filter(injected_loop, parameters):
     registered = False
     while not registered:
-        registered = await register("Filter")
+        registered = await register("Filter", parameters)
         if registered:
-            injected_loop.create_task(heartbeat_scheduler("Filter"))
+            injected_loop.create_task(heartbeat_scheduler("Filter", parameters))
             return
         else:
             print("Failed to register, retrying in 10 seconds...")

@@ -1,7 +1,9 @@
 using System.ComponentModel;
+using CommonDis.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using MudBlazor;
+using MudBlazor.Charts;
 using SkyPanel.Components.Dialogs;
 using SkyPanel.Components.Services;
 using SkyPanel.Utils;
@@ -33,6 +35,8 @@ public partial class ConfigurationPanel : ComponentBase
     private string Username { get; set; } = string.Empty;
     private string Password { get; set; } = string.Empty;
     private string PlaceholderText { get; set; } = "No Secret Selected";
+    
+    private List<FilterDto> CurrentFilters { get; set; } = new List<FilterDto>();
     
     // Properties for the polling frequency selector
     private int _activeTabIndex = 0;
@@ -224,6 +228,11 @@ public partial class ConfigurationPanel : ComponentBase
         // Update UI components with values from ParserState
         UrlValue = ParserState.DownloadUrl;
         BackupUrlValue = ParserState.BackupUrl;
+        CurrentFilters = ParserState.Filters.Select(f => new FilterDto
+        {
+            Name = f.Name,
+            Parameters = new Dictionary<string, string>(f.Parameters)
+        }).ToList();
         if (ParserState.ParserIsNotSelected())
         {
             // Reset to default values when no parser is selected
@@ -238,21 +247,22 @@ public partial class ConfigurationPanel : ComponentBase
             // Parse polling value when a parser is selected
             ParsePollingValue(ParserState.Polling);
         }
-        await CheckForCredentials(ParserState.SecretName);
-        
+        _isLoading = true;
         StateHasChanged();
+    
+        try
+        {
+            await CheckForCredentials(ParserState.SecretName);
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
+        
     }
     
     private string _parserNameSelection = string.Empty;
-    
-    private async Task CheckForCredentials(string parserSecret)
-    {
-        var secret = await CredentialsService.GetSecret(parserSecret);
-        _secretName = parserSecret ?? "";
-        Username = secret.TokenName ?? "";
-        Password = secret.Token ?? "";
-        StateHasChanged();
-    }
     
     private Task OpenSecretManagementDialog()
     {
@@ -266,6 +276,23 @@ public partial class ConfigurationPanel : ComponentBase
 
         return DialogService.ShowAsync<CredentialsDialog>("Secret Management", parameters, options);
     }
+
+    private async Task OpenFilterDialogAsync()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.ExtraLarge, FullWidth = true };
+        var parameters = new DialogParameters<FilterConfiguration>
+        {
+            { x => x.SelectedFilters, CurrentFilters }
+        };
+        var dialogResult = await DialogService.ShowAsync<FilterConfiguration>("Filter configuration", parameters, options);
+        
+        var result = await dialogResult?.Result;
+        if (result?.Data is List<FilterDto> updatedFilters)
+        {
+            CurrentFilters = updatedFilters;
+            Snackbar.Add($"Filters updated for {ParserState.ParserName}", Severity.Success);
+        }
+    }
     
     private async Task UpdateDialogAsync()
     {
@@ -276,7 +303,8 @@ public partial class ConfigurationPanel : ComponentBase
             { x => x.Url, UrlValue},
             { x => x.BackupUrl, BackupUrlValue},
             { x => x.SecretName, SecretName},
-            { x => x.PollingRate, PollingValue}
+            { x => x.PollingRate, PollingValue},
+            { x => x.Filters, CurrentFilters}
         };
         var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small, FullWidth = true };
         var dialogResult = await (await DialogService.ShowAsync<UpdateDialog>("Update confirmation", parameters, options)).Result;
@@ -361,9 +389,17 @@ public partial class ConfigurationPanel : ComponentBase
         {
             changes.Add($"Polling rate changed from '{ParserState.Polling ?? "empty"}' to '{pollingRateToSend}'");
         }
+
+        var filters = CurrentFilters;
+        if (!AreFiltersEqual(filters, ParserState.Filters))
+        {
+            var oldFilterNames = string.Join(", ",CurrentFilters.Select(f => f.Name));
+            var newFilterNames = string.Join(", ",filters.Select(f => f.Name));
+            changes.Add($"Filters changed from '{oldFilterNames}' to '{newFilterNames}'");
+        }
         
         var response = await OrchestratorClientService.ConfigureDownloader(ParserState.ParserName, 
-            urlValueToSend, backupUrlValueToSend, secretNameToSend, pollingRateToSend);
+            urlValueToSend, backupUrlValueToSend, secretNameToSend, pollingRateToSend, filters);
         if (response)
         {
             var authState = await AuthenticationStateTask;
@@ -387,11 +423,39 @@ public partial class ConfigurationPanel : ComponentBase
                     user, ParserState.ParserName);
             }
             Snackbar.Add("Successfully updated configuration", Severity.Success);
+            _ = UpdateFromParserState();
         }
         else
         {
             Snackbar.Add("Failed updating configuration", Severity.Error);
         }
+    }
+    
+    private bool AreFiltersEqual(List<FilterDto> list1, List<FilterDto> list2)
+    {
+        if (list1.Count != list2.Count)
+            return false;
+        
+        for (int i = 0; i < list1.Count; i++)
+        {
+            if (list1[i].Name != list2[i].Name)
+                return false;
+            
+            // Compare parameters if needed
+            var params1 = list1[i].Parameters;
+            var params2 = list2[i].Parameters;
+        
+            if (params1.Count != params2.Count)
+                return false;
+            
+            foreach (var key in params1.Keys)
+            {
+                if (!params2.ContainsKey(key) || params1[key] != params2[key])
+                    return false;
+            }
+        }
+    
+        return true;
     }
 
     private async Task TestConnection()
@@ -421,8 +485,10 @@ public partial class ConfigurationPanel : ComponentBase
         
         pollingRateToSend = PollingValue; 
         
+        var filters = ParserState.Filters;
+        
         var response = await OrchestratorClientService.TestConnection(ParserState.ParserName, 
-            urlValueToSend, backupUrlValueToSend, secretNameToSend, pollingRateToSend);
+            urlValueToSend, backupUrlValueToSend, secretNameToSend, pollingRateToSend, filters);
         
         switch (response.Count)
         {
@@ -447,12 +513,45 @@ public partial class ConfigurationPanel : ComponentBase
     }
 
 
+    private bool _waitingForSecret = false;
+    private bool _isLoading = false;
+    
+    private async Task CheckForCredentials(string parserSecret)
+    {
+        _isLoading = true;
+        StateHasChanged();
+    
+        try 
+        {
+            var secret = await CredentialsService.GetSecret(parserSecret);
+            _secretName = parserSecret ?? "";
+            Username = secret.TokenName ?? "";
+            Password = secret.Token ?? "";
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+    
+    
     private async Task OnParserChanged()
     {
         if (string.IsNullOrEmpty(ParserState.ParserName)) return;
-        var secretExists = await CredentialsService.HasSecret(ParserState.SecretName);
-        PlaceholderText = !secretExists ? "No Secret Found!" : "No Secret Selected";
+        _isLoading = true;
         StateHasChanged();
+        try
+        {
+            var secretExists = await CredentialsService.HasSecret(ParserState.SecretName);
+            _waitingForSecret = false;
+            PlaceholderText = !secretExists ? "No Secret Found!" : "No Secret Selected";
+        }
+        finally
+        {
+            _isLoading = false; 
+            StateHasChanged();
+        }
     }
     
 }

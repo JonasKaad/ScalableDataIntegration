@@ -1,0 +1,129 @@
+@using Cropper.Blazor.Components
+
+<MudGrid Class="pa-4" Style="height: 100%">
+    <MudItem xs="12" md="6">
+        <MudPaper Class="pa-4" Elevation="3" Style="height: 100%; display: flex; flex-direction: column;">
+            <MudText Typo="Typo.h5" Class="mb-4">Available Filters</MudText>
+
+            @if (isLoading)
+            {
+                <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-4" />
+            }
+            else if (!availableFilters.Any())
+            {
+                <MudAlert Severity="Severity.Info" Dense="true">No filters available.</MudAlert>
+            }
+            else
+            {
+                <div style="flex-shrink: 0;">
+                    <MudTextField @bind-Value="searchString" Placeholder="Search filters..." Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mb-4"/>
+                </div>
+
+                <div style="overflow-y: auto; flex-grow: 1; display: flex; align-items: flex-start;">
+                    @if (!filteredAvailableFilters.Any())
+                    {
+                        <MudAlert Severity="Severity.Info" Dense="true">No filters available.</MudAlert>
+                    }
+                    else
+                    {
+                        <MudTable Items="@filteredAvailableFilters" Dense="true" Hover="true" FixedHeader="true" Style="width: 100%;">
+                            <HeaderContent>
+                                <MudTh>Filter Name</MudTh>
+                                <MudTh>Action</MudTh>
+                            </HeaderContent>
+                            <RowTemplate>
+                                <MudTd DataLabel="Filter Name">@context.Name</MudTd>
+                                <MudTd DataLabel="Action">
+                                    <MudIconButton
+                                        Icon="@Icons.Material.Filled.Add"
+                                        Color="Color.Success"
+                                        Size="Size.Small"
+                                        OnClick="@(() => AddFilter(context))"/>
+                                </MudTd>
+                            </RowTemplate>
+                        </MudTable>
+                    }
+                </div>
+            }
+        </MudPaper>
+    </MudItem>
+
+    <MudItem xs="12" md="6">
+        <MudPaper Class="pa-4" Elevation="3" Style="height: 100%; display: flex; flex-direction: column;">
+            <MudText Typo="Typo.h5" Class="mb-4">Selected Filters</MudText>
+            <div style="overflow-y: auto; flex-grow: 1;">
+                <MudDropContainer T="DropItem" @ref="_dropContainer" Items="@dropItems" ItemsSelector="@((item, id) => item.id == id)" ItemDropped="ItemUpdated">
+                    <MudDropZone T="DropItem" Identifier="0" Class="d-flex flex-column gap-2" AllowReorder="true">
+                        <ChildContent>
+                            @if (!dropItems.Any())
+                            {
+                                <MudAlert Severity="Severity.Info" Dense="true" Class="my-2">
+                                    No filters selected. Select filters from the available list.
+                                </MudAlert>
+                            }
+                        </ChildContent>
+                        <ItemRenderer>
+                            <MudPaper Elevation="2" Class="pa-2 d-flex align-center" Style="cursor: move;">
+                                <MudIcon Icon="@Icons.Material.Filled.DragIndicator" Class="mr-2" />
+                                <div class="flex-grow-1">@context.Filter.Name</div>
+                                <MudIconButton Icon="@Icons.Material.Filled.Settings"
+                                               Color="Color.Default"
+                                               Size="Size.Small"
+                                               OnClick="@(() => OpenFilterSettings(context.Filter))" />
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                               Color="Color.Error"
+                                               Size="Size.Small"
+                                               OnClick="@(() => RemoveFilter(context.Filter))" />
+                            </MudPaper>
+                            @if (expandedFilters.FirstOrDefault(f => f.Name == context.Filter.Name) is {} filter)
+                            {
+                                @if (filter.Parameters.ContainsKey("startX") && filter.Parameters.ContainsKey("startY"))
+                                {
+                                    <MudPaper Class="pa-2" Elevation="1" Style=@(hasUploadedImage ? "height: 500px" : "height: 100px")>
+                                        <MudText Typo="Typo.body1" Class="mb-2">Choose a sample image to set bounds for OCR</MudText>
+                                        <InputFile OnChange="HandleImageUpload" />
+                                        @if (!string.IsNullOrEmpty(uploadedImageSrc))
+                                        {
+                                            <div style="height: 380px" class="ma-1">
+                                                <CropperComponent @ref="_cropper" Class="cropper-example" Src="@uploadedImageSrc" Options="CropperOptions" />
+                                            </div>
+                                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveCrop">Save</MudButton>
+                                        }
+                                    </MudPaper>
+                                }
+                                else
+                                {
+                                    <MudPaper Class="pa-2" Elevation="1" Style="@CalculateParameterHeight(filter.Parameters.Count)">
+                                        @foreach (var param in filter.Parameters)
+                                        {
+                                            <MudTextField T="string" @bind-Value="filter.Parameters[param.Key]" Label="@param.Key" Variant="Variant.Outlined"/>
+                                        }
+                                    </MudPaper>
+                                }
+                            }
+                        </ItemRenderer>
+                    </MudDropZone>
+                </MudDropContainer>
+            </div>
+        </MudPaper>
+    </MudItem>
+
+    <MudItem xs="12" Class="d-flex justify-end mt-4">
+        <MudButton Variant="Variant.Text"
+                   Color="Color.Default"
+                   OnClick="@(() => MudDialog?.Cancel())"
+                   Class="mr-2">Cancel</MudButton>
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   OnClick="SaveFilters">Save Filters</MudButton>
+
+    </MudItem>
+</MudGrid>
+
+<style>
+    .cropper-example {
+        max-width: 100%;
+        width: 100%;
+    }
+</style>
