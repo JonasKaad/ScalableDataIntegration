@@ -159,61 +159,57 @@ public partial class RoleManagement
             { x => x.RolesToAdd, auditRoleNamesToAdd },
         };
         var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small, FullWidth = true };
-        var dialogResult = await (await DialogService.ShowAsync<ConfirmationDialog>("Confirm roles", parameters, options)).Result;
+        var dialogResult = await (await DialogService.ShowAsync<ConfirmationDialog>("Update Roles", parameters, options)).Result;
         var result = dialogResult?.Data as string ?? string.Empty;
         
         if (result == "update")
         {
-            Console.WriteLine("Upxated!!");
-            return;
-        }
-        
-        
-        if (rolesToAdd.Length > 0)
-        {
-            var addRoleData = new RoleData { roles = rolesToAdd };
-            var addSuccess = await OrchestratorClient.UpdateUserRoles(_selectedUser.UserId, addRoleData);
-            if (!addSuccess)
+            if (rolesToAdd.Length > 0)
             {
-                Snackbar.Add("Failed to add roles", Severity.Error);
-                success = false;
-            }
-        }
-        
-        // Remove roles if needed
-        if (rolesToRemove.Length > 0)
-        {
-            var removeRoleData = new RoleData { roles = rolesToRemove };
-            var removeSuccess = await OrchestratorClient.RemoveUserRole(_selectedUser.UserId, removeRoleData);
-            if (!removeSuccess)
-            {
-                Snackbar.Add("Failed to remove roles", Severity.Error);
-                success = false;
-            }
-        }
-        if (success)
-        {
-            
-            var authState = await AuthenticationStateTask;
-            var authUser = authState.User;
-            var user = RoleUtil.GetUserEmail(authUser);
-            
-            // Detailed entry for adding roles
-            foreach (var role in auditRoleNamesToAdd)
-            {
-                _logger.LogInformation( "[AUDIT] {User} added role {Role} to {TargetUser}", user, role, _selectedUser.Email);
+                var addRoleData = new RoleData { roles = rolesToAdd };
+                var addSuccess = await OrchestratorClient.UpdateUserRoles(_selectedUser.UserId, addRoleData);
+                if (!addSuccess)
+                {
+                    Snackbar.Add("Failed to add roles", Severity.Error);
+                    success = false;
+                }
             }
             
-            // Detailed entry for removing roles
-            foreach (var role in auditRoleNamesToRemove)
+            // Remove roles if needed
+            if (rolesToRemove.Length > 0)
             {
-                _logger.LogInformation( "[AUDIT] {User} removed role {Role} from {TargetUser}", user, role, _selectedUser.Email);
+                var removeRoleData = new RoleData { roles = rolesToRemove };
+                var removeSuccess = await OrchestratorClient.RemoveUserRole(_selectedUser.UserId, removeRoleData);
+                if (!removeSuccess)
+                {
+                    Snackbar.Add("Failed to remove roles", Severity.Error);
+                    success = false;
+                }
             }
-            
-            Snackbar.Add("User roles updated successfully", Severity.Success);
-            _originalUserRoles = new List<Role>(_userRoles);
-            _rolesChanged = false;
-            StateHasChanged();
+            if (success)
+            {
+                
+                var authState = await AuthenticationStateTask;
+                var authUser = authState.User;
+                var user = RoleUtil.GetUserEmail(authUser);
+                
+                // Detailed entry for adding roles
+                foreach (var role in auditRoleNamesToAdd)
+                {
+                    _logger.LogInformation( "[AUDIT] {User} added role {Role} to {TargetUser}", user, role, _selectedUser.Email);
+                }
+                
+                // Detailed entry for removing roles
+                foreach (var role in auditRoleNamesToRemove)
+                {
+                    _logger.LogInformation( "[AUDIT] {User} removed role {Role} from {TargetUser}", user, role, _selectedUser.Email);
+                }
+                
+                Snackbar.Add("User roles updated successfully", Severity.Success);
+                _originalUserRoles = new List<Role>(_userRoles);
+                _rolesChanged = false;
+                StateHasChanged();
+            }
         }
     }
 
