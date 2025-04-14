@@ -2,6 +2,7 @@ using CommonDis.Models.Auth0;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using MudBlazor;
+using SkyPanel.Components.Dialogs;
 using SkyPanel.Components.Services;
 using SkyPanel.Utils;
 
@@ -149,6 +150,24 @@ public partial class RoleManagement
 
         var rolesToRemove = rolesToRemoveObjects.Select(r => r.id).ToArray();
         var auditRoleNamesToRemove = rolesToRemoveObjects.Select(r => r.name).ToArray();
+        
+        
+        var parameters = new DialogParameters<ConfirmationDialog>
+        {
+            { x => x.User, _selectedUser.Name },
+            { x => x.RolesToRemove, auditRoleNamesToRemove },
+            { x => x.RolesToAdd, auditRoleNamesToAdd },
+        };
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+        var dialogResult = await (await DialogService.ShowAsync<ConfirmationDialog>("Confirm roles", parameters, options)).Result;
+        var result = dialogResult?.Data as string ?? string.Empty;
+        
+        if (result == "update")
+        {
+            Console.WriteLine("Upxated!!");
+            return;
+        }
+        
         
         if (rolesToAdd.Length > 0)
         {
