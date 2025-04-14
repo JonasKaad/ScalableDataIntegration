@@ -79,6 +79,7 @@ builder.Services
         var connectionString = Env.GetString("BLOB_CONNECTION_STRING");
         return new BlobManagerService(connectionString);
     })
+    .AddHostedService<ParserRoleSyncService>()
     .AddDbContext<StatisticsDatabaseService>(options =>
     {
         // Npgsql formatted connection string
