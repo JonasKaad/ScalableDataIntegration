@@ -63,9 +63,6 @@ async def register(type="Parser"):
                 }
             else :
                 json_data = os.getenv("PARSER_URL")
-
-            print(f"Registering {type} with URL: {json_data}")
-            print(f"POST URL: {posturl}")
             async with session.post(posturl, json=json_data) as response:
                 return response.status == 200
         except aiohttp.ClientConnectorError:
