@@ -28,13 +28,19 @@ public class FilterController : ControllerBase
     [HttpGet]
     public ActionResult<FilterDto> GetFilterData(string filter)
     {
-        return _filterRegistry.GetService(filter);
+        var data = _filterRegistry.GetService(filter);
+        if (data is null)
+        {
+            return BadRequest("Filter not found");
+        }
+        return data;
     }
 
     [Route("{filter}/register")]
     [HttpPost]
     public ActionResult RegisterFilter(string filter, [FromBody] FilterData settings)
     {
+        _logger.LogInformation("{Service} with {Parameters} at {Url} registered", settings.Name, settings.Parameters, settings.Url);
         _filterRegistry.RegisterService(filter, settings);
         return Ok($"Filter {filter} has been registered.");
     }

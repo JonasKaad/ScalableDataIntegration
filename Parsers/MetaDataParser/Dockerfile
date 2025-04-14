@@ -7,15 +7,18 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["MetaDataParser.csproj", "./"]
-RUN dotnet restore "MetaDataParser.csproj"
+COPY ["./Common/Csharp/CommonDis/CommonDis.csproj", "./Common/Csharp/CommonDis/"]
+COPY ["./Parsers/MetaDataParser/MetaDataParser.csproj", "./Parsers/MetaDataParser/"]
+COPY ["./GeneratedClients/csharp/Parser.cs", "./GeneratedClients/csharp/"]
+COPY ["./GeneratedClients/csharp/ParserGrpc.cs", "./GeneratedClients/csharp/"]
+RUN dotnet restore "./Parsers/MetaDataParser/MetaDataParser.csproj"
 COPY . .
 WORKDIR "/src/"
-RUN dotnet build "MetaDataParser.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "./Parsers/MetaDataParser/MetaDataParser.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "MetaDataParser.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./Parsers/MetaDataParser/MetaDataParser.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app

@@ -6,3 +6,4 @@ protobuf~=5.29.0
 common~=0.1.2
 azure-identity~=1.12.0
 azure-storage-blob~=12.10.0
+datadog~=0.51.0

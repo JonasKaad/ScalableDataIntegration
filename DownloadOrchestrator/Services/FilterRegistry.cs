@@ -1,11 +1,16 @@
 using CommonDis.Models;
-using DownloadOrchestrator.Models;
 
 namespace DownloadOrchestrator.Services;
 
 public class FilterRegistry : RegistryService
 {
     private Dictionary<string, FilterData> _services = new Dictionary<string, FilterData>();
+    private ILogger<FilterRegistry> _logger;
+    
+    public FilterRegistry(ILogger<FilterRegistry> logger)
+    {
+        _logger = logger;
+    }
 
     public string GetFilterUrl(string filterName)
     {
@@ -34,7 +39,7 @@ public class FilterRegistry : RegistryService
         {
             if (service != settings)
             {
-                throw new Exception($"{serviceName} exists with different settings");
+                _logger.LogInformation("Registering {Service}, though different settings were detected", serviceName);
             }
 
             return;
@@ -53,7 +58,7 @@ public class FilterRegistry : RegistryService
         }
         else
         {
-            throw new KeyNotFoundException($"{serviceName} not found");
+            _logger.LogInformation("{Service} not found", serviceName);
         }
     }
 }

@@ -4,6 +4,8 @@ import datetime
 import json
 import os
 import sys
+from datadog import initialize, api
+initialize()
 
 import grpc
 from azure.identity.aio import DefaultAzureCredential
@@ -51,12 +53,13 @@ async def heartbeat_scheduler(type="Parser", filter_params=None):
             try:
                 alive = await send_heartbeat(type)
             except Exception as e:
-                print(e)
+
+                dd_warning("Failed sending heartbeat", str(e))
         else:
             try:
                 alive = await register(type, filter_params)
             except Exception as e:
-                print(e)
+                dd_warning("Failed to re-register", str(e))
 
 async def register(type="Parser", filter_params=None):
     async with aiohttp.ClientSession() as session:
@@ -78,6 +81,8 @@ async def register(type="Parser", filter_params=None):
             headers = {'Content-Type': 'application/json'}
             async with session.post(url, json=data, headers=headers) as response:
                 print(f"Response status: {response.status}")
+                if response.status != 200:
+                    dd_error("Failed to register", f"Tried to register at {url} with data: {json.dumps(data)}")
                 return response.status == 200
         except aiohttp.ClientConnectorError:
             print("failed to connect")
@@ -116,8 +121,8 @@ def get_data(raw_data, format_type):
             if format_type == "str":
                 try:
                     relevant.append(data.decode('utf-8').split(";"))
-                except UnicodeDecodeError:
-                    print(f"Warning: Could not decode part of data as UTF-8")
+                except UnicodeDecodeError as e:
+                    dd_warning(f"Warning: Could not decode part of data as UTF-8", str(e))
                     raw.append(data)
             elif format_type == "img":
                 ##TODO: Do some more checks to see if data is actually image
@@ -143,11 +148,14 @@ def get_next_url(urls):
 
 def read_params(params_list, relevant_string=""):
     relevant = {}
-    for parameter in params_list:
-        json_acceptable_string = parameter.replace("'", "\"")
-        if relevant_string in json_acceptable_string:
-            relevant = json.loads(json_acceptable_string)
-            params_list.remove(parameter)
+    try:
+        for parameter in params_list:
+            json_acceptable_string = parameter.replace("'", "\"")
+            if relevant_string in json_acceptable_string:
+                relevant = json.loads(json_acceptable_string)
+                params_list.remove(parameter)
+    except Exception as e:
+        dd_error("Failed to read parameters", str(e))
     return relevant, ";".join(params_list)
 
 ### GRPC
@@ -172,10 +180,12 @@ async def send_to_next_url(next_url, raw_data, parameters, urls):
             else:
                 success = False
                 msg = "Filter failed sending data to next url"
+                dd_error("Failed to send data to next URL", str(e))
     except Exception as e:
         print(f"gRPC connection error: {e}")
         success = False
         msg = "gRPC connection error"
+        dd_error("Failed to send data to next URL", str(e))
 
     return success, msg
 
@@ -210,3 +220,21 @@ def azure_cred_checker():
     account_url = "https://parserstorage.blob.core.windows.net/"
     blob_client = BlobServiceClient(account_url, credential)
     return blob_client
+
+
+## Datadog
+
+def dd_error(title: str, text: str):
+    title = f"{os.getenv('PARSER_NAME')} - {title}"
+    tags = {"service": os.getenv("PARSER_NAME")}
+    api.Event.create(title=title, text=text, tags=tags, alert_type="error", priority="normal")
+
+def dd_warning(title: str, text: str):
+    title = f"{os.getenv('PARSER_NAME')} - {title}"
+    tags = {"service": os.getenv("PARSER_NAME")}
+    api.Event.create(title=title, text=text, tags=tags, alert_type="warning", priority="normal")
+
+def dd_info(title: str, text: str):
+    title = f"{os.getenv('PARSER_NAME')} - {title}"
+    tags = {"service": os.getenv("PARSER_NAME")}
+    api.Event.create(title=title, text=text, tags=tags, alert_type="info", priority="normal")
