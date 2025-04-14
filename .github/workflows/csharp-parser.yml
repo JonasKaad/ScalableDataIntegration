@@ -35,11 +35,11 @@ jobs:
         # ClientId of the Azure Service principal created.
         client-id: ${{ secrets.AZURE_CLIENT_ID }}
         # TenantId of the Azure Service principal created.
-        tenant-id: ${{ secrets.AZURE_TENNANT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
         # Azure subscriptionId
         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         # The type of authentication. Supported values are SERVICE_PRINCIPAL, IDENTITY. Default value is SERVICE_PRINCIPAL
-        auth-type: IDENTITY
+        auth-type: SERVICE_PRINCIPAL
           
     - name: Azure Container Apps Deploy
       uses: Azure/container-apps-deploy-action@v2
