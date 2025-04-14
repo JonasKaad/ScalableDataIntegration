@@ -2,6 +2,7 @@ using CommonDis.Models.Auth0;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using MudBlazor;
+using SkyPanel.Components.Services;
 using SkyPanel.Utils;
 
 namespace SkyPanel.Components.Pages;
@@ -14,6 +15,10 @@ public partial class RoleManagement
     {
         _logger = logger;
     }
+    [Inject]
+    private IServiceScopeFactory ScopeFactory { get; set; } = default!;
+
+    private bool _isSyncing = false;
 
     [CascadingParameter] 
     private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
@@ -189,6 +194,40 @@ public partial class RoleManagement
             Snackbar.Add("User roles updated successfully", Severity.Success);
             _originalUserRoles = new List<Role>(_userRoles);
             _rolesChanged = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task SyncLatestRoles()
+    {
+        try
+        {
+            _isSyncing = true;
+            StateHasChanged();
+        
+            using var scope = ScopeFactory.CreateScope();
+            var orchestratorClient = scope.ServiceProvider.GetRequiredService<OrchestratorClientService>();
+            var syncService = scope.ServiceProvider.GetRequiredService<ParserRoleSyncService>();
+        
+            await syncService.SyncParserRoles(orchestratorClient);
+        
+            // Refresh roles after sync
+            await LoadAllRoles();
+            if (_selectedUser != null)
+            {
+                await LoadUserRoles();
+            }
+        
+            Snackbar.Add("Parser roles synchronized successfully", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error syncing parser roles");
+            Snackbar.Add("Failed to sync parser roles", Severity.Error);
+        }
+        finally
+        {
+            _isSyncing = false;
             StateHasChanged();
         }
     }

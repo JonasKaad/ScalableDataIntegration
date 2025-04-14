@@ -80,6 +80,7 @@ builder.Services
         return new BlobManagerService(connectionString);
     })
     .AddHostedService<ParserRoleSyncService>()
+    .AddTransient<ParserRoleSyncService>()
     .AddDbContext<StatisticsDatabaseService>(options =>
     {
         // Npgsql formatted connection string
