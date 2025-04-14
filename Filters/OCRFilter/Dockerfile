@@ -12,8 +12,8 @@ COPY GeneratedClients/python/ /app/GeneratedClients/python
 COPY Common/Python/ /app/Common/Python
 
 # Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r /app/Filters/OCRFilter/requirements.txt
-RUN pip install --no-cache-dir -r /app/Common/Python/requirements.txt
+RUN pip install  -r /app/Filters/OCRFilter/requirements.txt
+RUN pip install  -r /app/Common/Python/requirements.txt
 
 # Expose the port that the gRPC server will be listening on
 EXPOSE 50051
