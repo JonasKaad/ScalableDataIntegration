@@ -99,10 +99,10 @@ async def serve():
         ParserServicer(), server
     )
 
-    # Listen on port 50054
-    server.add_insecure_port('[::]:50054')
+    # Listen on port 50051
+    server.add_insecure_port('[::]:50051')
     await server.start()
-    print(f"Starting server on {50054}")
+    print(f"Starting server on {50051}")
     await server.wait_for_termination()
 
 
