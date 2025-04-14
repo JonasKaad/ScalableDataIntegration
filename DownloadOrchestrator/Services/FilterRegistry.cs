@@ -61,4 +61,16 @@ public class FilterRegistry : RegistryService
             _logger.LogInformation("{Service} not found", serviceName);
         }
     }
+    
+    public new void RefreshService(string serviceName)
+    {
+        if (_services.ContainsKey(serviceName))
+        {
+            _serviceDateTimes[serviceName] = DateTime.Now;
+        }
+        else
+        {
+            throw new KeyNotFoundException($"{serviceName} not found");
+        }
+    }
 }
