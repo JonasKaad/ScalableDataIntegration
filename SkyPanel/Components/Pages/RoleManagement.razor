@@ -3,6 +3,7 @@
 @attribute [Authorize(Roles = "Admin")]
 @inject OrchestratorClientService OrchestratorClient
 @inject ISnackbar Snackbar
+@inject IDialogService DialogService
 
 
 <PageTitle>SkyPanel — Role Management</PageTitle>
@@ -195,7 +196,7 @@
                                 <MudButton
                                     Variant="Variant.Filled"
                                     Color="Color.Primary"
-                                    OnClick="SaveUserRoles">
+                                    OnClick="@(() => SaveUserRoles())">
                                     Save Changes
                                 </MudButton>
                             </div>
