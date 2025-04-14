@@ -286,4 +286,24 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
         }
         return [];
     }
+    
+    public async Task<bool> AddRole(Role role)
+    {
+        var client = httpClientFactory.CreateClient();
+        try
+        {
+            using StringContent jsonContent = new(
+                JsonSerializer.Serialize(role),
+                Encoding.UTF8,
+                "application/json");
+            using HttpResponseMessage response = await client.PostAsync($"{baseUrl}/Auth/add-role", jsonContent);
+            var returnStatusCode = response.StatusCode;
+            return returnStatusCode == HttpStatusCode.OK;
+        }
+        catch (Exception e)
+        {
+            logger.LogError("Failed to add role with error: {error}", e.Message);
+        }
+        return false;
+    }
 }
