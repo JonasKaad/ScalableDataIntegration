@@ -1,0 +1,41 @@
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <DialogContent>
+        <MudStack Row="true">
+            <MudText Typo="Typo.body1">Upload roles for:</MudText>
+            <MudText Typo="Typo.body1" Style="font-weight: bold">@User</MudText>
+        </MudStack>
+        <MudPaper Height="300px"
+                  Width="100%"
+                  Outlined="true">
+            <MudText Typo="Typo.h6">
+                Remove the following roles:
+            </MudText>
+            @foreach (var role in RolesToRemove)
+            {
+                <MudChip T="string"
+                         Icon="@Icons.Material.Filled.Description"
+                         Color="Color.Primary"
+                         Text="@role"
+                         tabindex="-1"/>
+            }
+            <MudText Typo="Typo.h6">
+                Add the following roles:
+            </MudText>
+            @foreach (var role in RolesToAdd)
+            {
+                <MudChip T="string"
+                         Icon="@Icons.Material.Filled.Description"
+                         Color="Color.Primary"
+                         Text="@role"
+                         tabindex="-1"/>
+            }
+        </MudPaper>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@DialogCancel" Variant="Variant.Filled">Cancel</MudButton>
+        <MudSpacer/>
+        <MudButton Color="@Color.Primary" OnClick="@DialogSubmit" Variant="Variant.Filled">Confirm</MudButton>
+    </DialogActions>
+</MudDialog>
