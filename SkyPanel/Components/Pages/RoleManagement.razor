@@ -85,8 +85,20 @@
 
         <MudItem xs="12" md="6">
             <MudPaper Class="pa-4" Elevation="3">
-                <MudText Typo="Typo.h5" Class="mb-4">User Roles</MudText>
-
+                <MudStack Row="true">
+                    <MudText Typo="Typo.h5" Class="mb-4">User Roles</MudText>
+                    <MudSpacer />
+                    <MudButton
+                        StartIcon="@Icons.Material.Filled.Sync"
+                        Variant="Variant.Filled"
+                        Size="Size.Medium"
+                        Color="Color.Primary"
+                        OnClick="SyncLatestRoles"
+                        Disabled="@_isSyncing">
+                        Sync Latest Roles
+                    </MudButton>
+                </MudStack>
+                    
                 @if (_selectedUser == null)
                 {
                     <MudAlert Severity="Severity.Info" Dense="true">Select a user to manage their roles.</MudAlert>
