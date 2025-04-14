@@ -28,8 +28,25 @@ jobs:
         file: ./Parsers/TestParser/Dockerfile
         push: true
         tags: parsers.azurecr.io/test-parser:${{ github.sha }}
-    - name: Add command to summary
-      run: |
-        echo "-----------------" >> $GITHUB_STEP_SUMMARY
-        echo "**Image pushed!** Run this in the terminal to deploy the new image: \`az containerapp update --name newdis-parser --resource-group ScalableDataIntegration --image parsers.azurecr.io/test-parser:${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
-        echo "-----------------" >> $GITHUB_STEP_SUMMARY
+
+    - name: Azure Login
+      uses: Azure/login@v2.3.0
+      with:
+        # ClientId of the Azure Service principal created.
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        # TenantId of the Azure Service principal created.
+        tenant-id: ${{ secrets.AZURE_TENNANT_ID }}
+        # Azure subscriptionId
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        # The type of authentication. Supported values are SERVICE_PRINCIPAL, IDENTITY. Default value is SERVICE_PRINCIPAL
+        auth-type: SERVICE_PRINCIPAL
+          
+    - name: Azure Container Apps Deploy
+      uses: Azure/container-apps-deploy-action@v2
+      with:
+        acrName: parsers
+        acrUsername: ${{ secrets.ACR_USERNAME }}
+        acrPassword: ${{ secrets.ACR_PASSWORD }}
+        imageToDeploy: parsers.azurecr.io/test-parser:${{ github.sha }}
+        containerAppName: newdis-parser 
+        resourceGroup: ScalableDataIntegration
