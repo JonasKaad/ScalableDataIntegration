@@ -1,8 +1,8 @@
 @using Cropper.Blazor.Components
 
-<MudGrid Class="pa-4" Style="height: 1000px">
+<MudGrid Class="pa-4" Style="height: 100%">
     <MudItem xs="12" md="6">
-        <MudPaper Class="pa-4" Elevation="3" Style="height: 850px; display: flex; flex-direction: column;">
+        <MudPaper Class="pa-4" Elevation="3" Style="height: 100%; display: flex; flex-direction: column;">
             <MudText Typo="Typo.h5" Class="mb-4">Available Filters</MudText>
 
             @if (isLoading)
@@ -50,64 +50,60 @@
     </MudItem>
 
     <MudItem xs="12" md="6">
-        <MudPaper Class="pa-4" Elevation="3" Style="height: 850px; display: flex; flex-direction: column;">
+        <MudPaper Class="pa-4" Elevation="3" Style="height: 100%; display: flex; flex-direction: column;">
             <MudText Typo="Typo.h5" Class="mb-4">Selected Filters</MudText>
             <div style="overflow-y: auto; flex-grow: 1;">
-                <MudDropContainer T="DropItem" @ref="_dropContainer" Items="@dropItems" ItemDropped="ItemUpdated">
-                    <ChildContent>
-                        <MudDropZone T="DropItem" Identifier="0" Class="d-flex flex-column gap-2" AllowReorder="true">
+                <MudDropContainer T="DropItem" @ref="_dropContainer" Items="@dropItems" ItemsSelector="@((item, id) => item.id == id)" ItemDropped="ItemUpdated">
+                    <MudDropZone T="DropItem" Identifier="0" Class="d-flex flex-column gap-2" AllowReorder="true">
+                        <ChildContent>
                             @if (!dropItems.Any())
                             {
                                 <MudAlert Severity="Severity.Info" Dense="true" Class="my-2">
                                     No filters selected. Select filters from the available list.
                                 </MudAlert>
                             }
-                            else
+                        </ChildContent>
+                        <ItemRenderer>
+                            <MudPaper Elevation="2" Class="pa-2 d-flex align-center" Style="cursor: move;">
+                                <MudIcon Icon="@Icons.Material.Filled.DragIndicator" Class="mr-2" />
+                                <div class="flex-grow-1">@context.Filter.Name</div>
+                                <MudIconButton Icon="@Icons.Material.Filled.Settings"
+                                               Color="Color.Default"
+                                               Size="Size.Small"
+                                               OnClick="@(() => OpenFilterSettings(context.Filter))" />
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                               Color="Color.Error"
+                                               Size="Size.Small"
+                                               OnClick="@(() => RemoveFilter(context.Filter))" />
+                            </MudPaper>
+                            @if (expandedFilters.FirstOrDefault(f => f.Name == context.Filter.Name) is {} filter)
                             {
-                                @foreach (var item in dropItems)
+                                @if (filter.Parameters.ContainsKey("startX") && filter.Parameters.ContainsKey("startY"))
                                 {
-                                    <MudPaper Elevation="2" Class="pa-2 d-flex align-center" Style="cursor: move;">
-                                        <MudIcon Icon="@Icons.Material.Filled.DragIndicator" Class="mr-2" />
-                                        <div class="flex-grow-1">@item.Filter.Name</div>
-                                        <MudIconButton Icon="@Icons.Material.Filled.Settings"
-                                                       Color="Color.Default"
-                                                       Size="Size.Small"
-                                                       OnClick="@(() => OpenFilterSettings(item.Filter))" />
-                                        <MudIconButton Icon="@Icons.Material.Filled.Delete"
-                                                       Color="Color.Error"
-                                                       Size="Size.Small"
-                                                       OnClick="@(() => RemoveFilter(item.Filter))" />
+                                    <MudPaper Class="pa-2" Elevation="1" Style=@(hasUploadedImage ? "height: 500px" : "height: 100px")>
+                                        <MudText Typo="Typo.body1" Class="mb-2">Choose a sample image to set bounds for OCR</MudText>
+                                        <InputFile OnChange="HandleImageUpload" />
+                                        @if (!string.IsNullOrEmpty(uploadedImageSrc))
+                                        {
+                                            <div style="height: 380px" class="ma-1">
+                                                <CropperComponent @ref="_cropper" Class="cropper-example" Src="@uploadedImageSrc" Options="CropperOptions" />
+                                            </div>
+                                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveCrop">Save</MudButton>
+                                        }
                                     </MudPaper>
-                                    @if (expandedFilters.FirstOrDefault(f => f.Name == item.Filter.Name) is {} filter)
-                                    {
-                                        @if (filter.Parameters.ContainsKey("startX") && filter.Parameters.ContainsKey("startY"))
+                                }
+                                else
+                                {
+                                    <MudPaper Class="pa-2" Elevation="1" Style="@CalculateParameterHeight(filter.Parameters.Count)">
+                                        @foreach (var param in filter.Parameters)
                                         {
-                                            <MudPaper Class="pa-2" Elevation="1" Style=@(hasUploadedImage ? "height: 500px" : "height: 100px")>
-                                            <MudText Typo="Typo.body1" Class="mb-2">Choose a sample image to set bounds for OCR</MudText>
-                                            <InputFile OnChange="HandleImageUpload" />
-                                            @if (!string.IsNullOrEmpty(uploadedImageSrc))
-                                            {
-                                                <div style="height: 380px" class="ma-1">
-                                                    <CropperComponent @ref="_cropper" Class="cropper-example" Src="@uploadedImageSrc" Options="CropperOptions" />
-                                                </div>
-                                                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveCrop">Save</MudButton>
-                                            }
-                                            </MudPaper>
+                                            <MudTextField T="string" @bind-Value="filter.Parameters[param.Key]" Label="@param.Key" Variant="Variant.Outlined"/>
                                         }
-                                        else
-                                        {
-                                            <MudPaper Class="pa-2" Elevation="1" Style="height: 100px">
-                                            @foreach (var param in filter.Parameters)
-                                            {
-                                                <MudTextField T="string" @bind-Value="filter.Parameters[param.Key]" Label="@param.Key" Variant="Variant.Outlined"/>
-                                            }
-                                            </MudPaper>
-                                        }
-                                    }
+                                    </MudPaper>
                                 }
                             }
-                        </MudDropZone>
-                    </ChildContent>
+                        </ItemRenderer>
+                    </MudDropZone>
                 </MudDropContainer>
             </div>
         </MudPaper>

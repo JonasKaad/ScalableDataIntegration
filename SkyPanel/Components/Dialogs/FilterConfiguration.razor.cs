@@ -107,6 +107,11 @@ public partial class FilterConfiguration : ComponentBase
             dropItems.Add(new DropItem() { Filter = filter });
             _dropContainer.Refresh();
             StateHasChanged();
+            Console.WriteLine($"Added filter: {filter.Name}");
+        }
+        else
+        {
+            Console.Write("LASDJAJDLK");
         }
     }
 
@@ -189,6 +194,11 @@ public partial class FilterConfiguration : ComponentBase
         _cropper.Options.SetDataOptions.X = x;
         _cropper.Options.SetDataOptions.Y = y;
     }
+    
+    private string CalculateParameterHeight(int count)
+    {
+        return $"height: {count * 75}px";
+    }
 
     private void ItemUpdated(MudItemDropInfo<DropItem> dropItem)
     {
@@ -210,5 +220,6 @@ public partial class FilterConfiguration : ComponentBase
     public class DropItem
     {
         public FilterDto Filter { get; set; } = new();
+        public string id { get; set; } = "0";
     }
 }
