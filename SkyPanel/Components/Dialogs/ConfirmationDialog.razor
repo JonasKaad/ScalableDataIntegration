@@ -2,40 +2,70 @@
 
 <MudDialog>
     <DialogContent>
-        <MudStack Row="true">
-            <MudText Typo="Typo.body1">Upload roles for:</MudText>
-            <MudText Typo="Typo.body1" Style="font-weight: bold">@User</MudText>
-        </MudStack>
-        <MudPaper Height="300px"
-                  Width="100%"
-                  Outlined="true">
-            <MudText Typo="Typo.h6">
-                Remove the following roles:
+        <MudPaper Elevation="0" Class="mb-4">
+            <MudText Typo="Typo.body2" Color="Color.Secondary">
+                You're about to update roles for <MudText Typo="Typo.body1" Color="Color.Primary" Style="display: inline; font-weight: 500;">@User</MudText>
             </MudText>
-            @foreach (var role in RolesToRemove)
+        </MudPaper>
+        
+        <MudPaper Elevation="0" Class="pa-4 rounded-lg" Style="max-height: 350px; overflow-y: auto;">
+            @if (RolesToRemove.Any())
             {
-                <MudChip T="string"
-                         Icon="@Icons.Material.Filled.Description"
-                         Color="Color.Primary"
-                         Text="@role"
-                         tabindex="-1"/>
+                <MudCard Elevation="0" Class="mb-4 pa-3" Style="border-left: 4px solid red; border-radius: 4px;">                    
+                    <MudText Typo="Typo.subtitle1" Color="Color.Error" Class="d-flex align-center gap-2 mb-2">
+                        <MudIcon Icon="@Icons.Material.Filled.RemoveCircle" Size="Size.Small" />
+                        Roles to be removed
+                    </MudText>
+                    <MudStack Row="true" Class="flex-wrap gap-2">
+                        @foreach (var role in RolesToRemove)
+                        {
+                            <MudChip T="string" Color="Color.Error" 
+                                    Variant="Variant.Outlined"
+                                    Size="Size.Medium"
+                                    Label="true"
+                                    Text="@role" />
+                        }
+                    </MudStack>
+                </MudCard>
             }
-            <MudText Typo="Typo.h6">
-                Add the following roles:
-            </MudText>
-            @foreach (var role in RolesToAdd)
+            
+            @if (RolesToAdd.Any())
             {
-                <MudChip T="string"
-                         Icon="@Icons.Material.Filled.Description"
-                         Color="Color.Primary"
-                         Text="@role"
-                         tabindex="-1"/>
+            <MudCard Elevation="0" Class="pa-3" Style="border-left: 4px solid #4CAF50; border-radius: 4px;">                    <MudText Typo="Typo.subtitle1" Color="Color.Success" Class="d-flex align-center gap-2 mb-2">
+                        <MudIcon Icon="@Icons.Material.Filled.AddCircle" Size="Size.Small" />
+                        Roles to be added
+                    </MudText>
+                    <MudStack Row="true" Class="flex-wrap gap-2">
+                        @foreach (var role in RolesToAdd)
+                        {
+                            <MudChip T="string"  Color="Color.Success" 
+                                    Variant="Variant.Outlined"
+                                    Size="Size.Medium" 
+                                    Label="true"
+                                    Text="@role" />
+                        }
+                    </MudStack>
+                </MudCard>
+            }
+            
+            @if (!RolesToRemove.Any() && !RolesToAdd.Any())
+            {
+                <MudAlert Severity="Severity.Info" Class="my-2">No role changes to apply.</MudAlert>
             }
         </MudPaper>
     </DialogContent>
     <DialogActions>
-        <MudButton OnClick="@DialogCancel" Variant="Variant.Filled">Cancel</MudButton>
-        <MudSpacer/>
-        <MudButton Color="@Color.Primary" OnClick="@DialogSubmit" Variant="Variant.Filled">Confirm</MudButton>
+        <MudButton OnClick="@DialogCancel" 
+                  Variant="Variant.Text" 
+                  Color="Color.Default">
+            Cancel
+        </MudButton>
+        <MudButton OnClick="@DialogSubmit" 
+                  Variant="Variant.Filled" 
+                  Color="Color.Primary"
+                  StartIcon="@Icons.Material.Filled.Save"
+                  Disabled="@(!RolesToRemove.Any() && !RolesToAdd.Any())">
+            Apply Changes
+        </MudButton>
     </DialogActions>
 </MudDialog>
