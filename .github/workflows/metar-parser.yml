@@ -27,9 +27,9 @@ jobs:
         context: .
         file: ./Parsers/MetarParser/src/scalabledataintegration/Dockerfile
         push: true
-        tags: parsers.azurecr.io/metar-parser:${{ github.sha }}
+        tags: parsers.azurecr.io/metarparser:${{ github.sha }}
     - name: Add command to summary
       run: |
         echo "-----------------" >> $GITHUB_STEP_SUMMARY
-        echo "**Image pushed!** Run this in the terminal to deploy the new image: \`az containerapp update --name metar-parser --resource-group ScalableDataIntegration --image parsers.azurecr.io/metar-parser:${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "**Image pushed!** Run this in the terminal to deploy the new image: \`az containerapp update --name metarparser --resource-group ScalableDataIntegration --image parsers.azurecr.io/metarparser:${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
         echo "-----------------" >> $GITHUB_STEP_SUMMARY
