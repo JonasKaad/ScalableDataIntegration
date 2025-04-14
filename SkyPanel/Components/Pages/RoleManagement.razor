@@ -1,4 +1,5 @@
 ﻿@page "/role-management"
+@using CommonDis.Models.Auth0
 @using SkyPanel.Components.Services
 @attribute [Authorize(Roles = "Admin")]
 @inject OrchestratorClientService OrchestratorClient
@@ -147,7 +148,8 @@
                                             Icon="@Icons.Material.Filled.Delete"
                                             Color="Color.Error"
                                             Size="Size.Small"
-                                            OnClick="@(() => RemoveRole(context))"/>
+                                            OnClick="@(() => RemoveRole(context))"
+                                            Title="Remove role" />
                                     </MudTd>
                                 </RowTemplate>
                             </MudTable>
@@ -193,6 +195,13 @@
                         @if (_rolesChanged)
                         {
                             <div class="d-flex justify-end">
+                                <MudButton
+                                    Variant="Variant.Outlined"
+                                    Color="Color.Secondary"
+                                    OnClick="@(() => { _userRoles = new List<Role>(_originalUserRoles); _rolesChanged = false; })">
+                                    Clear
+                                </MudButton>
+                                <MudSpacer/>
                                 <MudButton
                                     Variant="Variant.Filled"
                                     Color="Color.Primary"
