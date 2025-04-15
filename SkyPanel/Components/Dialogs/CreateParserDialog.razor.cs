@@ -1,4 +1,4 @@
-﻿using CommonDis.Models;
+using CommonDis.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using MudBlazor;
@@ -15,6 +15,8 @@ public partial class CreateParserDialog : ComponentBase
 
     public string ConfirmationButtonText { get; set; } = "Ok";
 
+    private bool _isLoading;
+    
     public Color Color { get; set; } = Color.Success;
 
     [CascadingParameter] private IMudDialogInstance? MudDialog { get; set; }
@@ -85,20 +87,28 @@ public partial class CreateParserDialog : ComponentBase
 
     private async Task<IEnumerable<string>> Search(string value, CancellationToken token)
     {
+        _isLoading = true;
+        StateHasChanged();
         var downloaders = await OrchestratorClient.GetParsers();
         var authenticationState = await authenticationStateTask;
         var user = authenticationState.User;
-
+        _isLoading = false;
+        StateHasChanged();
+        
         if (!user.IsInRole("Admin")) return [];
         return string.IsNullOrEmpty(value)
             ? downloaders
             : downloaders.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+        
     }
 
     private async Task<IEnumerable<string>> SearchSecrets(string value, CancellationToken token)
     {
+        _isLoading = true;
+        StateHasChanged();
         var allParserNames = await CredentialsService.GetParserSecretNames();
-
+        _isLoading = false;
+        StateHasChanged();
         // if text is null or empty, return all parser names
         if (string.IsNullOrEmpty(value))
             return allParserNames;
