@@ -197,10 +197,7 @@ public partial class RoleManagement
                 _logger.LogInformation( "[AUDIT] {User} added role {Roles} to {TargetUser}", user, auditRoleNamesToAdd, _selectedUser.Email);
                 
                 // Detailed entry for removing roles
-                foreach (var role in auditRoleNamesToRemove)
-                {
-                    _logger.LogInformation( "[AUDIT] {User} removed role {Role} from {TargetUser}", user, role, _selectedUser.Email);
-                }
+                _logger.LogInformation( "[AUDIT] {User} removed role {Roles} from {TargetUser}", user, auditRoleNamesToRemove, _selectedUser.Email);
                 
                 Snackbar.Add("User roles updated successfully", Severity.Success);
                 _originalUserRoles = new List<Role>(_userRoles);
