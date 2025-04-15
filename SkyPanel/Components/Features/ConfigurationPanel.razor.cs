@@ -272,16 +272,20 @@ public partial class ConfigurationPanel : ComponentBase
             
         };
         var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small, FullWidth = true };
-
-        //var dialogResult = await DialogService.ShowAsync<CredentialsDialog>("Secret Management", parameters, options);
         
         var dialogResult = await (await DialogService.ShowAsync<CredentialsDialog>("Secret Management", parameters, options)).Result;
 
         if (dialogResult?.Data is DisSecret result)
         {
-            Console.WriteLine($"Old username: {Username} and password: {Password}");
-            Console.WriteLine($"New username: {result.TokenName} and password: {result.Token}");
+            // Update the secret in the backend
             await CredentialsService.UpdateSecretAsync(SecretName, result);
+            
+            _isSyncing = true;
+            StateHasChanged();
+            await CheckForCredentials(SecretName);
+            _isSyncing = false;
+            StateHasChanged();
+            Snackbar.Add("Secret updated successfully", Severity.Success);
         }
     }
 
