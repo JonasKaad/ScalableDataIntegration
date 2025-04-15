@@ -59,12 +59,7 @@ public partial class ConfigurationPanel : ComponentBase
             _ => "*/30 * * * *"                   // Default value (30 minutes)
         };
     }
-
-    private bool IsValid()
-    {
-        return !_success && ParserState.ParserIsNotSelected();
-    }
-
+    
     private string ValidateMinutes(int minutes)
     {
         switch (minutes)
@@ -102,7 +97,7 @@ public partial class ConfigurationPanel : ComponentBase
             _activeTabIndex = 0; 
             SelectedMinutes = 0;
             SelectedHours = 1;
-            SelectedDays = 0;
+            SelectedDays = 1;
             PollingValue = string.Empty;
             return;
         }
@@ -240,7 +235,7 @@ public partial class ConfigurationPanel : ComponentBase
             _activeTabIndex = 2;
             SelectedMinutes = 1;
             SelectedHours = 1; 
-            SelectedDays = 0;
+            SelectedDays = 1;
             PollingValue = string.Empty;
         }
         else
@@ -248,6 +243,9 @@ public partial class ConfigurationPanel : ComponentBase
             // Parse polling value when a parser is selected
             ParsePollingValue(ParserState.Polling);
         }
+        await Task.Delay(10);
+        await _form.Validate();
+        
         _isLoading = true;
         StateHasChanged();
     
@@ -561,6 +559,8 @@ public partial class ConfigurationPanel : ComponentBase
             var secretExists = await CredentialsService.HasSecret(ParserState.SecretName);
             _waitingForSecret = false;
             PlaceholderText = !secretExists ? "No Secret Found!" : "No Secret Selected";
+
+            await _form.Validate();
         }
         finally
         {
@@ -568,5 +568,9 @@ public partial class ConfigurationPanel : ComponentBase
             StateHasChanged();
         }
     }
-    
+    private async Task OnFormChanged()
+    {
+        UpdatePollingValue();
+        await _form.Validate();
+    }
 }
