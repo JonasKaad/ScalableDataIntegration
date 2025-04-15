@@ -8,6 +8,39 @@ namespace SkyPanel.Components.Services;
 
 public sealed class OrchestratorClientService(IHttpClientFactory httpClientFactory, string baseUrl, ILogger<OrchestratorClientService> logger)
 {
+
+    public async Task<bool> CreateDownloader(DownloaderData downloaderData)
+    {
+        var client = httpClientFactory.CreateClient();
+        try
+        {
+            var content = new StringContent(JsonSerializer.Serialize(downloaderData), Encoding.UTF8,
+                "application/json");
+            var response = await client.PostAsync($"{baseUrl}/Downloader/add?downloader={downloaderData.Name}", content);
+            return response.StatusCode == HttpStatusCode.OK;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError("Failed to create downloader with error: {error}", ex.Message);
+        }
+        return false;
+    }
+
+    public async Task<IEnumerable<string>> GetParsers()
+    {
+        var client = httpClientFactory.CreateClient();
+        try
+        {
+            var response = await client.GetAsync($"{baseUrl}/Parser/parsers");
+            var elements = await response.Content.ReadFromJsonAsync<IEnumerable<string>>();
+            return elements ?? [];
+        }
+        catch (Exception e)
+        {
+            logger.LogError("Failed to get downloaders with error: {error}", e.Message);
+        }
+        return [];
+    }
     
     public async Task<IEnumerable<string>> GetFilters()
     {

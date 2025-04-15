@@ -1,0 +1,124 @@
+﻿@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+
+<MudDialog>
+    <DialogContent>
+        <MudGrid>
+            <MudItem xs="12" sm="6">
+                <MudTextField T="string" @bind-Value="ParserName" Variant="Variant.Outlined" Label="Name"/>
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudAutocomplete
+                    T="string"
+                    @bind-Value=Parser
+                    Clearable="true"
+                    SearchFunc="@Search"
+                    Variant="Variant.Outlined"
+                    Label="Select Parser"
+                    ResetValueOnEmptyText="true"
+                    SelectValueOnTab="true"
+                    Placeholder="No Parser Selected"/>
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudTextField T="string" @bind-Value="UrlValue" Variant="Variant.Outlined" Label="URL"/>
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudTextField T="string" @bind-Value="BackupUrlValue" Variant="Variant.Outlined" Label="Backup URL"/>
+            </MudItem>
+            <MudItem>
+                <MudAutocomplete @bind-Value=SecretName
+                     Clearable="true"
+                     SearchFunc="@SearchSecrets"
+                     Variant="Variant.Outlined"
+                     Label="Select Secret"
+                     ResetValueOnEmptyText="true"
+                     SelectValueOnTab="true"/>
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudCard Elevation="0">
+                    <MudCardContent Style="padding: 0">
+                        <MudText Typo="Typo.body2">Polling Frequency</MudText>
+                        <MudTabs Elevation="0" Rounded="true" ApplyEffectsToContainer="true" MinimumTabWidth="80px" Centered="true"
+                                 @bind-ActivePanelIndex="_activeTabIndex" @bind-ActivePanelIndex:after="UpdatePollingValue">
+                            <MudTabPanel Text="Minutes" >
+                                <div style="min-height: 120px; margin-top: 0.5em; justify-content: center;">
+                                    <MudGrid Style="align-items: start; " Justify="Justify.Center">
+                                        <MudItem xs="3">
+                                            <MudText>Every</MudText>
+                                        </MudItem>
+                                        <MudItem xs="4">
+                                            <MudForm @bind-IsValid="@_success" @ref="@_form">
+                                                <MudTextField T="int" @bind-Value="SelectedMinutes" @bind-Value:after="UpdatePollingValue"
+                                                              Variant="Variant.Outlined"
+                                                              Validation="@(new Func<int, string>(ValidateMinutes))"
+                                                              Immediate="true"
+                                                              FullWidth="true"
+                                                              Style="height: 30px;"/>
+                                            </MudForm>
+                                        </MudItem>
+                                        <MudItem xs="3">
+                                            <MudText> @(SelectedMinutes == 1 ? "Minute" : "Minutes") </MudText >
+                                        </MudItem>
+                                    </MudGrid>
+                                </div>
+                            </MudTabPanel>
+                            <MudTabPanel Text="Hours">
+                                <div style="min-height: 120px; margin-top: 0.5em; justify-content: center;">
+                                    <MudGrid Style="align-items: start; " Justify="Justify.Center">
+                                        <MudItem xs="3">
+                                            <MudText>Every</MudText>
+                                        </MudItem>
+                                        <MudItem xs="4">
+                                            <MudForm @bind-IsValid="@_success" @ref="@_form">
+                                                <MudTextField T="int" @bind-Value="SelectedHours" @bind-Value:after="UpdatePollingValue"
+                                                              Variant="Variant.Outlined"
+                                                              Validation="@(new Func<int, string>(ValidateHours))"
+                                                              Immediate="true"
+                                                              FullWidth="true"
+                                                              Style="height: 30px;"/>
+                                            </MudForm>
+                                        </MudItem>
+                                        <MudItem xs="3">
+                                            <MudText> @(SelectedHours == 1 ? "Hour" : "Hours") </MudText >
+                                        </MudItem>
+                                    </MudGrid>
+                                </div>
+                            </MudTabPanel>
+                            <MudTabPanel Text="Days" >
+                                <div style="min-height: 120px; margin-top: 0.5em; justify-content: center;">
+                                    <MudGrid Style="align-items: start; " Justify="Justify.Center">
+                                        <MudItem xs="3">
+                                            <MudText>Every</MudText>
+                                        </MudItem>
+                                        <MudItem xs="4">
+                                            <MudForm @bind-IsValid="@_success" @ref="@_form" >
+                                                <MudTextField T="int" @bind-Value="SelectedDays"  @bind-Value:after="UpdatePollingValue"
+                                                              Variant="Variant.Outlined"
+                                                              Immediate="true"
+                                                              Required="true"
+                                                              Validation="@(new Func<int, string>(ValidateDays))"
+                                                              FullWidth="true"
+                                                              Style="height: 30px;"/>
+                                            </MudForm>
+                                        </MudItem>
+                                        <MudItem xs="3">
+                                            <MudText> @(SelectedDays == 1 ? "Day" : "Days") </MudText        >
+                                        </MudItem>
+                                    </MudGrid>
+                                </div>
+                            </MudTabPanel>
+                        </MudTabs>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+            <MudItem xs="12" sm="12" Style="display: flex; justify-content: center; align-items: center; padding-top: 0px;">
+                <MudButton Size="Size.Large" StartIcon="@Icons.Material.Filled.Tune" OnClick="@(() => OpenFilterDialogAsync())" Variant="Variant.Filled" Color="Color.Primary">Filters</MudButton>
+            </MudItem>
+        </MudGrid>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@DialogCancel" Variant="Variant.Filled">Cancel</MudButton>
+        <MudSpacer/>
+        <MudButton Color="@Color" OnClick="@DialogSubmit" Variant="Variant.Filled">@ConfirmationButtonText</MudButton>
+    </DialogActions>
+</MudDialog>

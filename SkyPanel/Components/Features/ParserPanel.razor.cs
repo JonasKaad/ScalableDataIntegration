@@ -1,4 +1,5 @@
 using System.Net.Http.Headers;
+using CommonDis.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Forms;
@@ -104,8 +105,31 @@ public partial class ParserPanel : ComponentBase
                 _logger.LogError("[AUDIT] Failed to fetch and parse latest dataset for {Parser}", ParserState.ParserName);
             }
         }
-        
     }
+
+    private async Task OpenCreateDialogAsync()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small, FullWidth = true};
+        var dialogResult = await (await DialogService.ShowAsync<CreateParserDialog>("Create new Downloader", options)).Result;
+
+        if(dialogResult?.Data is DownloaderData data)
+        {
+            var downloaderName = data.Name;
+            var result = await OrchestratorClient.CreateDownloader(data);
+            if (result)
+            {
+                Snackbar.Add($"Created new downloader {downloaderName}", Severity.Success);
+                _logger.LogInformation("[AUDIT] Created new downloader {Downloader}", downloaderName);
+            }
+            else
+            {
+                Snackbar.Add($"Failed to create downloader {downloaderName}", Severity.Error);
+                _logger.LogError("[AUDIT] Failed to create downloader {Downloader}", downloaderName);
+            }
+        }
+    }
+
+
     private List<UploadResult> uploadResults = new();
     private List<File> _files = new();
     
