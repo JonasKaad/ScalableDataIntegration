@@ -263,17 +263,26 @@ public partial class ConfigurationPanel : ComponentBase
     
     private string _parserNameSelection = string.Empty;
     
-    private Task OpenSecretManagementDialog()
+    private async Task OpenSecretManagementDialog()
     {
         var parameters = new DialogParameters<CredentialsDialog>
         {
-            { x => x.Username, Username },
-            { x => x.Password, Password },
+            { x => x.TokenName, Username },
+            { x => x.Token, Password },
+            { x => x.SecretName, SecretName },
             
         };
         var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small, FullWidth = true };
 
-        return DialogService.ShowAsync<CredentialsDialog>("Secret Management", parameters, options);
+        //var dialogResult = await DialogService.ShowAsync<CredentialsDialog>("Secret Management", parameters, options);
+        
+        var dialogResult = await (await DialogService.ShowAsync<CredentialsDialog>("Secret Management", parameters, options)).Result;
+
+        if (dialogResult?.Data is DisSecret result)
+        {
+            Console.WriteLine($"Old username: {Username} and password: {Password}");
+            Console.WriteLine($"New username: {result.TokenName} and password: {result.Token}");
+        }
     }
 
     private async Task OpenFilterDialogAsync()
