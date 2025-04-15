@@ -55,7 +55,7 @@
 
                     <div style="height: 600px; overflow: auto;">
                         <MudList T="string" Clickable="true" Dense="true">
-                            @foreach (var user in _filteredUsers)
+                            @foreach (var user in FilteredUsers)
                             {
                                 <MudListItem OnClick="@(() => SelectUser(user))"
                                              Selected="@(_selectedUser?.UserId == user.UserId)">
@@ -118,13 +118,13 @@
                     else
                     {
                         <MudText Typo="Typo.subtitle2" Class="mt-4 mb-2">Assigned Roles</MudText>
-                        @if (!_assignedRoles.Any())
+                        @if (!AssignedRoles.Any())
                         {
                             <MudAlert Severity="Severity.Info" Dense="true" Class="mb-4">No roles assigned to this user.</MudAlert>
                         }
                         else
                         {
-                            <MudTable Items="@_assignedRoles" Dense="true" Hover="true" Class="mb-4">
+                            <MudTable Items="@AssignedRoles" Dense="true" Hover="true" Class="mb-4">
                                 <HeaderContent>
                                     <MudTh>Role</MudTh>
                                     <MudTh>Description</MudTh>
@@ -156,13 +156,13 @@
                         }
 
                         <MudText Typo="Typo.subtitle2" Class="mt-4 mb-2">Available Roles</MudText>
-                        @if (!_availableRoles.Any())
+                        @if (!AvailableRoles.Any())
                         {
                             <MudAlert Severity="Severity.Info" Dense="true" Class="mb-4">No additional roles available.</MudAlert>
                         }
                         else
                         {
-                            <MudTable Items="@_availableRoles" Dense="true" Hover="true" Class="mb-4">
+                            <MudTable Items="@AvailableRoles" Dense="true" Hover="true" Class="mb-4">
                                 <HeaderContent>
                                     <MudTh>Role</MudTh>
                                     <MudTh>Description</MudTh>

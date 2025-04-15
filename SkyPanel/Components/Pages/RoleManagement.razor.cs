@@ -23,11 +23,13 @@ public partial class RoleManagement
     [Inject]
     private ParserRoleSyncService SyncService { get; set; } = null!;
     
+    private bool _isSyncing;
+
     [CascadingParameter] 
-    private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
+    private Task<AuthenticationState> AuthenticationStateTask { get; set; } = null!;
     
-    private List<User> _users = new();
-    private List<User> _filteredUsers => _users
+    private List<User> _users = [];
+    private List<User> FilteredUsers => _users
         .Where(u => string.IsNullOrWhiteSpace(_searchString) ||
                     u.Name.Contains(_searchString, StringComparison.OrdinalIgnoreCase) ||
                     u.Email.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
@@ -35,17 +37,17 @@ public partial class RoleManagement
 
     private string _searchString = "";
     private User? _selectedUser;
-    private List<Role> _userRoles = new();
-    private List<Role> _originalUserRoles = new();
-    private List<Role> _allRoles = new();
-    private List<Role> _assignedRoles => _userRoles.ToList();
-    private List<Role> _availableRoles => _allRoles
+    private List<Role> _userRoles = [];
+    private List<Role> _originalUserRoles = [];
+    private List<Role> _allRoles = [];
+    private List<Role> AssignedRoles => _userRoles.ToList();
+    private List<Role> AvailableRoles => _allRoles
         .Where(r => _userRoles.All(ur => ur.id != r.id))
         .ToList();
     
     private bool _isLoadingUsers = true;
-    private bool _isLoadingRoles = false;
-    private bool _rolesChanged = false;
+    private bool _isLoadingRoles;
+    private bool _rolesChanged;
 
     protected override async Task OnInitializedAsync()
     {
