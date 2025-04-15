@@ -106,15 +106,15 @@ public partial class CreateParserDialog : ComponentBase
     {
         _isLoading = true;
         StateHasChanged();
-        var allParserNames = await CredentialsService.GetParserSecretNames();
+        var secretNames = await CredentialsService.GetParserSecretNames();
         _isLoading = false;
         StateHasChanged();
-        // if text is null or empty, return all parser names
+        // if text is null or empty, return all secret names
         if (string.IsNullOrEmpty(value))
-            return allParserNames;
+            return secretNames;
 
-        // Filter parser names based on the input value
-        return allParserNames
+        // Filter secret names based on the input value
+        return secretNames
             .Where(key => key.Contains(value, StringComparison.InvariantCultureIgnoreCase));
     }
 
