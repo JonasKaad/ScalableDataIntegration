@@ -29,10 +29,12 @@
                 Fetch and Parse Latest Dataset
             </MudButton>
         </MudItem>
-        <MudItem>
-            <MudButton OnClick="@(() => OpenCreateDialogAsync())" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.AddCircle" Color="Color.Primary"  Disabled="!ParserState.ParserIsNotSelected()">
-                Create New Downloader
-            </MudButton>
-        </MudItem>
+        <AuthorizeView Roles="Admin">
+            <MudItem>
+                <MudButton OnClick="@(() => OpenCreateDialogAsync())" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.AddCircle" Color="Color.Primary"  Disabled="!ParserState.ParserIsNotSelected()">
+                    Create New Downloader
+                </MudButton>
+            </MudItem>
+        </AuthorizeView>
     </MudGrid>
 </MudStack>
