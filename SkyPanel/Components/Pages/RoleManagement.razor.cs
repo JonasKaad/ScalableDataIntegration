@@ -16,11 +16,13 @@ public partial class RoleManagement
     {
         _logger = logger;
     }
+
     [Inject]
-    private IServiceScopeFactory ScopeFactory { get; set; } = default!;
-
-    private bool _isSyncing = false;
-
+    private OrchestratorClientService OrchestratorClientService { get; set; } = null!;
+    
+    [Inject]
+    private ParserRoleSyncService SyncService { get; set; } = null!;
+    
     [CascadingParameter] 
     private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
     
@@ -214,11 +216,7 @@ public partial class RoleManagement
             _isSyncing = true;
             StateHasChanged();
         
-            using var scope = ScopeFactory.CreateScope();
-            var orchestratorClient = scope.ServiceProvider.GetRequiredService<OrchestratorClientService>();
-            var syncService = scope.ServiceProvider.GetRequiredService<ParserRoleSyncService>();
-        
-            await syncService.SyncParserRoles(orchestratorClient);
+            await SyncService.SyncParserRoles(OrchestratorClientService);
         
             // Refresh roles after sync
             await LoadAllRoles();
