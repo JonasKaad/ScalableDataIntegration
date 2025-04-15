@@ -282,6 +282,7 @@ public partial class ConfigurationPanel : ComponentBase
         {
             Console.WriteLine($"Old username: {Username} and password: {Password}");
             Console.WriteLine($"New username: {result.TokenName} and password: {result.Token}");
+            await CredentialsService.UpdateSecretAsync(SecretName, result);
         }
     }
 
