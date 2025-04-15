@@ -111,15 +111,6 @@
         </MudCard>
     </MudItem>
 </MudGrid>
-@if (_awsUsernamePasswordDebug)
-{
-    <MudText>
-        @Username
-    </MudText>
-    <MudText>
-        @Password
-    </MudText>
-}
 <MudGrid Class="d-flex justify-center" Style="margin-top: 0.3em">
     <MudItem>
         <MudButton Size="Size.Large" StartIcon="@Icons.Material.Filled.Tune" Disabled="ParserState.ParserIsNotSelected()" OnClick="@(() => OpenFilterDialogAsync())" Variant="Variant.Filled" Color="Color.Primary">Filters</MudButton>

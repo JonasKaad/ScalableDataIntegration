@@ -28,7 +28,6 @@ public partial class ConfigurationPanel : ComponentBase
     
     [Inject] private OrchestratorClientService OrchestratorClientService { get; set; } = default!;
 
-    private bool _awsUsernamePasswordDebug = false;
     private string _secretName = string.Empty;
     private string? UrlValue { get; set; }
     private string? BackupUrlValue { get; set; }
