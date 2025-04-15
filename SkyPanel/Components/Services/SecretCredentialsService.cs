@@ -33,4 +33,14 @@ public class SecretCredentialsService
     {
         return await _secretService.GetSecretAsync(parserName) != null;
     }
+
+    public async Task UpdateSecretAsync(string parserName, DisSecret secret)
+    {
+        await _secretService.AddSecretAsync(parserName, secret);
+    }
+    
+    public void UpdateSecret(string parserName, DisSecret secret)
+    {
+        _secretService.AddSecret(parserName, secret);
+    }
 }
