@@ -288,6 +288,8 @@ public partial class ConfigurationPanel : ComponentBase
             Snackbar.Add("Secret updated successfully", Severity.Success);
         }
     }
+    
+    private bool SecretIsNotChosen => string.IsNullOrEmpty(SecretName);
 
     private async Task OpenFilterDialogAsync()
     {
