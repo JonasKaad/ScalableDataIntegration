@@ -194,10 +194,7 @@ public partial class RoleManagement
                 var user = RoleUtil.GetUserEmail(authUser);
                 
                 // Detailed entry for adding roles
-                foreach (var role in auditRoleNamesToAdd)
-                {
-                    _logger.LogInformation( "[AUDIT] {User} added role {Role} to {TargetUser}", user, role, _selectedUser.Email);
-                }
+                _logger.LogInformation( "[AUDIT] {User} added role {Roles} to {TargetUser}", user, auditRoleNamesToAdd, _selectedUser.Email);
                 
                 // Detailed entry for removing roles
                 foreach (var role in auditRoleNamesToRemove)
