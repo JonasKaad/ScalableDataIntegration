@@ -2,7 +2,7 @@
 @inject ISnackbar Snackbar
 
 <div style="position: relative;">
-    @if (_isLoading)
+    @if (_isLoading || _isSyncing)
     {
         <MudOverlay Visible="true" Absolute="true" ZIndex="5" LightBackground="true"
                     Style="display: flex; align-items: center; justify-content: center;">
