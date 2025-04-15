@@ -37,7 +37,7 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
         }
         catch (Exception e)
         {
-            logger.LogError("Failed to get downloaders with error: {error}", e.Message);
+            logger.LogError("Failed to get parsers with error: {error}", e.Message);
         }
         return [];
     }
