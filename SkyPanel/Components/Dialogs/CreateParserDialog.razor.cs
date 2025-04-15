@@ -1,4 +1,4 @@
-using CommonDis.Models;
+﻿using CommonDis.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using MudBlazor;
@@ -25,9 +25,9 @@ public partial class CreateParserDialog : ComponentBase
     [Inject] private OrchestratorClientService OrchestratorClient { get; set; } = null!;
 
     private int _activeTabIndex = 1;
-    private int SelectedMinutes { get; set; } = 0;
+    private int SelectedMinutes { get; set; } = 1;
     private int SelectedHours { get; set; } = 6;
-    private int SelectedDays { get; set; } = 0;
+    private int SelectedDays { get; set; } = 1;
     private MudForm _form;
     private bool _success;
     private string PollingValue { get; set; } = "0 */6 * * *";
@@ -176,5 +176,11 @@ public partial class CreateParserDialog : ComponentBase
         {
             Filters = updatedFilters;
         }
+    }
+    
+    private async Task OnFormChanged()
+    {
+        UpdatePollingValue();
+        await _form.Validate();
     }
 }
