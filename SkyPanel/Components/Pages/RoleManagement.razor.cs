@@ -196,10 +196,18 @@ public partial class RoleManagement
                 var user = RoleUtil.GetUserEmail(authUser);
                 
                 // Detailed entry for adding roles
-                _logger.LogInformation( "[AUDIT] {User} added role {Roles} to {TargetUser}", user, auditRoleNamesToAdd, _selectedUser.Email);
-                
+                if (auditRoleNamesToAdd.Length > 0)
+                {
+                    _logger.LogInformation("[AUDIT] {User} added role {Roles} to {TargetUser}", user,
+                        auditRoleNamesToAdd, _selectedUser.Email);
+                }
+
                 // Detailed entry for removing roles
-                _logger.LogInformation( "[AUDIT] {User} removed role {Roles} from {TargetUser}", user, auditRoleNamesToRemove, _selectedUser.Email);
+                if (auditRoleNamesToRemove.Length > 0)
+                {
+                    _logger.LogInformation( "[AUDIT] {User} removed role {Roles} from {TargetUser}", user, 
+                        auditRoleNamesToRemove, _selectedUser.Email);
+                }
                 
                 Snackbar.Add("User roles updated successfully", Severity.Success);
                 _originalUserRoles = new List<Role>(_userRoles);
