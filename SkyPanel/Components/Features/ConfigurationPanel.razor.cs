@@ -31,8 +31,8 @@ public partial class ConfigurationPanel : ComponentBase
     private string _secretName = string.Empty;
     private string? UrlValue { get; set; }
     private string? BackupUrlValue { get; set; }
-    private string Username { get; set; } = string.Empty;
-    private string Password { get; set; } = string.Empty;
+    private string TokenName { get; set; } = string.Empty;
+    private string Token { get; set; } = string.Empty;
     private string PlaceholderText { get; set; } = "No Secret Selected";
     
     private List<FilterDto> CurrentFilters { get; set; } = new List<FilterDto>();
@@ -196,8 +196,8 @@ public partial class ConfigurationPanel : ComponentBase
             if (string.IsNullOrEmpty(value))
             {
                 _secretName = string.Empty;
-                Username = string.Empty;
-                Password = string.Empty;
+                TokenName = string.Empty;
+                Token = string.Empty;
             }
             else
             {
@@ -266,8 +266,8 @@ public partial class ConfigurationPanel : ComponentBase
     {
         var parameters = new DialogParameters<CredentialsDialog>
         {
-            { x => x.TokenName, Username },
-            { x => x.Token, Password },
+            { x => x.TokenName, TokenName },
+            { x => x.Token, Token },
             { x => x.SecretName, SecretName },
             
         };
@@ -547,8 +547,8 @@ public partial class ConfigurationPanel : ComponentBase
         {
             var secret = await CredentialsService.GetSecret(parserSecret);
             _secretName = parserSecret ?? "";
-            Username = secret.TokenName ?? "";
-            Password = secret.Token ?? "";
+            TokenName = secret.TokenName ?? "";
+            Token = secret.Token ?? "";
         }
         finally
         {
