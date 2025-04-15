@@ -41,7 +41,7 @@ public class BaseDownloaderJob : IDownloaderJob
                 return;
             }
             Log(data.Name, bytes.Length, DateTime.UtcNow);
-            var parameters = data.Filters.Select(f => string.Join(",", f.Parameters.Select(p => $"{{'{p.Key}':'{p.Value}'}}"))).ToList();
+            var parameters = data.Filters.Select(f => System.Text.Json.JsonSerializer.Serialize(f.Parameters)).ToList();
             var filterNames = data.Filters.Select(f => f.Name).ToList();
             var urls = filterNames.Select(filter => _filterRegistry.GetFilterUrl(filter)).ToList();
             urls.Add(data.Parser);

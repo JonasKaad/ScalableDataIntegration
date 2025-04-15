@@ -41,10 +41,10 @@ class FilterServicer(filter_pb2_grpc.FilterServicer):
 
         (json_parameters, parameters) = read_params(request.parameters.split(";"), "startX")
 
-        start_y = json_parameters["startY"]
-        start_x = json_parameters["startX"]
-        end_y = json_parameters["endY"]
-        end_x = json_parameters["endX"]
+        start_y = int(float(json_parameters["startY"]))
+        start_x = int(float(json_parameters["startX"]))
+        end_y = int(float(json_parameters["endY"]))
+        end_x = int(float(json_parameters["endX"]))
         cropped = image_data[start_y:end_y, start_x:end_x]
         img_bytes = cv2.imencode('.png', cropped)[1].tobytes()
         result = reader.readtext(img_bytes, detail=0)

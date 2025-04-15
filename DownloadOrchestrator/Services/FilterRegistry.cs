@@ -37,7 +37,7 @@ public class FilterRegistry : RegistryService
     {
         if(_services.TryGetValue(serviceName, out var service))
         {
-            if (service != settings)
+            if (!EqualFilters(service, settings))
             {
                 _logger.LogInformation("Registering {Service}, though different settings were detected", serviceName);
             }
@@ -47,6 +47,24 @@ public class FilterRegistry : RegistryService
         
         _serviceDateTimes.Add(serviceName, DateTime.Now);
         _services.Add(serviceName, settings);
+    }
+
+    private bool EqualFilters(FilterData registered, FilterData newFilter)
+    {
+        var same = true;
+        same &= registered.Name == newFilter.Name;
+        same &= registered.Url == newFilter.Url;
+        same &= registered.Parameters.Count == newFilter.Parameters.Count;
+        if (!same) return same;
+        for (var i = 0; i < registered.Parameters.Count; i++)
+        {
+            var regParam = registered.Parameters.ElementAt(i);
+            var newParam = newFilter.Parameters.ElementAt(i);
+            same &= regParam.Key == newParam.Key;
+            same &= regParam.Value == newParam.Value;
+        }
+
+        return same;
     }
 
     public new void DeRegisterService(string serviceName)
