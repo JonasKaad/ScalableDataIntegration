@@ -46,6 +46,7 @@ public partial class ConfigurationPanel : ComponentBase
 
     private MudForm _form;
     private bool _success;
+    private bool _isSyncing;
 
     // Convert the selected tab and value to a polling rate string
     private void UpdatePollingValue()
@@ -312,8 +313,22 @@ public partial class ConfigurationPanel : ComponentBase
         
         if (result == "update")
         {
-           await UpdateParserConfiguration();
+            await SyncParserState();
         }
+    }
+
+    private async Task SyncParserState()
+    {
+        _isSyncing = true;          
+        StateHasChanged();
+        
+        await UpdateParserConfiguration();
+        var updatedConfig = await OrchestratorClientService.GetDownloaderConfiguration(ParserState.ParserName);
+        ParserState.SetParser(updatedConfig);
+        await UpdateFromParserState();
+        
+        _isSyncing = false;
+        StateHasChanged();
     }
     
     private async Task<IEnumerable<string>> Search(string value, CancellationToken token)
