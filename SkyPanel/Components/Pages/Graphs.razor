@@ -135,7 +135,7 @@
                                         var point = (DataPoint<ParserData>)context.DataPoint;
                                         <h3>@_selected.ToList()[context.SeriesIndex]</h3>
                                         <p>Time: @point.X</p>
-                                        <p>Downloaded: @point.Y Megabytes</p>
+                                        <p>Downloaded: @point.Y @_downloadedText</p>
                                     }
                                 </div>
                             </ApexPointTooltip>

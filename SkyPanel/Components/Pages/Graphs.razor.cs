@@ -22,6 +22,7 @@ public partial class Graphs
     private TimeSpan? _toTime = new TimeSpan(23, 59, 59);
     private TimeSpan _groupSpan = new TimeSpan(1, 0, 0);
     private Amount _yaxis = Amount.Byte;
+    private string _downloadedText = "Bytes";
     [Inject] private StatisticsDatabaseService context { get; set; } = null!;
 
     protected override void OnInitialized()
@@ -161,18 +162,22 @@ public partial class Graphs
             {
                 case Amount.Giga:
                     title.Text = "Gigabytes";
+                    _downloadedText = "Gigabytes";
                     ratio = 1_000_000_000;
                     break;
                 case Amount.Kilo:
                     title.Text = "Kilobytes";
+                    _downloadedText = "Kilobytes";
                     ratio = 1_000;
                     break;
                 case Amount.Mega:
                     title.Text = "Megabytes";
+                    _downloadedText = "Megabytes";
                     ratio = 1_000_000;
                     break;
                 case Amount.Byte:
                     title.Text = "Bytes";
+                    _downloadedText = "Bytes";
                     ratio = 1;
                     break;
             }
