@@ -7,14 +7,14 @@
             <MudAutocomplete 
                 T="string"
                 @bind-Value=Parser
-                                     Clearable="true"
-                                     SearchFunc="@Search"
-                                     Variant="Variant.Outlined"
-                                     Label="Select Parser"
-                                     ResetValueOnEmptyText="true"
-                                     SelectValueOnTab="true"
-                                     Placeholder="No Parser Selected"
-                                     />
+                Clearable="true"
+                SearchFunc="@Search"
+                Variant="Variant.Outlined"
+                Label="Select Parser"
+                ResetValueOnEmptyText="true"
+                SelectValueOnTab="true"
+                Placeholder="No Parser Selected"
+                />
         </MudItem> 
     </MudGrid>
     <MudGrid Class="d-flex justify-center" Style="margin-top: 0.1em">
@@ -31,10 +31,20 @@
         </MudItem>
         <AuthorizeView Roles="Admin">
             <MudItem>
-                <MudButton OnClick="@(() => OpenCreateDialogAsync())" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.AddCircle" Color="Color.Primary"  Disabled="!ParserState.ParserIsNotSelected()">
-                    Create New Downloader
-                </MudButton>
+                @if (ParserState.ParserIsNotSelected())
+                {
+                    <MudButton OnClick="@(() => OpenCreateDialogAsync())" StartIcon="@Icons.Material.Filled.AddCircle" Variant="Variant.Filled" Color="Color.Primary" Disabled="!ParserState.ParserIsNotSelected()">
+                        Create New Downloader
+                    </MudButton>
+                }
+                else
+                {
+                    <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error" Disabled="ParserState.ParserIsNotSelected()">
+                        Delete Downloader
+                    </MudButton>
+                }
             </MudItem>
+            
         </AuthorizeView>
     </MudGrid>
 </MudStack>
