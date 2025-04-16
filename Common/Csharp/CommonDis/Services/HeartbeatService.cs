@@ -27,7 +27,7 @@ public class HeartbeatService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("Heartbeat service starting");
+        _logger.LogInformation("Heartbeat service for {Name} starting", _parserName);
 
         while (!stoppingToken.IsCancellationRequested)
         {
