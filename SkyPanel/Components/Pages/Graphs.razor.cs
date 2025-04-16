@@ -78,13 +78,37 @@ public partial class Graphs
     }
     private void LoadDataFromDb()
     {
+        _loading = true;
         var start = DateTime.UtcNow - TimeSpan.FromDays(14);
         try
         {
+            // Clear existing data
+            _rawParserData.Clear();
+            _parsers.Clear();
+        
             FetchDataFromDb(start);
-        } catch (Exception ex)
+        
+            // If there are selected parsers, update their data
+            if (!_selectedParsers.Any()) return;
+            foreach (var parser in _selectedParsers.ToList().Where(parser => !_rawParserData.ContainsKey(parser)))
+            {
+                _selected.Remove(parser);
+                _selectedParsers = _selected;
+            }
+            if (_selected.Count != 0)
+            {
+                ClampData(Date.Start.GetValueOrDefault().Add(_fromTime.GetValueOrDefault()), 
+                    Date.End.GetValueOrDefault().Add(_toTime.GetValueOrDefault()));
+            }
+        }
+        catch (Exception ex)
         {
             Console.WriteLine($"Error fetching data from db: {ex.Message}");
+        }
+        finally
+        {
+            _loading = false;
+            StateHasChanged();
         }
     }
 
