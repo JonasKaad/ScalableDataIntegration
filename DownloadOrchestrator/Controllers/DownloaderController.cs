@@ -70,7 +70,9 @@ public class DownloaderController : ControllerBase
                 return BadRequest("The parser could not be resolved.");
             }
             dlToConfigure.Parser = HandleConfiguration(dlToConfigure.Parser, parser!);
-            
+
+
+            var isRemovingFilters = dlConfiguration.Filters.Any(f => f.Name.Equals(" ") || f.Parameters.Count == 0);
             var filters = dlConfiguration.Filters
                 .Select(filter =>
                 {
@@ -80,13 +82,16 @@ public class DownloaderController : ControllerBase
                     return temp;
                 })
                 .ToList();
-            if (dlConfiguration.Filters.Count != 0 && filters.Any(f => string.IsNullOrEmpty(f.Name)))
+            if (dlConfiguration.Filters.Count != 0 && filters.Any(f => string.IsNullOrEmpty(f.Name)) && !isRemovingFilters)
             {
                 _logger.LogWarning("Failed to set filters for downloader {Downloader} with filters {Filters}", downloader, dlConfiguration.Filters);
                 return BadRequest("Some or more filters could not be resolved.");
             }
 
-            dlToConfigure.Filters = filters!;
+            if (filters.Count != 0 || isRemovingFilters)
+            {
+                dlToConfigure.Filters = filters!.Where(f => !string.IsNullOrEmpty(f.Name)).ToList();
+            }
             
             dlToConfigure.DownloadUrl = HandleConfiguration(dlToConfigure.DownloadUrl, dlConfiguration.DownloadUrl);
             dlToConfigure.BackUpUrl = HandleConfiguration(dlToConfigure.BackUpUrl, dlConfiguration.BackUpUrl);
@@ -173,7 +178,7 @@ public class DownloaderController : ControllerBase
             }
         }
 
-        var parameters = dl.Filters.Select(f => string.Join(",", f.Parameters.Select(p => $"{{'{p.Key}':'{p.Value}'}}"))).ToList();
+        var parameters = dl.Filters.Select(f => System.Text.Json.JsonSerializer.Serialize(f.Parameters)).ToList();
         var filterNames = dl.Filters.Select(f => f.Name).ToList();
         var urls = filterNames.Select(filter => _filterRegistry.GetFilterUrl(filter)).ToList();
         urls.Add(dl.Parser);
