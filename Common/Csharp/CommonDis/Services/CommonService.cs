@@ -21,8 +21,8 @@ public class CommonService
 
         try
         {
-            await container.UploadBlobAsync($"{date:yyyy/MM/dd/HHmm}-tracks_raw.{format}", raw);
-            await container.UploadBlobAsync($"{date:yyyy/MM/dd/HHmm}-tracks_parsed.{format}", parsed);
+            await container.UploadBlobAsync($"{date:yyyy/MM/dd/HHmm}-raw.{format}", raw);
+            await container.UploadBlobAsync($"{date:yyyy/MM/dd/HHmm}-parsed.{format}", parsed);
         }
         catch (RequestFailedException ex)
         {
@@ -38,8 +38,8 @@ public class CommonService
 
         try
         {
-            await container.UploadBlobAsync($"{date:yyyy/MM/dd/HHmm}-tracks_raw.{format}", raw);
-            await container.UploadBlobAsync($"{date:yyyy/MM/dd/HHmm}-tracks_parsed.{format}", parsed);
+            await container.UploadBlobAsync($"{date:yyyy/MM/dd/HHmm}-raw.{format}", raw);
+            await container.UploadBlobAsync($"{date:yyyy/MM/dd/HHmm}-parsed.{format}", parsed);
         }
         catch (RequestFailedException ex)
         {
