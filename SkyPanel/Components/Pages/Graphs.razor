@@ -31,8 +31,9 @@
                     </MudAlert>
                     <MudGrid Justify="Justify.SpaceBetween" Class="mt-0">
                         <MudItem md="7">
-                            <MudTooltip Text="Fetch all data from the database">
+                            <MudTooltip Text="Fetch all parsers with data from the database">
                                 <MudButton Variant="Variant.Outlined"
+                                           Color="Color.Primary"
                                            FullWidth="true"
                                            OnClick="@(() => FetchDataFromDb(DateTime.Parse("2023-01-01").ToUniversalTime()))"
                                            StartIcon="@Icons.Material.Filled.History"
@@ -42,7 +43,7 @@
                             </MudTooltip>
                         </MudItem>
                         <MudItem md="5">
-                            <MudTooltip Text="Refresh the current data">
+                            <MudTooltip Text="Refresh with latest data">
                                 <MudButton Variant="Variant.Filled"
                                            Color="Color.Primary"
                                            FullWidth="true"
