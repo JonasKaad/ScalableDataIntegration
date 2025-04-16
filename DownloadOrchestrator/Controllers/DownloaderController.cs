@@ -72,7 +72,7 @@ public class DownloaderController : ControllerBase
             dlToConfigure.Parser = HandleConfiguration(dlToConfigure.Parser, parser!);
 
 
-            var isRemovingFilters = dlConfiguration.Filters.Any(f => f.Name.Equals(" ") || f.Parameters.Count == 0);
+            var isRemovingFilters = dlConfiguration.Filters.Any(f => string.IsNullOrWhiteSpace(f.Name) || f.Parameters.Count == 0);
             var filters = dlConfiguration.Filters
                 .Select(filter =>
                 {
