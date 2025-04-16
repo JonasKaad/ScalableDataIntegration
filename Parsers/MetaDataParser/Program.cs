@@ -3,12 +3,35 @@ using DotNetEnv;
 using DotNetEnv.Configuration;
 using MetaDataParser.Services;
 using Serilog;
+using Serilog.Events;
+using Serilog.Sinks.Datadog.Logs;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddDotNetEnv(".env", LoadOptions.TraversePath());
 
+if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+{
+    Log.Logger = new LoggerConfiguration().WriteTo.Console()
+        .CreateLogger();
+}
+else
+{
+    var datadogConfiguration = new DatadogConfiguration() { Url = "https://http-intake.logs.us5.datadoghq.com", UseSSL = true, UseTCP = false};
+    Log.Logger = new LoggerConfiguration()
+        .WriteTo.DatadogLogs(
+            apiKey: Environment.GetEnvironmentVariable("DD_API_KEY"),
+            configuration: datadogConfiguration,
+            service: Environment.GetEnvironmentVariable("PARSER_NAME")
+        )
+        .MinimumLevel.Override("Microsoft.AspNetCore.Hosting", LogEventLevel.Warning)
+        .MinimumLevel.Override("Microsoft.AspNetCore.Mvc", LogEventLevel.Warning)
+        .MinimumLevel.Override("Microsoft.AspNetCore.Routing", LogEventLevel.Warning)
+        .CreateLogger();
+}
+
 // Add services to the container.
 builder.Services
+    .AddSerilog()
     .AddSingleton<CommonService>()
     .AddHostedService<HeartbeatService>(sp =>
     {
