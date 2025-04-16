@@ -15,16 +15,14 @@ public class CommonService
 
     public async Task SaveDataToBlob(string parser, BinaryData raw, BinaryData parsed, string format = "txt")
     {
-        var container = await CommonService.GetContainerClient(parser);
+        var container = await GetContainerClient(parser);
 
-        var date = DateTime.UtcNow.Date;
-        var hour = DateTime.UtcNow.Hour;
-        var min = DateTime.UtcNow.Minute;
+        var date = DateTime.UtcNow;
 
         try
         {
-            await container.UploadBlobAsync($"{date:yyyy/MM/dd}/{hour}{min}-tracks_raw.{format}", raw);
-            await container.UploadBlobAsync($"{date:yyyy/MM/dd}/{hour}{min}-tracks_parsed.{format}", parsed);
+            await container.UploadBlobAsync($"{date:yyyy/MM/dd/hhmm}-tracks_raw.{format}", raw);
+            await container.UploadBlobAsync($"{date:yyyy/MM/dd/hhmm}-tracks_parsed.{format}", parsed);
         }
         catch (RequestFailedException ex)
         {
@@ -34,16 +32,14 @@ public class CommonService
     
     public async Task SaveDataToBlob(string parser, Stream raw, Stream parsed, string format = "txt")
     {
-        var container = await CommonService.GetContainerClient(parser);
+        var container = await GetContainerClient(parser);
 
-        var date = DateTime.UtcNow.Date;
-        var hour = DateTime.UtcNow.Hour;
-        var min = DateTime.UtcNow.Minute;
+        var date = DateTime.UtcNow;
 
         try
         {
-            await container.UploadBlobAsync($"{date:yyyy/MM/dd}/{hour}{min}-tracks_raw.{format}", raw);
-            await container.UploadBlobAsync($"{date:yyyy/MM/dd}/{hour}{min}-tracks_parsed.{format}", parsed);
+            await container.UploadBlobAsync($"{date:yyyy/MM/dd/hhmm}-tracks_raw.{format}", raw);
+            await container.UploadBlobAsync($"{date:yyyy/MM/dd/hhmm}-tracks_parsed.{format}", parsed);
         }
         catch (RequestFailedException ex)
         {
