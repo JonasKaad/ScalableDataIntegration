@@ -26,11 +26,10 @@
                         }
                     </MudSelect>
 
-                    <MudAlert Severity="Severity.Info" Dense="true" Icon="@Icons.Material.Filled.Info" Variant="Variant.Outlined">
+                    <MudAlert Severity="Severity.Info" Dense="true" Icon="@Icons.Material.Filled.Info" Variant="Variant.Outlined" Class="mb-4">
                         Showing parsers with downloaded data in the last 14 days
                     </MudAlert>
-                    <MudGrid Justify="Justify.SpaceBetween" Class="mt-0">
-                        <MudItem md="7">
+                    <MudStack Row="true" Class="mb-2">
                             <MudTooltip Text="Fetch all parsers with data from the database">
                                 <MudButton Variant="Variant.Outlined"
                                            Color="Color.Primary"
@@ -41,20 +40,18 @@
                                     Fetch All Data
                                 </MudButton>
                             </MudTooltip>
-                        </MudItem>
-                        <MudItem md="5">
-                            <MudTooltip Text="Refresh with latest data">
-                                <MudButton Variant="Variant.Filled"
-                                           Color="Color.Primary"
-                                           FullWidth="true"
-                                           OnClick="@RefreshData"
-                                           Size="Size.Medium"
-                                           StartIcon="@Icons.Material.Filled.Refresh">
-                                    Refresh
-                                </MudButton>
-                            </MudTooltip>
-                        </MudItem>
-                    </MudGrid>
+                        <MudSpacer/>
+                        <MudTooltip Text="Refresh with latest data">
+                            <MudButton Variant="Variant.Filled"
+                                       Color="Color.Primary"
+                                       FullWidth="true"
+                                       OnClick="@RefreshData"
+                                       Size="Size.Medium"
+                                       StartIcon="@Icons.Material.Filled.Refresh">
+                                Refresh
+                            </MudButton>
+                        </MudTooltip>
+                    </MudStack>
                 </MudStack>
             </MudPaper>
         </MudItem>
