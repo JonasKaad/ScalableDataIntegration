@@ -2,37 +2,59 @@
 @attribute [Authorize(Roles = "Admin, Developer")]
 @using ApexCharts
 @using Color = MudBlazor.Color
+@using Size = MudBlazor.Size
 <PageTitle>SkyPanel — Graphs</PageTitle>
 <MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
     <MudGrid Justify="Justify.Center">
         <MudItem xs="12" sm="4">
-            <MudPaper Elevation="3" Class="pa-8 ma-2" Style="border-radius: 16px; height: 95%">
-                <MudText Typo="Typo.h5" Class="mb-4">Parser</MudText>
-                <MudItem xs="12" sm="12">
-                    <MudStack>
-                        <MudGrid>
-                            <MudItem xs="12">
-                                <MudSelect T="string" Label="Parsers" MultiSelection="true" SelectedValues="_selectedParsers" SelectedValuesChanged="AddParser">
-                                    @foreach (var parser in _parsers)
-                                    {
-                                        <MudSelectItem T="string" Value="@parser">@parser</MudSelectItem>
-                                    }
-                                </MudSelect>
-                            </MudItem>
-                            <MudItem>
-                                <MudText>Showing parsers with downloaded data in the last 14 days</MudText>
-                                <MudButton Variant="Variant.Filled" OnClick="@(() => FetchDataFromDb(DateTime.Parse("2023-01-01").ToUniversalTime()))">Fetch more?</MudButton>
-                            </MudItem>
-                            <MudItem>
-                                <MudButton Variant="Variant.Filled" Color=Color.Primary 
-                                           OnClick="@RefreshData" 
-                                           StartIcon="@Icons.Material.Filled.Refresh">
-                                    Refresh Data
+            <MudPaper Elevation="3" Class="pa-8 ma-2" Style="border-radius: 16px;">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-4">
+                    <MudText Typo="Typo.h5">Parser</MudText>
+                </MudStack>
+                
+                <MudStack Spacing="3">
+                    <MudSelect T="string"
+                               Label="Parsers"
+                               MultiSelection="true"
+                               SelectedValues="_selectedParsers"
+                               SelectedValuesChanged="AddParser"
+                               Variant="Variant.Outlined"
+                               Class="mb-1">
+                        @foreach (var parser in _parsers)
+                        {
+                            <MudSelectItem T="string" Value="@parser">@parser</MudSelectItem>
+                        }
+                    </MudSelect>
+
+                    <MudAlert Severity="Severity.Info" Dense="true" Icon="@Icons.Material.Filled.Info" Variant="Variant.Outlined">
+                        Showing parsers with downloaded data in the last 14 days
+                        </MudAlert>
+                    <MudGrid Justify="Justify.SpaceBetween" Class="mt-0">
+                        <MudItem md="7">
+                            <MudTooltip Text="Fetch all data from the database">
+                                <MudButton Variant="Variant.Outlined"
+                                           FullWidth="true"
+                                           OnClick="@(() => FetchDataFromDb(DateTime.Parse("2023-01-01").ToUniversalTime()))"
+                                           StartIcon="@Icons.Material.Filled.History"
+                                           Size="Size.Medium">
+                                    Fetch All Data
                                 </MudButton>
-                            </MudItem>
-                        </MudGrid>
-                    </MudStack>
-                </MudItem>
+                            </MudTooltip>
+                        </MudItem>
+                        <MudItem md="5">
+                            <MudTooltip Text="Refresh the current data">
+                                <MudButton Variant="Variant.Filled"
+                                           Color="Color.Primary"
+                                           FullWidth="true"
+                                           OnClick="@RefreshData"
+                                           Size="Size.Medium"
+                                           StartIcon="@Icons.Material.Filled.Refresh">
+                                    Refresh
+                                </MudButton>
+                            </MudTooltip>
+                        </MudItem>
+                    </MudGrid>
+                </MudStack>
             </MudPaper>
         </MudItem>
         <MudItem xs="12" sm="6">
