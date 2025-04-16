@@ -123,7 +123,21 @@ public partial class Graphs
         }
     }
     
-    
+    private async Task RefreshData()
+    {
+        _loading = true;
+        StateHasChanged();
+        
+        LoadDataFromDb();
+        
+        if (_selected.Any())
+        {
+            await Chart.UpdateOptionsAsync(true, false, false);
+        }
+        
+        _loading = false;
+        StateHasChanged();
+    }
 
     private async Task AddParser(IEnumerable<string> values)
     {
