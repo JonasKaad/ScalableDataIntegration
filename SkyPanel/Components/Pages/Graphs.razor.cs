@@ -8,6 +8,7 @@ namespace SkyPanel.Components.Pages;
 public partial class Graphs
 {
     private bool _loading = true;
+    private bool _refreshing;
     private ApexChart<ParserData> Chart { get; set; } = new();
     private ApexChartOptions<ParserData>? _options;
     [CascadingParameter] private bool IsDarkMode { get; set; }
@@ -125,17 +126,15 @@ public partial class Graphs
     
     private async Task RefreshData()
     {
-        _loading = true;
+        _refreshing = true;
         StateHasChanged();
         
         LoadDataFromDb();
-        
         if (_selected.Any())
         {
             await Chart.UpdateOptionsAsync(true, false, false);
         }
-        
-        _loading = false;
+        _refreshing = false;
         StateHasChanged();
     }
 

@@ -11,7 +11,7 @@
                 <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-4">
                     <MudText Typo="Typo.h5">Parser</MudText>
                 </MudStack>
-                
+
                 <MudStack Spacing="3">
                     <MudSelect T="string"
                                Label="Parsers"
@@ -28,7 +28,7 @@
 
                     <MudAlert Severity="Severity.Info" Dense="true" Icon="@Icons.Material.Filled.Info" Variant="Variant.Outlined">
                         Showing parsers with downloaded data in the last 14 days
-                        </MudAlert>
+                    </MudAlert>
                     <MudGrid Justify="Justify.SpaceBetween" Class="mt-0">
                         <MudItem md="7">
                             <MudTooltip Text="Fetch all data from the database">
@@ -82,11 +82,11 @@
                                     Dense="true"
                                     Variant="Variant.Filled"
                                     @bind-Value="_groupSpan">
-                                    <MudSelectItem Value="@(new TimeSpan(0,15,0))">15 Minutes</MudSelectItem>
-                                    <MudSelectItem Value="@(new TimeSpan(1,0,0))">1 Hour</MudSelectItem>
-                                    <MudSelectItem Value="@(new TimeSpan(6,0,0))">6 Hours</MudSelectItem>
-                                    <MudSelectItem Value="@(new TimeSpan(24,0,0))">1 day</MudSelectItem>
-                                    <MudSelectItem Value="@(new TimeSpan(24*7,0,0))">1 week</MudSelectItem>
+                                    <MudSelectItem Value="@(new TimeSpan(0, 15, 0))">15 Minutes</MudSelectItem>
+                                    <MudSelectItem Value="@(new TimeSpan(1, 0, 0))">1 Hour</MudSelectItem>
+                                    <MudSelectItem Value="@(new TimeSpan(6, 0, 0))">6 Hours</MudSelectItem>
+                                    <MudSelectItem Value="@(new TimeSpan(24, 0, 0))">1 day</MudSelectItem>
+                                    <MudSelectItem Value="@(new TimeSpan(24 * 7, 0, 0))">1 week</MudSelectItem>
                                 </MudSelect>
                             </MudItem>
                             <MudItem xs="6">
@@ -109,46 +109,54 @@
                 </MudItem>
             </MudPaper>
         </MudItem>
-    
+
         <MudItem xs="12" sm="12">
             @if (_loading)
             {
                 <MudPaper Class="pa-8 ma-2 d-flex justify-center">
-                    <MudProgressCircular Color="MudBlazor.Color.Primary" Indeterminate="true" Size="MudBlazor.Size.Large" />
+                    <MudProgressCircular Color="Color.Primary" Indeterminate="true" Size="Size.Large"/>
                 </MudPaper>
             }
             else
             {
-                <MudPaper Class="pa-8 ma-2">
-                    <ApexChart TItem="ParserData"
-                               Options=_options
-                               Title="Downloaded data amount" @ref="Chart"
-                               XAxisType="XAxisType.Datetime">
-                        <ApexPointTooltip>
-                            <div class="ma-2">
-                                @{
-                                    var point = (DataPoint<ParserData>)context.DataPoint;
-                                    <h3>@_selected.ToList()[context.SeriesIndex]</h3>
-                                    <p>Time: @point.X</p>
-                                    <p>Downloaded: @point.Y Megabytes</p>
+                <div style="position: relative;">
+                    <MudPaper Class="pa-8 ma-2">
+                        @if (_refreshing)
+                        {
+                            <MudOverlay Visible="true" Absolute="true" ZIndex="5" LightBackground="true">
+                                <MudProgressCircular Color="Color.Primary" Indeterminate="true" Size="Size.Large" />
+                            </MudOverlay>
+                        }
+                        <ApexChart TItem="ParserData"
+                                   Options=_options
+                                   Title="Downloaded data amount" @ref="Chart"
+                                   XAxisType="XAxisType.Datetime">
+                            <ApexPointTooltip>
+                                <div class="ma-2">
+                                    @{
+                                        var point = (DataPoint<ParserData>)context.DataPoint;
+                                        <h3>@_selected.ToList()[context.SeriesIndex]</h3>
+                                        <p>Time: @point.X</p>
+                                        <p>Downloaded: @point.Y Megabytes</p>
+                                    }
+                                </div>
+                            </ApexPointTooltip>
+                            <ChildContent>
+                                @foreach (string parser in _selected)
+                                {
+                                    <ApexPointSeries TItem="ParserData"
+                                                     Items="@_parserData[@parser]"
+                                                     Name="@parser"
+                                                     SeriesType="SeriesType.Bar"
+                                                     XValue="e => e.Time"
+                                                     YAggregate="e => Math.Round(e.Sum(es => es.DownloadedBytes), 5)"
+                                                     OrderByDescending="e => e.X"
+                                                     ShowDataLabels/>
                                 }
-                            </div>
-                        </ApexPointTooltip>
-                        <ChildContent>
-                            @foreach (string parser in _selected)
-                            {
-                                <ApexPointSeries TItem="ParserData"
-                                                 Items="@_parserData[@parser]"
-                                                 Name="@parser"
-                                                 SeriesType="SeriesType.Bar"
-                                                 XValue="e => e.Time"
-                                                 YAggregate="e => Math.Round(e.Sum(es => es.DownloadedBytes),5)"
-                                                 OrderByDescending="e => e.X"
-                                                 ShowDataLabels />
-                            }
-                        </ChildContent>
-                    </ApexChart>
-                </MudPaper>
+                            </ChildContent>
+                        </ApexChart>
+                    </MudPaper>
+                </div>
             }
         </MudItem>
     </MudGrid>
