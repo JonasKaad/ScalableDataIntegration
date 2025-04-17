@@ -41,7 +41,7 @@ services:
       - ./Parsers/MetarParser/.env
     environment:
       - BASE_URL=http://downloader:8080
-      - PARSER_URL=http://metar:50051
+      - PARSER_URL=http://metarparser:50051
     volumes:
       - ./Parsers/MetarParser/src:/app/Parsers/MetarParser/src
     networks:
