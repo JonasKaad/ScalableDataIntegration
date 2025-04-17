@@ -31,7 +31,10 @@ services:
       - parser-network
     depends_on:
       - downloader
-  metar:
+
+### Parsers
+
+  metarparser:
     build:
       context: .
       dockerfile: ./Parsers/MetarParser/src/scalabledataintegration/Dockerfile
@@ -104,6 +107,8 @@ services:
       - parser-network
     depends_on:
       - downloader
+
+### Filters
 
   ocrfilter:
     build:
