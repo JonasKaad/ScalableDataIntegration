@@ -25,6 +25,7 @@ services:
       - ./SkyPanel/.env
     environment:
       - DOWNLOAD_ORCHESTRATOR_URL=http://downloader:8080
+      - ASPNETCORE_ENVIRONMENT=Development
     volumes:
       - ./SkyPanel:/app/SkyPanel
     networks:
