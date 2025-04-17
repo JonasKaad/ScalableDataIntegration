@@ -25,10 +25,19 @@ func (m *MetarParserImpl) ParseCall(_ context.Context, req *parser.ParseRequest)
 			Success: false,
 			ErrMsg:  &errMsg,
 		}, nil
+
 	}
+
 	metarParser := goMetarParser.New()
-	count := 0
-	allReports := make([]*metar.Report, 0)
+	var allReports []*metar.Report
+
+	// Use defer to recover from any panic
+	defer func() {
+		if r := recover(); r != nil {
+			log.Printf("Recovered from panic in METAR parsing: %v", r)
+		}
+	}()
+
 	for _, fullDataString := range data {
 		metarDataSplitNewline := strings.Split(fullDataString, "\n")
 		for _, metarLine := range metarDataSplitNewline {
@@ -37,29 +46,47 @@ func (m *MetarParserImpl) ParseCall(_ context.Context, req *parser.ParseRequest)
 				continue
 			}
 
-			report, err := metarParser.Parse(metarLine)
+			var parsedReport *metar.Report
+			func() {
+				defer func() {
+					if r := recover(); r != nil {
+						log.Printf("Parsing failed for line '%s': %v", metarLine, r)
+						parsedReport = nil
+					}
+				}()
+				report, err := metarParser.Parse(metarLine)
+				if err != nil {
+					log.Printf("Error parsing line '%s': %v", metarLine, err)
+					return
+				}
+				parsedReport = &report
+			}()
 
-			if err != nil {
-				errMsg := "Error parsing METAR data: " + err.Error()
-				log.Print(errMsg)
-				return &parser.ParseResponse{
-					Success: false,
-					ErrMsg:  &errMsg,
-				}, nil
+			if parsedReport != nil {
+				allReports = append(allReports, parsedReport)
 			}
-			allReports = append(allReports, &report)
-			count++
 		}
+	}
+
+	if len(allReports) == 0 {
+		errMsg := "No valid METAR reports could be parsed"
+		return &parser.ParseResponse{
+			Success: false,
+			ErrMsg:  &errMsg,
+		}, nil
 	}
 
 	jsonData, err := json.MarshalIndent(allReports, "", "  ")
 	if err != nil {
 		errMsg := "Error converting reports to JSON: " + err.Error()
 		log.Print(errMsg)
+		return &parser.ParseResponse{
+			Success: false,
+			ErrMsg:  &errMsg,
+		}, nil
 	}
 
 	server.SaveData(req.RawData, jsonData)
-
 	return &parser.ParseResponse{
 		Success: true,
 	}, nil
