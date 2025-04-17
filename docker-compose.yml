@@ -68,6 +68,24 @@ services:
     depends_on:
       - downloader
 
+  pythonparser:
+    build:
+      context: .
+      dockerfile: ./Parsers/PythonParser/Dockerfile
+    ports:
+      - "50052:50051"
+    env_file:
+      - ./Parsers/PythonParser/.env
+    environment:
+      - BASE_URL=http://downloader:8080
+      - PARSER_URL=http://pythonparser:50051
+    volumes:
+      - ./Parsers/PythonParser:/app/Parsers/PythonParser
+    networks:
+      - parser-network
+    depends_on:
+      - downloader
+
 
 networks:
   parser-network:
