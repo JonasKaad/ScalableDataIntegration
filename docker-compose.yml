@@ -105,6 +105,24 @@ services:
     depends_on:
       - downloader
 
+  ocrfilter:
+    build:
+      context: .
+      dockerfile: ./Filters/OCRFilter/Dockerfile
+    ports:
+      - "50053:50051"
+    env_file:
+      - ./Filters/OCRFilter/.env
+    environment:
+      - BASE_URL=http://downloader:8080
+      - PARSER_URL=http://ocrfilter:50051
+    volumes:
+      - ./Filters/OCRFilter:/app/Filters/OCRFilter
+    networks:
+      - parser-network
+    depends_on:
+      - downloader
+
 
 networks:
   parser-network:
