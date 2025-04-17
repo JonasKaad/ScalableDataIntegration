@@ -40,7 +40,7 @@ services:
       - BLOB_CONNECTION=${BLOB_CONNECTION}
       - DD_API_KEY=${DD_API_KEY}
     volumes:
-      - ./Parsers/MetarParser:/app/Parsers/MetarParser
+      - ./Parsers/MetarParser/src:/app/Parsers/MetarParser/src
     networks:
       - parser-network
     depends_on:
