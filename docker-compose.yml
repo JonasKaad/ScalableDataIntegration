@@ -48,6 +48,26 @@ services:
       - parser-network
     depends_on:
       - downloader
+  ausotparser:
+    build:
+      context: .
+      dockerfile: ./Parsers/AusotParser/Dockerfile
+    ports:
+      - "8084:8084"
+      - "8085:8080"
+    env_file:
+      - ./Parsers/AusotParser/.env
+    environment:
+      - BASE_URL=http://downloader:8080
+      - PARSER_URL=http://ausotparser:8084
+      - ASPNETCORE_ENVIRONMENT=Development
+    volumes:
+      - ./Parsers/AusotParser:/app/Parsers/AusotParser
+    networks:
+      - parser-network
+    depends_on:
+      - downloader
+
 
 networks:
   parser-network:
