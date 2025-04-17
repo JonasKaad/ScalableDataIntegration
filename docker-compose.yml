@@ -14,7 +14,23 @@ services:
       - ./DownloadOrchestrator:/app/DownloadOrchestrator
     networks:
       - parser-network
-
+  skypanel:
+    build:
+      context: .
+      dockerfile: ./SkyPanel/Dockerfile
+    ports:
+      - "9080:8080" 
+      - "9081:8081"
+    env_file:
+      - ./SkyPanel/.env
+    environment:
+      - DOWNLOAD_ORCHESTRATOR_URL=http://downloader:8080
+    volumes:
+      - ./SkyPanel:/app/SkyPanel
+    networks:
+      - parser-network
+    depends_on:
+      - downloader
   metar:
     build:
       context: .
