@@ -68,6 +68,25 @@ services:
     depends_on:
       - downloader
 
+  metadataparser:
+    build:
+      context: .
+      dockerfile: ./Parsers/MetaDataParser/Dockerfile
+    ports:
+      - "8086:8080"
+      - "8087:8081"
+    env_file:
+      - ./Parsers/MetaDataParser/.env
+    environment:
+      - BASE_URL=http://downloader:8080
+      - PARSER_URL=http://metadataparser:8080
+    volumes:
+      - ./Parsers/MetaDataParser:/app/Parsers/MetaDataParser
+    networks:
+      - parser-network
+    depends_on:
+      - downloader
+
   pythonparser:
     build:
       context: .
