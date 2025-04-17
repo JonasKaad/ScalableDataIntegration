@@ -123,6 +123,23 @@ services:
     depends_on:
       - downloader
 
+  regexfilter:
+    build:
+      context: .
+      dockerfile: ./Filters/RegexFilter/Dockerfile
+    ports:
+      - "50054:50051"
+    env_file:
+      - ./Filters/RegexFilter/.env
+    environment:
+      - BASE_URL=http://downloader:8080
+      - PARSER_URL=http://regexfilter:50051
+    volumes:
+      - ./Filters/RegexFilter:/app/Filters/RegexFilter
+    networks:
+      - parser-network
+    depends_on:
+      - downloader
 
 networks:
   parser-network:
