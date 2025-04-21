@@ -69,7 +69,7 @@ async def serve():
 
 if __name__ == '__main__':
     parameters = {
-        "regex": "*"
+        "regex": ".*"
     }
     loop = asyncio.new_event_loop()
     loop.create_task(init_filter(loop, parameters))
