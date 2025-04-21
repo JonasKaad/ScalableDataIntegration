@@ -10,6 +10,7 @@ services:
       - ./DownloadOrchestrator/.env
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+      - ACCESS_TOKEN=${ACCESS_TOKEN}
     volumes:
       - ./DownloadOrchestrator:/app/DownloadOrchestrator
     networks:

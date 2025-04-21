@@ -62,16 +62,30 @@ builder.Services
         options.UseNpgsql(connectionString))
     .AddScoped<SecretService>(s =>
     {
-        var userAssignedClientId = new ResourceIdentifier(Environment.GetEnvironmentVariable("AZURE_CLIENT_ID"));
-
-        var credential = new DefaultAzureCredential(
-            new DefaultAzureCredentialOptions
-            {
-                ManagedIdentityClientId = userAssignedClientId
-            });
+        var azureClientId = Environment.GetEnvironmentVariable("AZURE_CLIENT_ID");
+        if (string.IsNullOrEmpty(azureClientId))
+        {
+            throw new InvalidOperationException("AZURE_CLIENT_ID environment variable is not set.");
+        }
+        
         var keyVaultName = Environment.GetEnvironmentVariable("KEY_VAULT_NAME");
         var kvUri = "https://" + keyVaultName + ".vault.azure.net";
-
+        TokenCredential credential;
+        var accessToken = Environment.GetEnvironmentVariable("ACCESS_TOKEN"); 
+        
+        if (!string.IsNullOrEmpty(accessToken))
+        {
+            credential = new StaticTokenCredential(accessToken);
+        }
+        else
+        {
+            var userAssignedClientId = new ResourceIdentifier(azureClientId);
+            credential = new DefaultAzureCredential(
+                new DefaultAzureCredentialOptions
+                {
+                    ManagedIdentityClientId = userAssignedClientId
+                });
+        }
         var client = new SecretClient(new Uri(kvUri), credential);
         var logger = s.GetService<Logger<SecretService>>();
         return new SecretService(client, logger!);
@@ -119,4 +133,26 @@ catch (Exception e)
 finally
 {
     Log.CloseAndFlush();
+}
+
+
+
+public class StaticTokenCredential : TokenCredential
+{
+    private readonly string _token;
+
+    public StaticTokenCredential(string token)
+    {
+        _token = token;
+    }
+
+    public override AccessToken GetToken(TokenRequestContext requestContext, CancellationToken cancellationToken)
+    {
+        return new AccessToken(_token, DateTimeOffset.Now.AddHours(1));
+    }
+
+    public override ValueTask<AccessToken> GetTokenAsync(TokenRequestContext requestContext, CancellationToken cancellationToken)
+    {
+        return new ValueTask<AccessToken>(GetToken(requestContext, cancellationToken));
+    }
 }
