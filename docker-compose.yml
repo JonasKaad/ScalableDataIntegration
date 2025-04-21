@@ -26,6 +26,7 @@ services:
     environment:
       - DOWNLOAD_ORCHESTRATOR_URL=http://downloader:8080
       - ASPNETCORE_ENVIRONMENT=Development
+      - ACCESS_TOKEN=${ACCESS_TOKEN}
     volumes:
       - ./SkyPanel:/app/SkyPanel
     networks:
