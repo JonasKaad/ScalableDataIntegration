@@ -135,7 +135,15 @@ public class DownloaderController : ControllerBase
         }
 
         newDl.Parser = _parserRegistry.GetService(newDl.Parser.ToLowerInvariant()) ?? "";
-        newDl.Filters = newDl.Filters.Select(filter => _filterRegistry.GetService(filter.Name.ToLowerInvariant())).ToList()!;
+        newDl.Filters = newDl.Filters.Select(filter =>
+        {
+            var registeredFilter = _filterRegistry.GetService(filter.Name.ToLowerInvariant());
+            if (registeredFilter != null)
+            {
+                registeredFilter.Parameters = filter.Parameters;
+            }
+            return registeredFilter;
+        }).ToList()!;
         
         _downloaders.Add(newDl);
         _downloaderService.ScheduleOrUpdateRecurringDownload(newDl);
