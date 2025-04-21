@@ -32,6 +32,9 @@ class FilterServicer(filter_pb2_grpc.FilterServicer):
     async def FilterCall(self, request, context):
         # Get data from the request
         raw_data = request.raw_data
+        format_type = request.format
+        if format_type != "img":
+            return filter_pb2.FilterResponse(success=False, err_msg="Invalid format")
 
         nparr = np.frombuffer(raw_data, np.uint8)
         image_data = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
