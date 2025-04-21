@@ -31,13 +31,6 @@ import parser_pb2
 # noinspection PyUnresolvedReferences
 import parser_pb2_grpc
 
-### Classes
-class MyObject:
-    def __init__(self, name, parameters, url):
-        self.name = name
-        self.parameters = parameters
-        self.url = url
-
 ### REGISTRY
 async def send_heartbeat(type="Parser"):
     baseurl = os.getenv("BASE_URL")
@@ -124,7 +117,6 @@ def get_data(raw_data, format_type):
                 try:
                     relevant.append(data.decode('utf-8').split(";"))
                 except UnicodeDecodeError as e:
-                    dd_warning(f"Warning: Could not decode part of data as UTF-8", str(e))
                     raw.append(data)
             elif format_type == "img":
                 ##TODO: Do some more checks to see if data is actually image
@@ -168,9 +160,11 @@ async def send_to_next_url(next_url, raw_data, parameters, urls):
         options = [
             ('grpc.enable_retries', 1),
             ('grpc.keepalive_time_ms', 10000),
+            ('grpc.keepalive_timeout_ms', 5000),
             ('grpc.dns_resolution_timeout_ms', 5000)
         ]
-        async with grpc.aio.insecure_channel(next_url, options=options) as channel:
+        credentials = grpc.ssl_channel_credentials()
+        async with grpc.aio.secure_channel(next_url, options=options, credentials=credentials) as channel:
             if len(parameters) > 0:
                 response = await send_to_filter(channel, raw_data, parameters, urls)
             else:
@@ -182,12 +176,17 @@ async def send_to_next_url(next_url, raw_data, parameters, urls):
             else:
                 success = False
                 msg = "Filter failed sending data to next url"
-                dd_error("Failed to send data to next URL", str(e))
-    except Exception as e:
-        print(f"gRPC connection error: {e}")
+                dd_error("Filter succeeded sending data to next url, but received error", str(response.err_msg))
+    except grpc.aio.AioRpcError as e:
+        print(f"gRPC connection error: {e.code()} - {e.details()}")
         success = False
-        msg = "gRPC connection error"
-        dd_error("Failed to send data to next URL", str(e))
+        msg = f"gRPC connection error: {e.details()}"
+        dd_error("Failed to send data to next URL", f"gRPC Error: {e.code()} - {e.details()}")
+    except Exception as e:
+        print(f"Unexpected error during gRPC call: {e}")
+        success = False
+        msg = f"Unexpected error: {e}"
+        dd_error("Failed to send data to next URL", f"Unexpected Error: {str(e)}")
 
     return success, msg
 
