@@ -65,7 +65,7 @@ services:
       - ./Parsers/AusotParser/.env
     environment:
       - BASE_URL=http://downloader:8080
-      - PARSER_URL=http://ausotparser:8084
+      - PARSER_URL=http://ausotparser:8080
       - ASPNETCORE_ENVIRONMENT=Development
     volumes:
       - ./Parsers/AusotParser:/app/Parsers/AusotParser
