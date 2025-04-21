@@ -48,7 +48,11 @@ class FilterServicer(filter_pb2_grpc.FilterServicer):
         (next_url, urls) = get_next_url(request.next_urls.split(";"))
         dd_info("Routing", f"Next URL: {next_url}")
 
-        data_to_send = raw[0]
+        if not raw:
+            dd_warning("Data Processing", "No raw data received")
+            data_to_send = b''
+        else:
+            data_to_send = raw[0]
         data_to_send += b'magic'
         data_to_send += bytes(match, encoding='utf-8') if match else b''
         dd_info("Data Processing", f"Prepared data to send: {len(data_to_send)} bytes")
