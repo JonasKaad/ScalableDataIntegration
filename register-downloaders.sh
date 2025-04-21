@@ -27,7 +27,7 @@ add_downloader "metadataparser" '{
     "parser": "metadataparser",
     "filters": [
         {
-            "name": "ocrfilter",
+            "name": "ocr-filter",
             "parameters": {
                 "startX": "21.683421280821783",
                 "startY": "15.751422076198782",
@@ -36,7 +36,7 @@ add_downloader "metadataparser" '{
             }
         },
         {
-            "name": "regexfilter",
+            "name": "regex-filter",
             "parameters": {
                 "regex": "(VALID|valid)"
             }
