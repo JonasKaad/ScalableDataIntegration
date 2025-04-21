@@ -31,6 +31,8 @@ class FilterServicer(filter_pb2_grpc.FilterServicer):
         raw_data = request.raw_data
         format_type = request.format
         (strings, raw) = get_data(raw_data, format_type)
+        if format_type != "str":
+            return filter_pb2.FilterResponse(success=False, err_msg="Invalid format")
 
         (json_parameters, parameters) = read_params(request.parameters.split(";"), "regex")
 
