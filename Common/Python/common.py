@@ -5,7 +5,9 @@ import json
 import os
 import sys
 from datadog import initialize, api
+import logging
 initialize()
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 import grpc
 from azure.identity.aio import DefaultAzureCredential
@@ -228,13 +230,16 @@ def dd_error(title: str, text: str):
     title = f"{os.getenv('PARSER_NAME')} - {title}"
     tags = {"service": os.getenv("PARSER_NAME")}
     api.Event.create(title=title, text=text, tags=tags, alert_type="error", priority="normal")
+    logging.error(text)
 
 def dd_warning(title: str, text: str):
     title = f"{os.getenv('PARSER_NAME')} - {title}"
     tags = {"service": os.getenv("PARSER_NAME")}
     api.Event.create(title=title, text=text, tags=tags, alert_type="warning", priority="normal")
+    logging.warning(text)
 
 def dd_info(title: str, text: str):
     title = f"{os.getenv('PARSER_NAME')} - {title}"
     tags = {"service": os.getenv("PARSER_NAME")}
     api.Event.create(title=title, text=text, tags=tags, alert_type="info", priority="normal")
+    logging.info(text)
