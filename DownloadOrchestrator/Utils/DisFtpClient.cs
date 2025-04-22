@@ -25,7 +25,7 @@ public class DisFtpClient : IDownloaderClient
         }
         if (host.Contains(':'))
         {
-            port = int.Parse(host.Split().Last());
+            port = int.Parse(host.Split(":").Last());
         }
 
         Console.WriteLine(host);
