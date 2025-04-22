@@ -14,7 +14,7 @@ public class DisDownloaderClient
 
     private Source GetSourceFromUrl(string url)
     {
-        if (url[..3].Equals("ftp", StringComparison.OrdinalIgnoreCase))
+        if (url[..4].Contains("ftp", StringComparison.OrdinalIgnoreCase))
         { 
             return Source.Ftp;
         }
