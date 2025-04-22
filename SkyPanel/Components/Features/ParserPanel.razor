@@ -39,8 +39,8 @@
                 }
                 else
                 {
-                    <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error" Disabled="ParserState.ParserIsNotSelected()">
-                        Delete Downloader
+                    <MudButton Variant="Variant.Filled" OnClick="@(() => OpenDeleteDialogAsync())" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error" Disabled="ParserState.ParserIsNotSelected()">
+                        Remove Downloader
                     </MudButton>
                 }
             </MudItem>
