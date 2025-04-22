@@ -251,4 +251,12 @@ public class DownloaderController : ControllerBase
         }
         return new List<bool> {mainResult, backUpResult};
     }
+    [Route("{downloader}/remove")]
+    [HttpDelete]
+    public ActionResult Remove(string downloader)
+    {
+        _downloaderService.RemoveRecurringJob(downloader);
+        
+        return Ok($"Downloader {downloader} has been removed.");
+    }
 }
