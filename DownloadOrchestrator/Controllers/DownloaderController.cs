@@ -63,7 +63,7 @@ public class DownloaderController : ControllerBase
         
         try
         {
-            var parser = !string.IsNullOrEmpty(dlConfiguration.Parser) ?  _parserRegistry.GetService(dlConfiguration.Parser.ToLowerInvariant()) : "";
+            var parser = !string.IsNullOrEmpty(dlConfiguration.Parser) ?  dlConfiguration.Parser.ToLowerInvariant() : "";
             if(parser is null)
             {
                 _logger.LogWarning("Tried to configure downloader {Downloader} with parser {Parser} but the parser was not found", downloader, dlConfiguration.Parser);
@@ -134,7 +134,7 @@ public class DownloaderController : ControllerBase
             return BadRequest("The downloader must have a polling rate.");
         }
 
-        newDl.Parser = _parserRegistry.GetService(newDl.Parser.ToLowerInvariant()) ?? "";
+        newDl.Parser = newDl.Parser.ToLowerInvariant();
         newDl.Filters = newDl.Filters.Select(filter =>
         {
             var registeredFilter = _filterRegistry.GetService(filter.Name.ToLowerInvariant());
@@ -189,8 +189,17 @@ public class DownloaderController : ControllerBase
         var parameters = dl.Filters.Select(f => System.Text.Json.JsonSerializer.Serialize(f.Parameters)).ToList();
         var filterNames = dl.Filters.Select(f => f.Name).ToList();
         var urls = filterNames.Select(filter => _filterRegistry.GetFilterUrl(filter)).ToList();
-        urls.Add(dl.Parser);
-        await BaseDownloaderJob.SendToParser(totalBytes.ToArray(), urls, parameters);
+        var parserUrl = _parserRegistry.GetService(dl.Parser);
+        if(!string.IsNullOrEmpty(parserUrl))
+            urls.Add(parserUrl);
+        if (urls.Any())
+        {
+            await BaseDownloaderJob.SendToParser(totalBytes.ToArray(), urls, parameters);
+        }
+        else
+        {
+            await DirectDownloadJob.SendToParser(totalBytes.ToArray(), downloader);
+        }
         return Ok($"Parsing for {downloader} has been started with uploaded data.");
     }
 

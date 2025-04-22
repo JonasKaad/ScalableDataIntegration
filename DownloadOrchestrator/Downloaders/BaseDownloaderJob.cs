@@ -15,13 +15,15 @@ public class BaseDownloaderJob : IDownloaderJob
     private readonly StatisticsDatabaseService _context;
     protected readonly SecretService SecretService;
     protected readonly FilterRegistry _filterRegistry;
+    protected readonly ParserRegistry _parserRegistry;
     private readonly ILogger<IDownloaderJob> _logger;
     
-    public BaseDownloaderJob(ILogger<BaseDownloaderJob> logger, StatisticsDatabaseService context, SecretService secretService, FilterRegistry filterRegistry)
+    public BaseDownloaderJob(ILogger<BaseDownloaderJob> logger, StatisticsDatabaseService context, SecretService secretService, ParserRegistry parserRegistry, FilterRegistry filterRegistry)
     {
         _context = context; 
         SecretService = secretService;
         _filterRegistry = filterRegistry;
+        _parserRegistry = parserRegistry;
         _logger = logger;
     }
 
@@ -44,7 +46,9 @@ public class BaseDownloaderJob : IDownloaderJob
             var parameters = data.Filters.Select(f => System.Text.Json.JsonSerializer.Serialize(f.Parameters)).ToList();
             var filterNames = data.Filters.Select(f => f.Name).ToList();
             var urls = filterNames.Select(filter => _filterRegistry.GetFilterUrl(filter)).ToList();
-            urls.Add(data.Parser);
+            var parserUrl = _parserRegistry.GetService(data.Parser);
+            if(!string.IsNullOrEmpty(parserUrl))
+                urls.Add(parserUrl);
             await SendToParser(bytes, urls, parameters);
         }
         catch (Exception e)
