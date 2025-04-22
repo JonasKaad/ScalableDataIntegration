@@ -128,8 +128,39 @@ public partial class ParserPanel : ComponentBase
             }
         }
     }
-
-
+    
+    private async Task OpenDeleteDialogAsync()
+    {
+        var parameters = new DialogParameters<ReparseDialog>
+        {
+            { x => x.ContentText, "Do you want to remove the following downloader:" },
+            { x => x.ConfirmationButtonText, "Remove" },
+            {x=> x.Color, Color.Error },
+            { x => x.EmphasizedCenterText, ParserState.ParserName },
+        };
+        
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.ExtraSmall, FullWidth = true };
+        var dialogResult = await (await DialogService.ShowAsync<ReparseDialog>("Remove downloader", parameters, options)).Result;
+        var result = dialogResult?.Data as string ?? string.Empty;
+        
+        if (result == "reparse")
+        {
+            var removeResult = await OrchestratorClient.RemoveDownloader(ParserState.ParserName);
+            if (removeResult)
+            {
+                Snackbar.Add($"Removed downloader: {ParserState.ParserName}",  Severity.Info);
+            }
+            else
+            {
+                Snackbar.Add($"Failed to remove downloader: {ParserState.ParserName}", Severity.Error);
+                _logger.LogError("[AUDIT] Failed to remove downloader: {Parser}", ParserState.ParserName);
+            }
+        }
+        Parser = string.Empty;
+        ParserState.SetParser(null);
+        StateHasChanged();
+    }
+    
     private List<UploadResult> uploadResults = new();
     private List<File> _files = new();
     
