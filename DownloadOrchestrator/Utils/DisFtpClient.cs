@@ -12,14 +12,29 @@ public class DisFtpClient : IDownloaderClient
             throw new ArgumentException("Hostname is too short, did you forget the protocol?");
         }
         int port = 21;
-        if (host[5..].Contains(':'))
+        bool useSftp = false;
+        
+        if (host.Contains("ftp://"))
         {
             string[] parts = host.Split(':');
-            host = parts[0] + ":" + parts[1];
-            port = int.Parse(parts[2]);
+            if (parts[0].Contains("sftp"))
+            {
+                useSftp = true;
+            }
+            host = parts[1][2..];
+        }
+        if (host.Contains(':'))
+        {
+            port = int.Parse(host.Split().Last());
         }
 
+        Console.WriteLine(host);
+
         _ftpClient = new AsyncFtpClient(host, userName, password, port);
+        if (useSftp)
+        {
+            _ftpClient.Config.EncryptionMode = FtpEncryptionMode.Explicit;
+        }
     }
 
     public async Task<byte[]> FetchData()
