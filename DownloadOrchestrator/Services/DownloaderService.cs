@@ -37,6 +37,11 @@ public class DownloaderService : IDownloaderService
         }
         return data.Name;
     }
+    
+    public void RemoveRecurringJob(string jobId)
+    {
+        _recurringJobManager.RemoveIfExists(jobId);
+    }
 
     public List<DownloaderData> GetRecurringJobs()
     {
