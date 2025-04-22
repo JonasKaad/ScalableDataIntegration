@@ -260,7 +260,6 @@ func SaveData(rawFile []byte, parsedFile []byte) {
 	}
 
 	containerName := strings.ToLower(os.Getenv("PARSER_NAME"))
-	log.Printf("Container name: %s", containerName)
 
 	// First check if container exists
 	containerExists := false
@@ -279,7 +278,6 @@ func SaveData(rawFile []byte, parsedFile []byte) {
 		for _, container := range resp.ContainerItems {
 			if *container.Name == containerName {
 				containerExists = true
-				log.Printf("Container name: %s already exists. Skipping creating it.", *container.Name)
 			}
 		}
 	}
@@ -289,6 +287,7 @@ func SaveData(rawFile []byte, parsedFile []byte) {
 			log.Printf("Failed to create container: %v", err)
 			return
 		}
+		log.Printf("Creating container with name: %s.", containerName)
 	}
 	now := time.Now().UTC()
 	formattedTime := now.Format("2006/01/02/1504")

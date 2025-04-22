@@ -1,0 +1,154 @@
+services:
+  downloader:
+    build:
+      context: .
+      dockerfile: ./DownloadOrchestrator/Dockerfile
+    ports:
+      - "8081:8081"
+      - "8080:8080"
+    env_file:
+      - ./DownloadOrchestrator/.env
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ACCESS_TOKEN=${ACCESS_TOKEN}
+    volumes:
+      - ./DownloadOrchestrator:/app/DownloadOrchestrator
+    networks:
+      - parser-network
+  skypanel:
+    build:
+      context: .
+      dockerfile: ./SkyPanel/Dockerfile
+    ports:
+      - "9080:8080" 
+      - "9081:8081"
+    env_file:
+      - ./SkyPanel/.env
+    environment:
+      - DOWNLOAD_ORCHESTRATOR_URL=http://downloader:8080
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ACCESS_TOKEN=${ACCESS_TOKEN}
+    volumes:
+      - ./SkyPanel:/app/SkyPanel
+    networks:
+      - parser-network
+    depends_on:
+      - downloader
+
+### Parsers
+
+  metarparser:
+    build:
+      context: .
+      dockerfile: ./Parsers/MetarParser/src/scalabledataintegration/Dockerfile
+    ports:
+      - "50051:50051"
+    env_file:
+      - ./Parsers/MetarParser/.env
+    environment:
+      - BASE_URL=http://downloader:8080
+      - PARSER_URL=http://metarparser:50051
+    volumes:
+      - ./Parsers/MetarParser/src:/app/Parsers/MetarParser/src
+    networks:
+      - parser-network
+    depends_on:
+      - downloader
+  ausotparser:
+    build:
+      context: .
+      dockerfile: ./Parsers/AusotParser/Dockerfile
+    ports:
+      - "8084:8084"
+      - "8085:8080"
+    env_file:
+      - ./Parsers/AusotParser/.env
+    environment:
+      - BASE_URL=http://downloader:8080
+      - PARSER_URL=http://ausotparser:8080
+      - ASPNETCORE_ENVIRONMENT=Development
+    volumes:
+      - ./Parsers/AusotParser:/app/Parsers/AusotParser
+    networks:
+      - parser-network
+    depends_on:
+      - downloader
+
+  metadataparser:
+    build:
+      context: .
+      dockerfile: ./Parsers/MetaDataParser/Dockerfile
+    ports:
+      - "8086:8080"
+      - "8087:8081"
+    env_file:
+      - ./Parsers/MetaDataParser/.env
+    environment:
+      - BASE_URL=http://downloader:8080
+      - PARSER_URL=http://metadataparser:8080
+    volumes:
+      - ./Parsers/MetaDataParser:/app/Parsers/MetaDataParser
+    networks:
+      - parser-network
+    depends_on:
+      - downloader
+
+  pythonparser:
+    build:
+      context: .
+      dockerfile: ./Parsers/PythonParser/Dockerfile
+    ports:
+      - "50052:50051"
+    env_file:
+      - ./Parsers/PythonParser/.env
+    environment:
+      - BASE_URL=http://downloader:8080
+      - PARSER_URL=http://pythonparser:50051
+    volumes:
+      - ./Parsers/PythonParser:/app/Parsers/PythonParser
+    networks:
+      - parser-network
+    depends_on:
+      - downloader
+
+### Filters
+
+  ocrfilter:
+    build:
+      context: .
+      dockerfile: ./Filters/OCRFilter/Dockerfile
+    ports:
+      - "50053:50051"
+    env_file:
+      - ./Filters/OCRFilter/.env
+    environment:
+      - BASE_URL=http://downloader:8080
+      - PARSER_URL=http://ocrfilter:50051
+    volumes:
+      - ./Filters/OCRFilter:/app/Filters/OCRFilter
+    networks:
+      - parser-network
+    depends_on:
+      - downloader
+
+  regexfilter:
+    build:
+      context: .
+      dockerfile: ./Filters/RegexFilter/Dockerfile
+    ports:
+      - "50054:50051"
+    env_file:
+      - ./Filters/RegexFilter/.env
+    environment:
+      - BASE_URL=http://downloader:8080
+      - PARSER_URL=http://regexfilter:50051
+    volumes:
+      - ./Filters/RegexFilter:/app/Filters/RegexFilter
+    networks:
+      - parser-network
+    depends_on:
+      - downloader
+
+networks:
+  parser-network:
+    driver: bridge

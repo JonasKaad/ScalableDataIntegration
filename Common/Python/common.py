@@ -1,4 +1,4 @@
-﻿import aiohttp
+import aiohttp
 import asyncio
 import datetime
 import json
@@ -235,7 +235,7 @@ def dd_warning(title: str, text: str):
     title = f"{os.getenv('PARSER_NAME')} - {title}"
     tags = {"service": os.getenv("PARSER_NAME")}
     api.Event.create(title=title, text=text, tags=tags, alert_type="warning", priority="normal")
-    logging.warning(title)
+    logging.warning(text)
 
 def dd_info(title: str, text: str):
     title = f"{os.getenv('PARSER_NAME')} - {title}"

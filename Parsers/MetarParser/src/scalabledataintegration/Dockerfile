@@ -20,10 +20,13 @@ WORKDIR /app/Parsers/MetarParser/src/scalabledataintegration
 RUN go mod download
 
 # Build the application
-RUN go build -o metarparser main.go
+RUN go build -o /app/metarparser main.go
 
 # Expose the port
 EXPOSE 50051
+
+# Set the working directory for running the application
+WORKDIR /app
 
 # Run the application
 CMD ["./metarparser"]

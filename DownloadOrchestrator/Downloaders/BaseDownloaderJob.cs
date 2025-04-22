@@ -87,13 +87,26 @@ public class BaseDownloaderJob : IDownloaderJob
         if (hasFilter)
         {
             var client = new Filter.FilterClient(channel);
-            var reply = await client.FilterCallAsync(new ()
+            if (urls.Count > 2)
             {
-                RawData = ByteString.CopyFrom(downloadedBytes), 
-                Format = "img", 
-                Parameters = parameters.Join(";"),
-                NextUrls = urls.Skip(1).ToList().Join(";")
-            });
+                var reply = await client.FilterCallAsync(new ()
+                {
+                    RawData = ByteString.CopyFrom(downloadedBytes), 
+                    Format = "img", 
+                    Parameters = parameters.Join(";"),
+                    NextUrls = urls.Skip(1).ToList().Join(";")
+                });
+            }
+            else
+            {
+                var reply = await client.FilterCallAsync(new ()
+                {
+                    RawData = ByteString.CopyFrom(downloadedBytes), 
+                    Format = "str", 
+                    Parameters = parameters.Join(";"),
+                    NextUrls = urls.Skip(1).ToList().Join(";")
+                });
+            }
         }
         else
         {
