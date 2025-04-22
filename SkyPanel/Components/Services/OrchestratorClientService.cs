@@ -227,6 +227,22 @@ public sealed class OrchestratorClientService(IHttpClientFactory httpClientFacto
             throw;
         }
     }
+    
+    public async Task<bool> RemoveDownloader(string downloader)
+    {
+        var client = httpClientFactory.CreateClient();
+        try
+        {
+            using HttpResponseMessage response = await client.DeleteAsync($"{baseUrl}/Downloader/{downloader}/remove");
+            var returnStatusCode = response.StatusCode;
+            return returnStatusCode == HttpStatusCode.OK;
+        }
+        catch (Exception e)
+        {
+            logger.LogError("Failed to delete downloader with error: {error}", e.Message);
+            return false;
+        }
+    }
 
     public async Task<List<User>> GetUsers()
     {
