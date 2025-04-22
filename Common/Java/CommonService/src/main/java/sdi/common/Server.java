@@ -32,4 +32,28 @@ public class Server {
         // Keep the server running until terminated
         server.awaitTermination();
     }
+    public void initialize() {
+        while(true){
+            boolean registered = registerService();
+            if (registered) {
+                System.out.println("Service registered successfully.");
+                new Thread(() -> {
+                    try {
+                        // Start the heartbeat service
+                        new HeartbeatService().run();
+                    } catch (Exception e) {
+                        System.err.println("Error starting server: " + e.getMessage());
+                    }
+                });
+                break;
+            } else {
+                System.out.println("Failed to register service. Retrying in " + retryInterval/1000 + " seconds...");
+                try {
+                    Thread.sleep(retryInterval);
+                } catch (InterruptedException e) {
+                    System.err.println("Thread interrupted: " + e.getMessage());
+                }
+            }
+        }
+    }
 }
