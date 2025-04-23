@@ -119,7 +119,49 @@ public class Server {
                 System.err.println("Thread interrupted: " + e.getMessage());
                 break;
             }
-
         }
+    }
+
+    public static ConversionResult convertData(ByteString rawData, String dataType) {
+        byte[] data = rawData.toByteArray();
+
+
+        // Split on "magic" and create lists for results
+        List<byte[]> sections = Arrays.stream(new String(data).split("magic"))
+                .map(String::getBytes)
+                .collect(Collectors.toList());
+
+        List<String> relevant = new ArrayList<>();
+        List<byte[]> raw = new ArrayList<>();
+
+        for (byte[] section : sections) {
+            if (section.length == 0) continue;
+
+            if (dataType.equals("str")) {
+                try {
+                    String decodedStr = new String(section, StandardCharsets.UTF_8);
+                    relevant.addAll(Arrays.asList(decodedStr.split(";")));
+                } catch (Exception e) {
+                    raw.add(section);
+                }
+            } else if (dataType.equals("img")) {
+                relevant.add(new String(section));
+            } else {
+                raw.add(section);
+            }
+        }
+
+        // Combine raw sections into single byte array
+        byte[] combinedRaw = raw.stream()
+                .reduce(new byte[0], (a, b) -> {
+                    byte[] result = Arrays.copyOf(a, a.length + b.length);
+                    System.arraycopy(b, 0, result, a.length, b.length);
+                    return result;
+                });
+
+        return new ConversionResult(
+                relevant.toArray(new String[0]),
+                combinedRaw
+        );
     }
 }
