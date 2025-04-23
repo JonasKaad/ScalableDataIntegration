@@ -3,10 +3,13 @@ package sdi.parsers;
 import com.google.protobuf.ByteString;
 import io.github.mivek.exception.ParseException;
 import io.github.mivek.model.Metar;
+import io.github.mivek.parser.MetarParser;
 import io.github.mivek.service.MetarService;
 import io.grpc.stub.StreamObserver;
 import sdi.parser.ParserGrpc;
 import sdi.parser.ParserOuterClass;
+import src.main.java.sdi.common.ConversionResult;
+import src.main.java.sdi.common.Server;
 
 public class Parser {
 
@@ -35,11 +38,20 @@ public class Parser {
 
                 System.out.println("Received parsing request with format: " + format);
                 System.out.println("Raw data size: " + rawData.size() + " bytes");
-                // Convert ByteString to String
-                rawData = ByteString.copyFrom(rawData.toByteArray());
-                String rawDataString = rawData.toStringUtf8();
+
+                ConversionResult conversionResult = Server.convertData(rawData, format);
+                String[] relevantData = conversionResult.getRelevantData();
+
                 Parser parser = new Parser();
-                parser.ParseMetar(rawDataString);
+                for (String data : relevantData) {
+                    String[] metarParts = data.split("\n");
+                    for (String metarPart : metarParts) {
+                        if (metarPart.trim().isEmpty() || metarPart.trim().equals("magic")) {
+                            continue;
+                        }
+                        parser.ParseMetar(metarPart);
+                    }
+                }
 
                 boolean success = true;
                 String errorMsg = null;
