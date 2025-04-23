@@ -7,8 +7,8 @@
     .apexcharts-datalabel {
         font-size: 14px;
         font-weight: 700;
-        color: #555 !important; /* Set the label color */
-        fill: #555 !important; /* Ensure fill color is overridden */
+        color: #555 !important;
+        fill: #555 !important;
     }
 </style>
 <PageTitle>SkyPanel — Graphs</PageTitle>
@@ -143,11 +143,7 @@
                                         var point = (DataPoint<ParserData>)context.DataPoint;
                                         <h3>@_selected.ToList()[context.SeriesIndex]</h3>
                                         <p>Time: @point.X</p>
-<<<<<<< Updated upstream
-                                        <p>Downloaded: @point.Y @_downloadedText</p>
-=======
                                         <p>Downloaded: @point.Y @_amount</p>
->>>>>>> Stashed changes
                                     }
                                 </div>
                             </ApexPointTooltip>

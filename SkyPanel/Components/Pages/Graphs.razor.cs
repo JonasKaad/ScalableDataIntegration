@@ -22,11 +22,7 @@ public partial class Graphs
     private TimeSpan? _toTime = new TimeSpan(23, 59, 59);
     private TimeSpan _groupSpan = new TimeSpan(1, 0, 0);
     private Amount _yaxis = Amount.Byte;
-<<<<<<< Updated upstream
-    private string _downloadedText = "Bytes";
-=======
     private string _amount = "bytes";
->>>>>>> Stashed changes
     [Inject] private StatisticsDatabaseService context { get; set; } = null!;
 
     protected override void OnInitialized()
@@ -165,20 +161,6 @@ public partial class Graphs
             switch (_yaxis)
             {
                 case Amount.Giga:
-<<<<<<< Updated upstream
-                    title.Text = "Gigabytes";
-                    _downloadedText = "Gigabytes";
-                    ratio = 1_000_000_000;
-                    break;
-                case Amount.Kilo:
-                    title.Text = "Kilobytes";
-                    _downloadedText = "Kilobytes";
-                    ratio = 1_000;
-                    break;
-                case Amount.Mega:
-                    title.Text = "Megabytes";
-                    _downloadedText = "Megabytes";
-=======
                     _amount= "Gigabytes";
                     ratio = 1_000_000_000;
                     break;
@@ -188,21 +170,15 @@ public partial class Graphs
                     break;
                 case Amount.Mega:
                     _amount = "Megabytes";
->>>>>>> Stashed changes
                     ratio = 1_000_000;
                     break;
                 default:
                 case Amount.Byte:
-<<<<<<< Updated upstream
-                    title.Text = "Bytes";
-                    _downloadedText = "Bytes";
-=======
                     _amount = "Bytes";
->>>>>>> Stashed changes
                     ratio = 1;
                     break;
             }
-            
+
             axis.Title.Text = _amount;
         }
 
