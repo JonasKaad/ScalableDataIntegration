@@ -78,6 +78,16 @@
       <artifactId>azure-identity</artifactId>
       <version>LATEST</version>
     </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>LATEST</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>LATEST</version>
+    </dependency>
   </dependencies>
 
   <build>
