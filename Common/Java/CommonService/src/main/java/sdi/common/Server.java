@@ -9,6 +9,8 @@ import com.azure.storage.blob.BlobServiceClientBuilder;
 import com.google.protobuf.ByteString;
 import io.github.cdimascio.dotenv.Dotenv;
 import io.grpc.ServerBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -26,6 +28,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 public class Server {
+    private static final Logger logger = LoggerFactory.getLogger(Server.class);
 
     private final int retryInterval = 60000; // Retry interval in milliseconds
     io.grpc.Server server;
@@ -45,7 +48,7 @@ public class Server {
     public void start() throws IOException, InterruptedException {
         // Start the server
         server.start();
-        System.out.println("Parser Server started on port " + port);
+        logger.info("Parser Server started on port {}", port);
 
         // Keep the server running until terminated
         server.awaitTermination();
@@ -71,14 +74,14 @@ public class Server {
                         HttpResponse.BodyHandlers.ofString());
                 HttpResponse<String> response = futureResponse.get();
                 if (response.statusCode() == 200) {
-                    System.out.printf("Successfully registered %s of type: %s \n", parserName, response);
+                    logger.info("Successfully registered {} of type: {}", parserName, response);
                     return true;
                 } else {
-                    System.out.printf("Failed to register service: %s. %s", parserName, response.body());
+                    logger.warn("Failed to register service: {}. {}", parserName, response.body());
                     return false;
                 }
             } catch (InterruptedException | ExecutionException e) {
-                System.out.printf("Failed to register service: %s. %s", parserName, e.getMessage());
+                logger.info("Failed to register service: {}. {}", parserName, e.getMessage());
                 return false;
             }
         }
@@ -89,21 +92,21 @@ public class Server {
         while(true){
             boolean registered = registerService(registerType);
             if (registered) {
-                System.out.println("Registering successful. Starting heartbeat service...");
+                logger.info("Registering successful. Starting heartbeat service...");
                 new Thread(() -> {
                     try {
                        heartbeatService(registerType);
                     } catch (Exception e) {
-                        System.err.println("Error starting server: " + e.getMessage());
+                        logger.warn("Error starting heartbeat service: {}",  e.getMessage());
                     }
                 }).start();
                 break;
             } else {
-                System.out.println("Failed to register service. Retrying in " + retryInterval/1000 + " seconds...");
+                logger.info("Failed to register service in initialization. Retrying in {} seconds...", (retryInterval / 1000));
                 try {
                     Thread.sleep(retryInterval);
                 } catch (InterruptedException e) {
-                    System.err.println("Thread interrupted: " + e.getMessage());
+                    logger.warn("Thread interrupted: {}", e.getMessage());
                 }
             }
         }
@@ -118,13 +121,13 @@ public class Server {
             } else {
                 alive = registerService(registerType);
                 if(!alive) {
-                    System.out.println("Failed to register service. Retrying in " + retryInterval / 1000 + " seconds...");
+                    logger.info("Failed to register service from heartbeatService. Retrying in {} seconds...", (retryInterval / 1000));
                 }
             }
             try {
                 Thread.sleep(retryInterval);
             } catch (InterruptedException e) {
-                System.err.println("Thread interrupted: " + e.getMessage());
+                logger.info("Thread interrupted: {}", e.getMessage());
                 break;
             }
         }
@@ -176,7 +179,7 @@ public class Server {
     public static void saveToBlobStorage(byte[] rawFile, byte[] parsedFile) {
         BlobServiceClient blobServiceClient = checkAzureCredentials();
         if (blobServiceClient == null) {
-            System.out.println("BlobServiceClient is null. Cannot save to Blob Storage.");
+            logger.warn("BlobServiceClient is null. Cannot save to Blob Storage.");
             return;
         }
 
@@ -189,9 +192,9 @@ public class Server {
 
             boolean exists = blobServiceClient.getBlobContainerClient(containerName).createIfNotExists();
             if(!exists) {
-                System.out.println("Container already exists: " + containerName);
+                logger.info("Container already exists: {}", containerName);
             } else {
-                System.out.println("Container created: " + containerName);
+                logger.info("Container created: {}", containerName);
             }
             BlobContainerClient blobContainerClient = blobServiceClient.getBlobContainerClient(containerName);
 
@@ -200,17 +203,17 @@ public class Server {
             String formattedTime = String.format("%tY/%tm/%td/%tH%tM", time, time, time, time, time);
             String rawFileName = formattedTime + "-raw.txt";
             String parsedFileName = formattedTime + "-parsed.txt";
-            System.out.printf("Raw file name: %s\n", rawFileName);
-            System.out.printf("Parsed file name: %s\n", parsedFileName);
+            logger.info("Raw file name: {}", rawFileName);
+            logger.info("Parsed file name: {}", parsedFileName);
 
             BlobClient rawClient = blobContainerClient.getBlobClient(rawFileName);
             rawClient.upload(new ByteArrayInputStream(rawFile), (long) rawFile.length);
             BlobClient parsedClient = blobContainerClient.getBlobClient(parsedFileName);
             parsedClient.upload(new ByteArrayInputStream(parsedFile), (long) parsedFile.length);
 
-            System.out.println("Data uploaded to Blob Storage successfully.");
+            logger.info("Data uploaded to Blob Storage successfully.");
         } catch (Exception e) {
-            System.out.println("Error uploading data to Blob Storage: " + e.getMessage());
+            logger.warn("Error uploading data to Blob Storage: {}", e.getMessage());
         }
     }
 
@@ -224,7 +227,7 @@ public class Server {
                     .connectionString(connectStr)
                     .buildClient();
             } catch (Exception e) {
-                System.out.println("Error creating BlobServiceClient with connection string: " + e.getMessage());
+                logger.warn("Error creating BlobServiceClient with connection string: {}", e.getMessage());
                 return null;
             }
         } else {
@@ -236,7 +239,7 @@ public class Server {
                         .credential(defaultCredential)
                         .buildClient();
             } catch (Exception e) {
-                System.out.println("Error creating BlobServiceClient azure credentials: " + e.getMessage());
+                logger.warn("Error creating BlobServiceClient azure credentials: {}", e.getMessage());
                 return null;
             }
         }
