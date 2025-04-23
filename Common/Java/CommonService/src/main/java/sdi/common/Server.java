@@ -1,15 +1,23 @@
 package src.main.java.sdi.common;
 
+import com.azure.identity.DefaultAzureCredential;
+import com.azure.identity.DefaultAzureCredentialBuilder;
+import com.azure.storage.blob.BlobClient;
+import com.azure.storage.blob.BlobContainerClient;
+import com.azure.storage.blob.BlobServiceClient;
+import com.azure.storage.blob.BlobServiceClientBuilder;
 import com.google.protobuf.ByteString;
 import io.github.cdimascio.dotenv.Dotenv;
 import io.grpc.ServerBuilder;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -163,5 +171,32 @@ public class Server {
                 relevant.toArray(new String[0]),
                 combinedRaw
         );
+    }
+    private static BlobServiceClient checkAzureCredentials(){
+        Dotenv dotenv = Dotenv.load();
+        String connectStr = dotenv.get("BLOB_CONNECTION_STRING");
+
+        if (connectStr != null && !connectStr.isEmpty()) {
+            try {
+                return new BlobServiceClientBuilder()
+                    .connectionString(connectStr)
+                    .buildClient();
+            } catch (Exception e) {
+                System.out.println("Error creating BlobServiceClient with connection string: " + e.getMessage());
+                return null;
+            }
+        } else {
+            DefaultAzureCredential defaultCredential = new DefaultAzureCredentialBuilder().build();
+            try {
+
+                return new BlobServiceClientBuilder()
+                        .endpoint("https://parserstorage.blob.core.windows.net/")
+                        .credential(defaultCredential)
+                        .buildClient();
+            } catch (Exception e) {
+                System.out.println("Error creating BlobServiceClient azure credentials: " + e.getMessage());
+                return null;
+            }
+        }
     }
 }
