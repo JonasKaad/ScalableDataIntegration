@@ -1,30 +1,53 @@
 package sdi.parsers;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.protobuf.ByteString;
 import io.github.mivek.exception.ParseException;
 import io.github.mivek.model.Metar;
+import io.github.mivek.model.TAF;
 import io.github.mivek.parser.MetarParser;
-import io.github.mivek.service.MetarService;
+import io.github.mivek.parser.TAFParser;
+import io.github.mivek.service.TAFService;
 import io.grpc.stub.StreamObserver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sdi.parser.ParserGrpc;
 import sdi.parser.ParserOuterClass;
 import src.main.java.sdi.common.ConversionResult;
 import src.main.java.sdi.common.Server;
 
-public class Parser {
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
-    MetarService metarService;
+public class Parser {
+    private static final Logger log = LoggerFactory.getLogger(Parser.class);
+    private final MetarParser metarParser;
+    private final TAFParser tafParser;
 
     public Parser() {
-        metarService = MetarService.getInstance();
+        this.metarParser = MetarParser.getInstance();
+        this.tafParser = TAFParser.getInstance();
     }
 
-    public void ParseMetar(String metar) {
+    public WeatherReport parseWeatherData(String data) {
         try {
-            Metar parsedMetar = metarService.decode(metar);
-            System.out.println(parsedMetar.getAirport());
-        } catch (ParseException e) {
-            System.out.println("Error: " + e.getMessage());
+            // Try parsing as TAF first
+            TAFService tafService = TAFService.getInstance();
+            TAF taf = tafService.decode("TAF " + data);
+            //TAF taf = tafParser.parse("TAF " + data);
+            return new WeatherReport(taf);
+        } catch (ParseException | NumberFormatException e)  {
+            try {
+                // If TAF parsing fails, try METAR
+                Metar metar = metarParser.parse(data);
+                return new WeatherReport(metar);
+            } catch (ParseException ex) {
+                log.warn("Failed to parse data: {}", data);
+                return null;
+            }
         }
     }
 
@@ -32,45 +55,27 @@ public class Parser {
         @Override
         public void parseCall(ParserOuterClass.ParseRequest request, StreamObserver<ParserOuterClass.ParseResponse> responseObserver) {
             try {
-                // Extract data from request
                 ByteString rawData = request.getRawData();
                 String format = request.getFormat();
 
-                System.out.println("Received parsing request with format: " + format);
-                System.out.println("Raw data size: " + rawData.size() + " bytes");
-
                 ConversionResult conversionResult = Server.convertData(rawData, format);
-                String[] relevantData = conversionResult.getRelevantData();
+                List<WeatherReport> reports = getWeatherReports(conversionResult);
 
-                Parser parser = new Parser();
-                for (String data : relevantData) {
-                    String[] metarParts = data.split("\n");
-                    for (String metarPart : metarParts) {
-                        if (metarPart.trim().isEmpty() || metarPart.trim().equals("magic")) {
-                            continue;
-                        }
-                        parser.ParseMetar(metarPart);
-                    }
-                }
+                // Convert reports to byte array
+                byte[] compiledReport = compileReports(reports);
 
-                boolean success = true;
-                String errorMsg = null;
+                // Save original data and compiled report
+                Server.saveToBlobStorage(rawData.toByteArray(), compiledReport);
 
-                ParserOuterClass.ParseResponse.Builder responseBuilder = ParserOuterClass.ParseResponse.newBuilder()
-                        .setSuccess(success);
+                ParserOuterClass.ParseResponse response = ParserOuterClass.ParseResponse.newBuilder()
+                        .setSuccess(true)
+                        .build();
 
-                if (errorMsg != null) {
-                    responseBuilder.setErrMsg(errorMsg);
-                }
-
-                // Send the response
-                responseObserver.onNext(responseBuilder.build());
+                responseObserver.onNext(response);
                 responseObserver.onCompleted();
 
             } catch (Exception e) {
-                System.err.println("Error processing request: " + e.getMessage());
-                e.printStackTrace();
-
+                log.warn("Error processing request: {}", e.getMessage());
                 ParserOuterClass.ParseResponse errorResponse = ParserOuterClass.ParseResponse.newBuilder()
                         .setSuccess(false)
                         .setErrMsg("Internal server error: " + e.getMessage())
@@ -79,6 +84,39 @@ public class Parser {
                 responseObserver.onNext(errorResponse);
                 responseObserver.onCompleted();
             }
+        }
+    }
+
+    private static List<WeatherReport> getWeatherReports(ConversionResult conversionResult) {
+        String[] relevantData = conversionResult.getRelevantData();
+        Parser parser = new Parser();
+        List<WeatherReport> reports = new ArrayList<>();
+
+        for (String data : relevantData) {
+            String[] lines = data.split("\n");
+            for (String line : lines) {
+                if (!line.trim().isEmpty() && !line.trim().equals("magic")) {
+                    WeatherReport report = parser.parseWeatherData(line);
+                    if (report != null) {
+                        reports.add(report);
+                    }
+                }
+            }
+        }
+        return reports;
+    }
+
+    private static byte[] compileReports(List<WeatherReport> reports) {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        try {
+            List<Map<String, Object>> reportMaps = reports.stream()
+                    .map(WeatherReport::getReport)
+                    .collect(Collectors.toList());
+            return mapper.writeValueAsBytes(reportMaps);
+        } catch (Exception e) {
+            log.error("Error compiling reports to JSON", e);
+            return new byte[0];
         }
     }
 }
