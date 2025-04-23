@@ -61,21 +61,19 @@ public class Server {
                         HttpResponse.BodyHandlers.ofString());
                 HttpResponse<String> response = futureResponse.get();
                 if (response.statusCode() == 200) {
-                    System.out.printf("Successfully registered %s of type: %s", parserName, type);
+                    System.out.printf("Successfully registered %s of type: %s \n", parserName, response);
                     return true;
                 } else {
                     System.out.printf("Failed to register service: %s. %s", parserName, response.body());
                     return false;
                 }
             } catch (InterruptedException | ExecutionException e) {
-                throw new RuntimeException(e);
+                System.out.printf("Failed to register service: %s. %s", parserName, e.getMessage());
+                return false;
             }
         }
     }
 
-    public void initialize(String registerType) {
-        registerService(Optional.of(registerType));
-    }
 
     public void initialize(RegisterType registerType) {
         while(true){
