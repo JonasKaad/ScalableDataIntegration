@@ -1,6 +1,8 @@
 package src.main.java.sdi.common;
 
 import io.github.cdimascio.dotenv.Dotenv;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -11,6 +13,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 public class Heartbeat {
+    private static final Logger logger = LoggerFactory.getLogger(Heartbeat.class);
 
     public static boolean sendHeartbeat(RegisterType registerType) {
         // send post request to url
@@ -31,14 +34,14 @@ public class Heartbeat {
                         HttpResponse.BodyHandlers.ofString());
                 HttpResponse<String> response = futureResponse.get();
                 if (response.statusCode() == 200) {
-                    System.out.printf("Heartbeat sent status: %s\n", response.statusCode());
+                    logger.info("Heartbeat sent status: {}", response.statusCode());
                     return true;
                 } else {
-                    System.out.printf("Heartbeat failed. Status: %s. %s\n", response.statusCode(), response.body());
+                    logger.warn("Heartbeat failed. Status: {}. {}", response.statusCode(), response.body());
                     return false;
                 }
             } catch (InterruptedException | ExecutionException e) {
-                System.out.printf("Heartbeat failed: Reason: %s\n", e.getMessage());
+                logger.warn("Heartbeat failed: Reason: {}", e.getMessage());
                 return false;
             }
         }
