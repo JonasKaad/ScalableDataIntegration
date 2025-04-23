@@ -1,5 +1,6 @@
 package src.main.java.sdi.common;
 
+import com.google.protobuf.ByteString;
 import io.github.cdimascio.dotenv.Dotenv;
 import io.grpc.ServerBuilder;
 
@@ -8,18 +9,19 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.Optional;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-
-import static src.main.java.sdi.common.RegisterType.Filter;
-import static src.main.java.sdi.common.RegisterType.Parser;
+import java.util.stream.Collectors;
 
 public class Server {
 
-    private int retryInterval = 1000; // Retry interval in milliseconds
+    private final int retryInterval = 60000; // Retry interval in milliseconds
     io.grpc.Server server;
-    private int port;
+    private final int port;
 
     public Server(int port) {
         this.port = port; // Default port
@@ -99,9 +101,7 @@ public class Server {
         }
     }
 
-
     public void heartbeatService(RegisterType registerType) {
-
         boolean alive = true;
 
         while (true) {
