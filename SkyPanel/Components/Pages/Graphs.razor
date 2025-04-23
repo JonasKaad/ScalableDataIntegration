@@ -3,6 +3,14 @@
 @using ApexCharts
 @using Color = MudBlazor.Color
 @using Size = MudBlazor.Size
+<style>
+    .apexcharts-datalabel {
+        font-size: 14px;
+        font-weight: 700;
+        color: #555 !important; /* Set the label color */
+        fill: #555 !important; /* Ensure fill color is overridden */
+    }
+</style>
 <PageTitle>SkyPanel — Graphs</PageTitle>
 <MudContainer MaxWidth="MaxWidth.Large" Class="mt-4">
     <MudGrid Justify="Justify.Center">
@@ -135,7 +143,11 @@
                                         var point = (DataPoint<ParserData>)context.DataPoint;
                                         <h3>@_selected.ToList()[context.SeriesIndex]</h3>
                                         <p>Time: @point.X</p>
+<<<<<<< Updated upstream
                                         <p>Downloaded: @point.Y @_downloadedText</p>
+=======
+                                        <p>Downloaded: @point.Y @_amount</p>
+>>>>>>> Stashed changes
                                     }
                                 </div>
                             </ApexPointTooltip>

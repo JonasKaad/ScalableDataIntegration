@@ -22,7 +22,11 @@ public partial class Graphs
     private TimeSpan? _toTime = new TimeSpan(23, 59, 59);
     private TimeSpan _groupSpan = new TimeSpan(1, 0, 0);
     private Amount _yaxis = Amount.Byte;
+<<<<<<< Updated upstream
     private string _downloadedText = "Bytes";
+=======
+    private string _amount = "bytes";
+>>>>>>> Stashed changes
     [Inject] private StatisticsDatabaseService context { get; set; } = null!;
 
     protected override void OnInitialized()
@@ -54,7 +58,8 @@ public partial class Graphs
                         {
                             Style = new BarDataLabelsStyle
                             {
-                                FontWeight = "800"
+                                FontWeight = "800",
+                                Color = "#880088"
                             },
                             Formatter = "(value) => Math.round(value * 10000) / 10000"
                         }
@@ -157,10 +162,10 @@ public partial class Graphs
         var axis = Chart.Options.Yaxis.FirstOrDefault();
         if (axis is not null)
         {
-            var title = new AxisTitle();
             switch (_yaxis)
             {
                 case Amount.Giga:
+<<<<<<< Updated upstream
                     title.Text = "Gigabytes";
                     _downloadedText = "Gigabytes";
                     ratio = 1_000_000_000;
@@ -173,27 +178,78 @@ public partial class Graphs
                 case Amount.Mega:
                     title.Text = "Megabytes";
                     _downloadedText = "Megabytes";
+=======
+                    _amount= "Gigabytes";
+                    ratio = 1_000_000_000;
+                    break;
+                case Amount.Kilo:
+                    _amount = "Kilobytes";
+                    ratio = 1_000;
+                    break;
+                case Amount.Mega:
+                    _amount = "Megabytes";
+>>>>>>> Stashed changes
                     ratio = 1_000_000;
                     break;
+                default:
                 case Amount.Byte:
+<<<<<<< Updated upstream
                     title.Text = "Bytes";
                     _downloadedText = "Bytes";
+=======
+                    _amount = "Bytes";
+>>>>>>> Stashed changes
                     ratio = 1;
                     break;
             }
-
-            axis.Title = title;
+            
+            axis.Title.Text = _amount;
         }
+
+        _parserData.Clear();
 
         foreach (var parser in _selectedParsers)
         {
-            _parserData[parser] = _rawParserData[parser].Where(p => start < p.Time && p.Time < end).ToList()
-                .ConvertAll(p => new ParserData(p.Time, p.DownloadedBytes));
-            foreach (var data in _parserData[parser])
+            var filteredData = _rawParserData[parser]
+                .Where(p => start <= p.Time && p.Time <= end)
+                .ToList();
+            
+            var groupedData = filteredData
+                .GroupBy(p => FloorDate(p.Time, _groupSpan))
+                .ToDictionary(
+                    group => group.Key,
+                    group => group.Sum(p => p.DownloadedBytes)
+                );
+            
+            var parserDataList = new List<ParserData>();
+            for (var date = start; date <= end; date = date.Add(_groupSpan))
             {
-                data.Time = FloorDate(data.Time, _groupSpan);
-                data.DownloadedBytes = Math.Round(data.DownloadedBytes / ratio, 4);
+                var currentDate = FloorDate(date, _groupSpan);
+                parserDataList.Add(groupedData.TryGetValue(currentDate, out decimal value)
+                    ? new ParserData(currentDate, Math.Round(value / ratio, 4))
+                    : new ParserData(currentDate, 0)); // Add zero value for missing dates
             }
+            
+            _parserData[parser] = parserDataList;
+        }
+        
+        var allZeroDates = new List<DateTime>();
+        if (_parserData.Count != 0)
+        {
+            allZeroDates = _parserData.First().Value
+                .Select(p => p.Time)
+                .Where(time => _selectedParsers.All(
+                    parser => _parserData[parser].FirstOrDefault(p => p.Time == time)?.DownloadedBytes == 0
+                    )
+                )
+                .ToList();
+        }
+        
+        foreach (var parser in _selectedParsers)
+        {
+            _parserData[parser] = _parserData[parser]
+                .Where(p => !allZeroDates.Contains(p.Time))
+                .ToList();
         }
     }
 
