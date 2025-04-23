@@ -172,6 +172,48 @@ public class Server {
                 combinedRaw
         );
     }
+
+    public static void saveToBlobStorage(byte[] rawFile, byte[] parsedFile) {
+        BlobServiceClient blobServiceClient = checkAzureCredentials();
+        if (blobServiceClient == null) {
+            System.out.println("BlobServiceClient is null. Cannot save to Blob Storage.");
+            return;
+        }
+
+        Dotenv dotenv = Dotenv.load();
+        String containerName = dotenv.get("PARSER_NAME");
+
+        try {
+            // Create a container if it doesn't exist
+
+
+            boolean exists = blobServiceClient.getBlobContainerClient(containerName).createIfNotExists();
+            if(!exists) {
+                System.out.println("Container already exists: " + containerName);
+            } else {
+                System.out.println("Container created: " + containerName);
+            }
+            BlobContainerClient blobContainerClient = blobServiceClient.getBlobContainerClient(containerName);
+
+            Time time = new Time(System.currentTimeMillis());
+            //Time should be formatted as yyyy/MM/dd/HHmm
+            String formattedTime = String.format("%tY/%tm/%td/%tH%tM", time, time, time, time, time);
+            String rawFileName = formattedTime + "-raw.txt";
+            String parsedFileName = formattedTime + "-parsed.txt";
+            System.out.printf("Raw file name: %s\n", rawFileName);
+            System.out.printf("Parsed file name: %s\n", parsedFileName);
+
+            BlobClient rawClient = blobContainerClient.getBlobClient(rawFileName);
+            rawClient.upload(new ByteArrayInputStream(rawFile), (long) rawFile.length);
+            BlobClient parsedClient = blobContainerClient.getBlobClient(parsedFileName);
+            parsedClient.upload(new ByteArrayInputStream(parsedFile), (long) parsedFile.length);
+
+            System.out.println("Data uploaded to Blob Storage successfully.");
+        } catch (Exception e) {
+            System.out.println("Error uploading data to Blob Storage: " + e.getMessage());
+        }
+    }
+
     private static BlobServiceClient checkAzureCredentials(){
         Dotenv dotenv = Dotenv.load();
         String connectStr = dotenv.get("BLOB_CONNECTION_STRING");
