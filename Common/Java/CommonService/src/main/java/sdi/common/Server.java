@@ -188,18 +188,10 @@ public class Server {
 
         try {
             // Create a container if it doesn't exist
-
-
-            boolean exists = blobServiceClient.getBlobContainerClient(containerName).createIfNotExists();
-            if(!exists) {
-                logger.info("Container already exists: {}", containerName);
-            } else {
-                logger.info("Container created: {}", containerName);
-            }
+            blobServiceClient.getBlobContainerClient(containerName).createIfNotExists();
             BlobContainerClient blobContainerClient = blobServiceClient.getBlobContainerClient(containerName);
 
             Time time = new Time(System.currentTimeMillis());
-            //Time should be formatted as yyyy/MM/dd/HHmm
             String formattedTime = String.format("%tY/%tm/%td/%tH%tM", time, time, time, time, time);
             String rawFileName = formattedTime + "-raw.txt";
             String parsedFileName = formattedTime + "-parsed.txt";
