@@ -100,4 +100,28 @@ public class Server {
             }
         }
     }
+
+
+    public void heartbeatService(RegisterType registerType) {
+
+        boolean alive = true;
+
+        while (true) {
+            if (alive) {
+                alive = Heartbeat.sendHeartbeat(registerType);
+            } else {
+                alive = registerService(registerType);
+                if(!alive) {
+                    System.out.println("Failed to register service. Retrying in " + retryInterval / 1000 + " seconds...");
+                }
+            }
+            try {
+                Thread.sleep(retryInterval);
+            } catch (InterruptedException e) {
+                System.err.println("Thread interrupted: " + e.getMessage());
+                break;
+            }
+
+        }
+    }
 }
