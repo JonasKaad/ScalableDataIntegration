@@ -12,6 +12,9 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+import static src.main.java.sdi.common.RegisterType.Filter;
+import static src.main.java.sdi.common.RegisterType.Parser;
+
 public class Server {
 
     private int retryInterval = 1000; // Retry interval in milliseconds
@@ -38,18 +41,13 @@ public class Server {
         server.awaitTermination();
     }
 
-    public boolean registerService() {
-        return registerService(Optional.empty());
-    }
-
-    public boolean registerService(Optional<String> registerType) {
-        String type = registerType.orElse("Parser");
+    public boolean registerService(RegisterType registerType) {
         Dotenv dotenv = Dotenv.load();
         String parserName = dotenv.get("PARSER_NAME");
         String parserUrl = dotenv.get("PARSER_URL");
         String baseUrl = dotenv.get("BASE_URL");
 
-        String url = String.format("%s/%s/%s/register", baseUrl, type, parserName);
+        String url = String.format("%s/%s/%s/register", baseUrl, registerType.toString(), parserName);
 
         //send post request to url
         try ( HttpClient client = HttpClient.newHttpClient() ) {
@@ -79,14 +77,14 @@ public class Server {
         registerService(Optional.of(registerType));
     }
 
-    public void initialize() {
+    public void initialize(RegisterType registerType) {
         while(true){
-            boolean registered = registerService();
+            boolean registered = registerService(registerType);
             if (registered) {
                 System.out.println("Registering successful. Starting heartbeat service...");
                 new Thread(() -> {
                     try {
-                        new HeartbeatService().run();
+                       heartbeatService(registerType);
                     } catch (Exception e) {
                         System.err.println("Error starting server: " + e.getMessage());
                     }
