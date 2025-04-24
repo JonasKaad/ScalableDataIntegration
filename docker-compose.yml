@@ -54,6 +54,7 @@ services:
       - parser-network
     depends_on:
       - downloader
+
   ausotparser:
     build:
       context: .
@@ -111,6 +112,23 @@ services:
     depends_on:
       - downloader
 
+  tafmetarparser:
+    build:
+      context: .
+      dockerfile: ./Parsers/TafMetarParser/Dockerfile
+    ports:
+      - "50055:50051"
+    env_file:
+      - ./Parsers/TafMetarParser/.env
+    environment:
+      - BASE_URL=http://downloader:8080
+      - PARSER_URL=http://tafmetarparser:50051
+    volumes:
+      - ./Parsers/TafMetarParser/src:/app/Parsers/TafMetarParser/src
+    networks:
+      - parser-network
+    depends_on:
+      - downloader
 ### Filters
 
   ocrfilter:
