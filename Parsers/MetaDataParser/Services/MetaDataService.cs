@@ -67,7 +67,7 @@ public class MetaDataService : Parser.ParserBase
                 break; // No more delimiters found
             
             // Convert position to be relative to the original array
-            position += startIndex + delimiter.Length - 1;
+            position += startIndex + delimiter.Length;
         
             if (position > startIndex) // Only add non-empty segments
             {
