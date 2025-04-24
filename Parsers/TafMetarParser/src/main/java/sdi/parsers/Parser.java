@@ -25,19 +25,17 @@ import java.util.stream.Collectors;
 public class Parser {
     private static final Logger log = LoggerFactory.getLogger(Parser.class);
     private final MetarParser metarParser;
-    private final TAFParser tafParser;
+    private final TAFService tafService;
 
     public Parser() {
         this.metarParser = MetarParser.getInstance();
-        this.tafParser = TAFParser.getInstance();
+        this.tafService = TAFService.getInstance();
     }
 
     public WeatherReport parseWeatherData(String data) {
         try {
             // Try parsing as TAF first
-            TAFService tafService = TAFService.getInstance();
             TAF taf = tafService.decode("TAF " + data);
-            //TAF taf = tafParser.parse("TAF " + data);
             return new WeatherReport(taf);
         } catch (ParseException | NumberFormatException e)  {
             try {
@@ -78,7 +76,7 @@ public class Parser {
                 log.warn("Error processing request: {}", e.getMessage());
                 ParserOuterClass.ParseResponse errorResponse = ParserOuterClass.ParseResponse.newBuilder()
                         .setSuccess(false)
-                        .setErrMsg("Internal server error: " + e.getMessage())
+                        .setErrMsg("Not able to parse given data")
                         .build();
 
                 responseObserver.onNext(errorResponse);
