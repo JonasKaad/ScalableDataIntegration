@@ -28,7 +28,7 @@ public partial class Logs
         "java",
         "ruby"
     };
-    private List<string> _services = new() { "DownloadOrchestrator" };
+    private List<string> _services = new() { "DownloadOrchestrator", "SkyPanel" };
     private DateRange _dateRange = new(DateTime.Today.AddDays(-1), DateTime.Today);
     private IEnumerable<string> _selectedServices = new List<string>();
     private IEnumerable<string> _selectedSeverities = new List<string>();
