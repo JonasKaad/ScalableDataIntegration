@@ -40,7 +40,7 @@ public class DisFtpClient : IDownloaderClient
     public async Task<byte[]> FetchData()
     {
         await _ftpClient.Connect();
-        var firstItem = _ftpClient.GetListing().Result.Skip(1).FirstOrDefault();
+        var firstItem = _ftpClient.GetListing().Result.FirstOrDefault();
         return await DownloadFile(firstItem?.Name);
     }
 
