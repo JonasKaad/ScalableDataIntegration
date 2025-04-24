@@ -7,7 +7,6 @@ import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
 import com.google.protobuf.ByteString;
-import io.github.cdimascio.dotenv.Dotenv;
 import io.grpc.ServerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,10 +56,9 @@ public class Server {
     }
 
     public boolean registerService(RegisterType registerType) {
-        Dotenv dotenv = Dotenv.load();
-        String parserName = dotenv.get("PARSER_NAME");
-        String parserUrl = dotenv.get("PARSER_URL");
-        String baseUrl = dotenv.get("BASE_URL");
+        String parserName = System.getenv("PARSER_NAME");
+        String parserUrl = System.getenv("PARSER_URL");
+        String baseUrl = System.getenv("BASE_URL");
 
         String url = String.format("%s/%s/%s/register", baseUrl, registerType.toString(), parserName);
 
@@ -185,8 +183,7 @@ public class Server {
             return;
         }
 
-        Dotenv dotenv = Dotenv.load();
-        String containerName = dotenv.get("PARSER_NAME");
+        String containerName = System.getenv("PARSER_NAME");
 
         try {
             // Create a container if it doesn't exist
@@ -219,8 +216,7 @@ public class Server {
     }
 
     private static BlobServiceClient checkAzureCredentials(){
-        Dotenv dotenv = Dotenv.load();
-        String connectStr = dotenv.get("BLOB_CONNECTION_STRING");
+        String connectStr = System.getenv("BLOB_CONNECTION_STRING");
 
         if (connectStr != null && !connectStr.isEmpty()) {
             try {
