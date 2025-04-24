@@ -44,7 +44,7 @@
                     <MudListItem>
                         <div class="d-flex flex-column">
                             <MudText Typo="Typo.subtitle1">@parameter.Label</MudText>
-                            @if ((parameter.State is string stateString && !string.IsNullOrEmpty(stateString)) || (parameter.State is List<object> stateList && stateList.Any()))
+                            @if ((parameter.State is string stateString && string.IsNullOrEmpty(stateString)) || (parameter.State is List<object> stateList && stateList.Any()))
                             {
                                 <MudText Typo="Typo.body2">From: None</MudText>
                             }
