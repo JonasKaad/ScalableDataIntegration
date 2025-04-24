@@ -20,6 +20,8 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.sql.Time;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -191,19 +193,26 @@ public class Server {
             blobServiceClient.getBlobContainerClient(containerName).createIfNotExists();
             BlobContainerClient blobContainerClient = blobServiceClient.getBlobContainerClient(containerName);
 
-            Time time = new Time(System.currentTimeMillis());
+            ZonedDateTime time = ZonedDateTime.now(ZoneOffset.UTC);
             String formattedTime = String.format("%tY/%tm/%td/%tH%tM", time, time, time, time, time);
             String rawFileName = formattedTime + "-raw.txt";
             String parsedFileName = formattedTime + "-parsed.txt";
             logger.info("Raw file name: {}", rawFileName);
             logger.info("Parsed file name: {}", parsedFileName);
-
-            BlobClient rawClient = blobContainerClient.getBlobClient(rawFileName);
-            rawClient.upload(new ByteArrayInputStream(rawFile), (long) rawFile.length);
-            BlobClient parsedClient = blobContainerClient.getBlobClient(parsedFileName);
-            parsedClient.upload(new ByteArrayInputStream(parsedFile), (long) parsedFile.length);
-
-            logger.info("Data uploaded to Blob Storage successfully.");
+            try {
+                // Check if the blob already exists
+                BlobClient rawBlobClient = blobContainerClient.getBlobClient(rawFileName);
+                BlobClient parsedClient = blobContainerClient.getBlobClient(parsedFileName);
+                if (rawBlobClient.exists() || parsedClient.exists()) {
+                    logger.info("Blob files {}, {} already exists. Skipping upload.", rawFileName, parsedFile);
+                    return;
+                }
+                rawBlobClient.upload(new ByteArrayInputStream(rawFile), (long) rawFile.length);
+                parsedClient.upload(new ByteArrayInputStream(parsedFile), (long) parsedFile.length);
+                logger.info("Data uploaded to Blob Storage successfully.");
+            } catch (Exception e) {
+                logger.warn("Error checking blob existence: {}", e.getMessage());
+            }
         } catch (Exception e) {
             logger.warn("Error uploading data to Blob Storage: {}", e.getMessage());
         }
