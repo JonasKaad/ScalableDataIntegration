@@ -1,6 +1,5 @@
 package src.main.java.sdi.common;
 
-import io.github.cdimascio.dotenv.Dotenv;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,9 +16,8 @@ public class Heartbeat {
 
     public static boolean sendHeartbeat(RegisterType registerType) {
         // send post request to url
-        Dotenv dotenv = Dotenv.load();
-        String parserName = dotenv.get("PARSER_NAME");
-        String baseUrl = dotenv.get("BASE_URL");
+        String parserName = System.getenv("PARSER_NAME");
+        String baseUrl = System.getenv("BASE_URL");
 
         String url = String.format("%s/%s/%s/heartbeat", baseUrl, registerType.toString(), parserName);
 
