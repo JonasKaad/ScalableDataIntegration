@@ -255,4 +255,11 @@ public partial class Graphs
         Giga,
         Byte
     }
+    
+    private async Task SelectAllParsers()
+    {
+        _selectedParsers = _parsers.ToList();
+        _selected = _parsers.ToList();
+        await Zoom();
+    }
 }
