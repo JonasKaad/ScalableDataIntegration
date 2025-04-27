@@ -82,13 +82,32 @@
                                 {
                                     <MudPaper Class="pa-2" Elevation="1" Style=@(hasUploadedImage ? "height: 500px" : "height: 100px")>
                                         <MudText Typo="Typo.body1" Class="mb-2">Choose a sample image to set bounds for OCR</MudText>
-                                        <InputFile OnChange="HandleImageUpload" />
+                                        <InputFile OnChange="@HandleImageUpload" />
                                         @if (!string.IsNullOrEmpty(uploadedImageSrc))
                                         {
                                             <div style="height: 380px" class="ma-1">
                                                 <CropperComponent @ref="_cropper" Class="cropper-example" Src="@uploadedImageSrc" Options="CropperOptions" />
                                             </div>
-                                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveCrop">Save</MudButton>
+                                            <div class="d-flex align-center">
+                                                <MudButton Variant="Variant.Filled"
+                                                           Color="Color.Primary"
+                                                           OnClick="@SaveCrop"
+                                                           StartIcon="@Icons.Material.Filled.Save"
+                                                           Class="mr-2">
+                                                    Save Crop
+                                                </MudButton>
+                                                @if (_cropSaved)
+                                                {
+                                                    <div class="d-flex align-center save-indicator">
+                                                        <MudIcon Icon="@Icons.Material.Filled.Check" 
+                                                                 Color="Color.Success" 
+                                                                 Size="Size.Medium" 
+                                                                 Class="mr-1 save-icon"/>
+                                                        <MudText Color="Color.Success" 
+                                                                 Class="save-text">Crop saved</MudText>
+                                                    </div>
+                                                }
+                                            </div>                             
                                         }
                                     </MudPaper>
                                 }
@@ -116,7 +135,7 @@
                    Class="mr-2">Cancel</MudButton>
         <MudButton Variant="Variant.Filled"
                    Color="Color.Primary"
-                   OnClick="SaveFilters">Save Filters</MudButton>
+                   OnClick="@SaveFilters">Save Filters</MudButton>
 
     </MudItem>
 </MudGrid>

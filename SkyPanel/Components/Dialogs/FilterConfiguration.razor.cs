@@ -23,7 +23,7 @@ public partial class FilterConfiguration : ComponentBase
     private string? uploadedImageSrc;
     private bool hasUploadedImage = false;
     private CropperComponent? _cropper = null;
-
+    private bool _cropSaved = false;
     private Options CropperOptions = new Options()
     {
         SetDataOptions = new SetDataOptions()
@@ -92,6 +92,12 @@ public partial class FilterConfiguration : ComponentBase
         _cropBoxWidth = cropData.Width ?? new decimal(0);
         _cropBoxLeft = cropData.X ?? new decimal(0);
         _cropBoxTop = cropData.Y ?? new decimal(0);
+        _cropSaved = true;
+        StateHasChanged();
+    
+        await Task.Delay(2000); // Show for 2 seconds
+        _cropSaved = false;
+        StateHasChanged();
     }
 
     private IEnumerable<FilterDto> filteredAvailableFilters => string.IsNullOrWhiteSpace(searchString)
@@ -108,10 +114,6 @@ public partial class FilterConfiguration : ComponentBase
             _dropContainer.Refresh();
             StateHasChanged();
             Console.WriteLine($"Added filter: {filter.Name}");
-        }
-        else
-        {
-            Console.Write("LASDJAJDLK");
         }
     }
 

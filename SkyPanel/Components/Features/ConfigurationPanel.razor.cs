@@ -305,7 +305,7 @@ public partial class ConfigurationPanel : ComponentBase
         if (result?.Data is List<FilterDto> updatedFilters)
         {
             CurrentFilters = updatedFilters;
-            Snackbar.Add($"Filters updated for {ParserState.ParserName}", Severity.Success);
+            Snackbar.Add($"Filters saved for {ParserState.ParserName}", Severity.Success);
         }
     }
     
