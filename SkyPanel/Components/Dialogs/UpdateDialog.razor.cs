@@ -150,12 +150,24 @@ public partial class UpdateDialog : ComponentBase
             // Compare filters from both lists
             var otherList = val == Filters ? ParserState.Filters : Filters;
 
+            // If current list has filters but other list is empty
+            if (filters.Any() && !otherList.Any())
+            {
+                foreach (var filter in filters)
+                {
+                    var paramString = string.Join(", ", filter.Parameters.Select(p => $"{p.Key}: {p.Value}"));
+                    changedFilters.Add($"{filter.Name} ({paramString})");
+                }
+                return string.Join("<br>", changedFilters);
+            }
+
             foreach (var filter in filters)
             {
                 var matchingFilter = otherList.FirstOrDefault(f => f.Name == filter.Name);
                 if (matchingFilter == null)
                 {
-                    changedFilters.Add($"{filter.Name} (New)");
+                    var paramString = string.Join(", ", filter.Parameters.Select(p => $"{p.Key}: {p.Value}"));
+                    changedFilters.Add($"{filter.Name} ({paramString})");
                     continue;
                 }
 
@@ -176,10 +188,9 @@ public partial class UpdateDialog : ComponentBase
                 }
             }
 
-            // Return each filter on a new line if there are multiple filters
-            return changedFilters.Any() 
-                ? changedFilters.Count > 1 
-                    ? string.Join("<br>", changedFilters) 
+            return changedFilters.Any()
+                ? changedFilters.Count > 1
+                    ? string.Join("<br>", changedFilters)
                     : changedFilters[0]
                 : string.Empty;
         }
