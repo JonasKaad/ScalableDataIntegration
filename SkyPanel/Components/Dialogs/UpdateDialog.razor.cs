@@ -160,7 +160,7 @@ public partial class UpdateDialog : ComponentBase
             var changedFilters = new List<string>();
 
             // Compare filters from both lists
-            var otherList = val == Filters ? ParserState.Filters : Filters;
+            var otherList = filters.SequenceEqual(Filters) ? ParserState.Filters : Filters;
 
             // If current list has filters but other list is empty
             if (filters.Any() && !otherList.Any())
