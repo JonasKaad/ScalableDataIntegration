@@ -79,3 +79,13 @@ add_downloader "ausotparser" '{
     "pollingRate": "0 */6 * * *",
     "secretName": ""
 }'
+
+add_downloader "tafmetarparser" '{
+    "downloadUrl": "https://api.met.no/weatherapi/tafmetar/1.0/tafmetar.txt?icao=EGLL",
+    "backUpUrl": "",
+    "parser": "tafmetarparser",
+    "filters": [],
+    "name": "tafmetarparser",
+    "pollingRate": "0 */8 * * *",
+    "secretName": ""
+}'
