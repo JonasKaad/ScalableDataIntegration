@@ -116,7 +116,23 @@
         <MudButton Size="Size.Large" StartIcon="@Icons.Material.Filled.Tune" Disabled="ParserState.ParserIsNotSelected()" OnClick="@(() => OpenFilterDialogAsync())" Variant="Variant.Filled" Color="Color.Primary">Filters</MudButton>
     </MudItem>
     <MudItem>
-        <MudButton Size="Size.Large" StartIcon="@Icons.Material.Filled.PublishedWithChanges" Disabled="ParserState.ParserIsNotSelected()" OnClick="@(() => TestConnection())" Variant="Variant.Filled" Color="Color.Primary">Test Connection</MudButton>
+        <MudButton OnClick="@TestConnection"
+                   Size="Size.Large"
+                   StartIcon="@(_isTestingConnection ? null : @Icons.Material.Filled.PublishedWithChanges)"
+                   Disabled="@(_isTestingConnection || ParserState.ParserIsNotSelected())"
+                   Variant="Variant.Filled"
+                   Color="Color.Primary">
+            @if (_isTestingConnection)
+            {
+                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="ms-n1" />
+                <span class="ms-2">Testing...</span>
+            }
+            else
+            {
+                <span>Test Connection</span>
+            }
+        </MudButton>
+        @* <MudButton Size="Size.Large" StartIcon="@Icons.Material.Filled.PublishedWithChanges" Disabled="ParserState.ParserIsNotSelected()" OnClick="@(() => TestConnection())" Variant="Variant.Filled" Color="Color.Primary">Test Connection</MudButton> *@
     </MudItem>
     <MudItem>
         <MudButton Size="Size.Large" Variant="Variant.Filled" Color="Color.Primary"            

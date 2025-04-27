@@ -46,6 +46,7 @@ public partial class ConfigurationPanel : ComponentBase
     private MudForm _form;
     private bool _success;
     private bool _isSyncing;
+    private bool _isTestingConnection;
 
     // Convert the selected tab and value to a polling rate string
     private void UpdatePollingValue()
@@ -492,51 +493,62 @@ public partial class ConfigurationPanel : ComponentBase
         {
             return;
         }
+        
+        _isTestingConnection = true;
+        StateHasChanged();
 
-        var urlValueToSend = "";
-        var backupUrlValueToSend = "";
-        var secretNameToSend = "";
-        var pollingRateToSend = "";
-        
-        // Check if parser values have changed. If not send a string without a space: ""
-        if (UrlValue != null)
+        try
         {
-            urlValueToSend = UrlValue;
+            var urlValueToSend = "";
+            var backupUrlValueToSend = "";
+            var secretNameToSend = "";
+            var pollingRateToSend = "";
+            
+            // Check if parser values have changed. If not send a string without a space: ""
+            if (UrlValue != null)
+            {
+                urlValueToSend = UrlValue;
+            }
+            
+            if (BackupUrlValue != null)
+            {
+                backupUrlValueToSend = BackupUrlValue;
+            }
+            
+            secretNameToSend = SecretName;
+            
+            pollingRateToSend = PollingValue; 
+            
+            var filters = ParserState.Filters;
+            
+            var response = await OrchestratorClientService.TestConnection(ParserState.ParserName, 
+                urlValueToSend, backupUrlValueToSend, secretNameToSend, pollingRateToSend, filters);
+            
+            switch (response.Count)
+            {
+                case 0:
+                    Snackbar.Add("Failed getting a response from downloader", Severity.Error);
+                    break;
+                case 1:
+                    Snackbar.Add(SnackbarUtil.FormatConnectionResponse(response.FirstOrDefault(), "URL", UrlValue).Item1, 
+                        SnackbarUtil.FormatConnectionResponse(response.FirstOrDefault(), "URL", UrlValue).Item2);
+                    break;
+                case 2:
+                    Snackbar.Add(SnackbarUtil.FormatConnectionResponse(response[0], "URL", UrlValue).Item1, 
+                        SnackbarUtil.FormatConnectionResponse(response[0], "URL", UrlValue).Item2);
+                    
+                    Snackbar.Add(SnackbarUtil.FormatConnectionResponse(response[1], "BackupURL", BackupUrlValue).Item1, 
+                        SnackbarUtil.FormatConnectionResponse(response[1], "BackupURL", BackupUrlValue).Item2);
+                    break;
+                default:
+                    Snackbar.Add("Failed getting a correct response from downloader", Severity.Error);
+                    break;
+            }
         }
-        
-        if (BackupUrlValue != null)
+        finally
         {
-            backupUrlValueToSend = BackupUrlValue;
-        }
-        
-        secretNameToSend = SecretName;
-        
-        pollingRateToSend = PollingValue; 
-        
-        var filters = ParserState.Filters;
-        
-        var response = await OrchestratorClientService.TestConnection(ParserState.ParserName, 
-            urlValueToSend, backupUrlValueToSend, secretNameToSend, pollingRateToSend, filters);
-        
-        switch (response.Count)
-        {
-            case 0:
-                Snackbar.Add("Failed getting a response from downloader", Severity.Error);
-                break;
-            case 1:
-                Snackbar.Add(SnackbarUtil.FormatConnectionResponse(response.FirstOrDefault(), "URL", UrlValue).Item1, 
-                    SnackbarUtil.FormatConnectionResponse(response.FirstOrDefault(), "URL", UrlValue).Item2);
-                break;
-            case 2:
-                Snackbar.Add(SnackbarUtil.FormatConnectionResponse(response[0], "URL", UrlValue).Item1, 
-                    SnackbarUtil.FormatConnectionResponse(response[0], "URL", UrlValue).Item2);
-                
-                Snackbar.Add(SnackbarUtil.FormatConnectionResponse(response[1], "BackupURL", BackupUrlValue).Item1, 
-                    SnackbarUtil.FormatConnectionResponse(response[1], "BackupURL", BackupUrlValue).Item2);
-                break;
-            default:
-                Snackbar.Add("Failed getting a correct response from downloader", Severity.Error);
-                break;
+            _isTestingConnection = false;
+            StateHasChanged();
         }
     }
 
