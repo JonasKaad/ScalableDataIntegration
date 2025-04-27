@@ -139,46 +139,124 @@ public partial class UpdateDialog : ComponentBase
         return $"{prefix}<span style=\"background-color: {color}; font-weight: bold;\">{changed}</span>{suffix}";
     }
 
-    private static string GetCorrectedVal(object? val)
+    private string GetCorrectedVal(object? val)
     {
-        var correctVal = "";
+        if (val == null) return string.Empty;
+
         if (val is List<FilterDto> filters)
         {
-            correctVal = string.Join(", ",filters.Select(f => f.Name));
-        }
-        else if (val is string old)
-        {
-            correctVal = old;
-        }
-        else
-        {
-            throw new InvalidCastException($"Can't cast {val?.GetType()} to string");
+            var changedFilters = new List<string>();
+
+            // Compare filters from both lists
+            var otherList = val == Filters ? ParserState.Filters : Filters;
+
+            foreach (var filter in filters)
+            {
+                var matchingFilter = otherList.FirstOrDefault(f => f.Name == filter.Name);
+                if (matchingFilter == null)
+                {
+                    changedFilters.Add($"{filter.Name} (New)");
+                    continue;
+                }
+
+                // Check for parameter changes
+                var paramChanges = new List<string>();
+                foreach (var param in filter.Parameters)
+                {
+                    if (!matchingFilter.Parameters.TryGetValue(param.Key, out var otherValue)
+                        || param.Value != otherValue)
+                    {
+                        paramChanges.Add($"{param.Key}: {param.Value}");
+                    }
+                }
+
+                if (paramChanges.Any())
+                {
+                    changedFilters.Add($"{filter.Name} ({string.Join(", ", paramChanges)})");
+                }
+            }
+
+            // Return each filter on a new line if there are multiple filters
+            return changedFilters.Any() 
+                ? changedFilters.Count > 1 
+                    ? string.Join("<br>", changedFilters) 
+                    : changedFilters[0]
+                : string.Empty;
         }
 
-        return correctVal;
+        if (val is string str)
+        {
+            return str;
+        }
+
+        throw new InvalidCastException($"Can't cast {val.GetType()} to string");
     }
 
     // Inspired by @https://github.com/google/diff-match-patch/blob/master/csharp/DiffMatchPatch.cs
     private static (string prefix, string changed, string suffix) FindDiff(string oldValue, string newValue)
     {
-        // Simple diff logic to find common prefixes and suffixes
-        int prefixLength = 0;
-        int minLength = Math.Min(oldValue.Length, newValue.Length);
+        int prefixLength;
+        int minLength;
+        int oldIndex;
+        int newIndex;
+        int suffixLength;
+        
+        if (oldValue.Contains(':') && newValue.Contains(':'))
+        {
+            // Split into filter name and parameters
+            var oldParts = oldValue.Split(new[] { " (" }, 2, StringSplitOptions.None);
+            var newParts = newValue.Split(new[] { " (" }, 2, StringSplitOptions.None);
 
-        // Find common prefix
+            if (oldParts.Length == 2 && newParts.Length == 2)
+            {
+                var oldParams = oldParts[1].TrimEnd(')');
+                var newParams = newParts[1].TrimEnd(')');
+
+                prefixLength = 0;
+                minLength = Math.Min(oldParams.Length, newParams.Length);
+
+                while (prefixLength < minLength && oldParams[prefixLength] == newParams[prefixLength])
+                {
+                    prefixLength++;
+                }
+
+                oldIndex = oldParams.Length - 1;
+                newIndex = newParams.Length - 1;
+                suffixLength = 0;
+
+                while (suffixLength < minLength - prefixLength &&
+                       oldIndex >= prefixLength &&
+                       newIndex >= prefixLength &&
+                       oldParams[oldIndex] == newParams[newIndex])
+                {
+                    oldIndex--;
+                    newIndex--;
+                    suffixLength++;
+                }
+
+                return (
+                    oldParts[0] + " (" + oldParams.Substring(0, prefixLength),
+                    oldParams.Substring(prefixLength, oldParams.Length - prefixLength - suffixLength),
+                    oldParams.Substring(oldParams.Length - suffixLength) + ")"
+                );
+            }
+        }
+
+        prefixLength = 0;
+        minLength = Math.Min(oldValue.Length, newValue.Length);
+
         while (prefixLength < minLength && oldValue[prefixLength] == newValue[prefixLength])
         {
             prefixLength++;
         }
 
-        // Find common suffix
-        int oldIndex = oldValue.Length - 1;
-        int newIndex = newValue.Length - 1;
-        int suffixLength = 0;
+        oldIndex = oldValue.Length - 1;
+        newIndex = newValue.Length - 1;
+        suffixLength = 0;
 
-        while (suffixLength < minLength - prefixLength && 
-               oldIndex >= prefixLength && 
-               newIndex >= prefixLength && 
+        while (suffixLength < minLength - prefixLength &&
+               oldIndex >= prefixLength &&
+               newIndex >= prefixLength &&
                oldValue[oldIndex] == newValue[newIndex])
         {
             oldIndex--;
@@ -189,7 +267,7 @@ public partial class UpdateDialog : ComponentBase
         string prefix = oldValue.Substring(0, prefixLength);
         string changed = oldValue.Substring(prefixLength, oldValue.Length - prefixLength - suffixLength);
         string suffix = oldValue.Substring(oldValue.Length - suffixLength);
-        
+
         return (prefix, changed, suffix);
     }
 }
