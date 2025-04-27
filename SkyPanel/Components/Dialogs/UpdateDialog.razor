@@ -77,7 +77,21 @@
     <DialogActions>
         <MudButton OnClick="@DialogCancel" Variant="Variant.Filled">Cancel</MudButton>
         <MudSpacer/>
-        <MudButton StartIcon="@Icons.Material.Filled.PublishedWithChanges" Disabled="@(!HasChanges)" OnClick="@TestConnection" Variant="Variant.Filled" Color="Color.Primary">Test Connection</MudButton>
+        <MudButton OnClick="@TestConnection"
+                   StartIcon="@(_isTestingConnection ? null : @Icons.Material.Filled.PublishedWithChanges)"
+                   Disabled="@(_isTestingConnection || !HasChanges)"
+                   Variant="Variant.Filled"
+                   Color="Color.Primary">
+            @if (_isTestingConnection)
+            {
+                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="ms-n1" />
+                <span class="ms-2">Testing...</span>
+            }
+            else
+            {
+                <span>Test Connection</span>
+            }
+        </MudButton>
         <MudButton Color="@Color.Success" OnClick="@DialogSubmit" Disabled="@(!HasChanges)" Variant="Variant.Filled">Confirm</MudButton>
     </DialogActions>
 </MudDialog>
