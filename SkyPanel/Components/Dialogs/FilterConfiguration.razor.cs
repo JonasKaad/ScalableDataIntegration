@@ -94,8 +94,15 @@ public partial class FilterConfiguration : ComponentBase
         _cropBoxTop = cropData.Y ?? new decimal(0);
         _cropSaved = true;
         StateHasChanged();
-    
-        await Task.Delay(2000); // Show for 2 seconds
+        try
+        {
+            await Task.Delay(2000, CancellationToken.None); // Show for 2 seconds
+        }
+        catch (TaskCanceledException)
+        {
+            // Task was canceled, no further action needed
+        }
+        
         _cropSaved = false;
         StateHasChanged();
     }
