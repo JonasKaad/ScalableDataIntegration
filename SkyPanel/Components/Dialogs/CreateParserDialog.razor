@@ -32,7 +32,7 @@
             <MudItem xs="12" sm="6">
                 <MudTextField T="string" @bind-Value="BackupUrlValue" Variant="Variant.Outlined" Label="Backup URL"/>
             </MudItem>
-            <MudItem>
+            <MudItem xs="12" sm="6">
                 <MudAutocomplete @bind-Value=SecretName
                                  Clearable="true"
                                  SearchFunc="@SearchSecrets"
