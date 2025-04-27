@@ -27,7 +27,8 @@ public partial class ParserPanel : ComponentBase
     [Inject] private OrchestratorClientService OrchestratorClient { get; set; } = null!;
     
     private string _selectedParser = string.Empty;
-    
+    private bool _isUploading;
+
     public string Parser
     {
         get => string.IsNullOrEmpty(ParserState.ParserName) ? _selectedParser : ParserState.ParserName;
@@ -165,12 +166,17 @@ public partial class ParserPanel : ComponentBase
     private List<File> _files = new();
     
     private async Task Upload(IList<IBrowserFile> files, string parserName)
+{
+    _isUploading = true;
+    StateHasChanged();
+
+    try
     {
         // 30 MB
         long maxFileSize = 30 * 1000000;
         var upload = false;
         _files.Clear();
-        
+
         using var content = new MultipartFormDataContent();
 
         foreach (var file in files)
@@ -180,7 +186,7 @@ public partial class ParserPanel : ComponentBase
                 _files.Add(new() { Name = file.Name });
 
                 var fileContent = new StreamContent(file.OpenReadStream(maxFileSize));
-                    fileContent.Headers.ContentType =
+                fileContent.Headers.ContentType =
                     new MediaTypeHeaderValue(file.ContentType);
 
                 content.Add(
@@ -197,10 +203,11 @@ public partial class ParserPanel : ComponentBase
                     file.Name, ex.Message);
                 Snackbar.Add($"Failed to upload {file.Name} \n{ex.Message}", Severity.Error);
             }
-            
         }
+
         if (upload)
         {
+            Snackbar.Add("Uploading and processing files...", Severity.Info);
             var response = await OrchestratorClient.UploadFiles(parserName, content);
 
             if (response.Success)
@@ -209,8 +216,8 @@ public partial class ParserPanel : ComponentBase
                 var authUser = authState.User;
                 var user = RoleUtil.GetUserEmail(authUser);
                 var fileNames = string.Join(", ", _files.Select(x => x.Name));
-                _logger.LogInformation( "[AUDIT] {User} uploaded: {files} to {Parser}", user, fileNames, parserName);
-                Snackbar.Add($"Uploaded {_files.Count} files!", Severity.Success);
+                _logger.LogInformation("[AUDIT] {User} uploaded: {files} to {Parser}", user, fileNames, parserName);
+                Snackbar.Add($"Successfully processed {_files.Count} files!", Severity.Success);
             }
             else if (response.Result == Result.AlreadyExists)
             {
@@ -227,8 +234,13 @@ public partial class ParserPanel : ComponentBase
                 _logger.LogInformation("{FileName} not uploaded {reason}", fileNames, response.Result);
             }
         }
-        
     }
+    finally
+    {
+        _isUploading = false;
+        StateHasChanged();
+    }
+}
     
     
     private async Task<IEnumerable<string>> Search(string value, CancellationToken token)

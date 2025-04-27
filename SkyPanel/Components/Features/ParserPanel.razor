@@ -19,8 +19,20 @@
     </MudGrid>
     <MudGrid Class="d-flex justify-center" Style="margin-top: 0.1em">
         <MudItem>
-            <MudButton OnClick="@(() => OpenFileDialogAsync())" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.FileUpload" Color="Color.Primary"  Disabled="ParserState.ParserIsNotSelected()">
-                Upload Dataset
+            <MudButton OnClick="@(() => OpenFileDialogAsync())" 
+                       Variant="Variant.Filled" 
+                       StartIcon="@Icons.Material.Filled.FileUpload" 
+                       Color="Color.Primary"  
+                       Disabled="ParserState.ParserIsNotSelected() || _isUploading">
+                @if (_isUploading)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="ms-n1" />
+                    <span class="ms-2">Processing...</span>
+                }
+                else
+                {
+                    <span>Upload Dataset</span>
+                }
             </MudButton>
            
         </MudItem>
