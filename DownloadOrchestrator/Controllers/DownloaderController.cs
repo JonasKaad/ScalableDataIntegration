@@ -17,9 +17,11 @@ public class DownloaderController : ControllerBase
     private readonly ILogger<DownloaderController> _logger;
     private readonly ParserRegistry _parserRegistry;
     private readonly FilterRegistry _filterRegistry;
+    private readonly CommonService _commonService;
 
     public DownloaderController(IDownloaderService downloaderService, SecretService secretService, 
-        ILogger<DownloaderController> logger, ParserRegistry parserRegistry, FilterRegistry filterRegistry)
+        ILogger<DownloaderController> logger, ParserRegistry parserRegistry, FilterRegistry filterRegistry,
+        CommonService commonService)
     {
         _downloaderService = downloaderService;
         _downloaders = downloaderService.GetRecurringJobs();
@@ -27,6 +29,7 @@ public class DownloaderController : ControllerBase
         _logger = logger;
         _parserRegistry = parserRegistry;
         _filterRegistry = filterRegistry;
+        _commonService = commonService;
     }
 
     [Route("downloaders")]
@@ -180,6 +183,8 @@ public class DownloaderController : ControllerBase
             var bytes = new byte[sr.Length];
             await sr.ReadExactlyAsync(bytes, 0, bytes.Length);
             totalBytes.AddRange(bytes);
+            var stream = new MemoryStream(bytes);
+            await _commonService.SaveDataToBlob(downloader, stream);
             if (formFiles.Count > 1)
             {
                 totalBytes.AddRange("magic"u8.ToArray());
