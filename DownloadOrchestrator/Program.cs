@@ -56,6 +56,7 @@ builder.Services.AddSingleton<TokenCacheService>();
 builder.Services.AddSwaggerGen();
 builder.Services
     .AddSerilog()
+    .AddSingleton<CommonService>()
     .AddSingleton<ParserRegistry>()
     .AddSingleton<FilterRegistry>()
     .AddDbContextFactory<StatisticsDatabaseService>(options =>
