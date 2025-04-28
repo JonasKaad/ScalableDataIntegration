@@ -291,15 +291,8 @@ func SaveData(rawFile []byte, parsedFile []byte) {
 	}
 	now := time.Now().UTC()
 	formattedTime := now.Format("2006/01/02/1504")
-	RawFileName := formattedTime + "-raw.txt"
 	ParsedFileName := formattedTime + "-parsed.txt"
-	log.Printf("Raw file name: %s", RawFileName)
 	log.Printf("Parsed file name: %s", ParsedFileName)
-
-	_, err = client.UploadBuffer(ctx, containerName, RawFileName, rawFile, &azblob.UploadBufferOptions{})
-	if err != nil {
-		log.Printf("Failed to upload file: %v", err)
-	}
 
 	_, err = client.UploadBuffer(ctx, containerName, ParsedFileName, parsedFile, &azblob.UploadBufferOptions{})
 	if err != nil {

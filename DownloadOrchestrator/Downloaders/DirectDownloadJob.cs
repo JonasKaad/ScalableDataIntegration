@@ -9,7 +9,8 @@ public class DirectDownloadJob : BaseDownloaderJob
 {
     private readonly ILogger<DirectDownloadJob> _logger;
 
-    public DirectDownloadJob(ILogger<DirectDownloadJob> logger, StatisticsDatabaseService statisticsContext, SecretService secretService, ParserRegistry parserRegistry, FilterRegistry filterRegistry) : base(logger, statisticsContext, secretService, parserRegistry, filterRegistry)
+    public DirectDownloadJob(ILogger<DirectDownloadJob> logger, StatisticsDatabaseService statisticsContext, SecretService secretService, ParserRegistry parserRegistry, FilterRegistry filterRegistry, CommonService commonService) 
+        : base(logger, statisticsContext, secretService, parserRegistry, filterRegistry, commonService)
     {
         _logger = logger;
     }
@@ -29,7 +30,7 @@ public class DirectDownloadJob : BaseDownloaderJob
                 _logger.LogError("Unable to fetch bytes from {Url} or {BackUpUrl}", data.DownloadUrl, data.BackUpUrl);
                 return;
             }
-            Log(data.Name, bytes.Length, DateTime.UtcNow);
+            await Log(data.Name, bytes, DateTime.UtcNow);
             var date = DateTime.UtcNow;
             _logger.LogInformation("Saving raw data to {Container} at {Date}-direct_raw.txt", data.Name, $"{date:yyyy/MM/dd/HHmm}");
             await SendToParser(bytes, data.Name);
