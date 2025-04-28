@@ -21,7 +21,6 @@ public class CommonService
 
         try
         {
-            await container.UploadBlobAsync($"{date:yyyy/MM/dd/HHmm}-raw.{format}", raw);
             await container.UploadBlobAsync($"{date:yyyy/MM/dd/HHmm}-parsed.{format}", parsed);
         }
         catch (RequestFailedException ex)
@@ -38,8 +37,21 @@ public class CommonService
 
         try
         {
-            await container.UploadBlobAsync($"{date:yyyy/MM/dd/HHmm}-raw.{format}", raw);
             await container.UploadBlobAsync($"{date:yyyy/MM/dd/HHmm}-parsed.{format}", parsed);
+        }
+        catch (RequestFailedException ex)
+        {
+            _logger.LogError("Failed to upload to blob: {Error}", ex);
+        }
+    }
+
+    public async Task SaveDataToBlob(string parser, Stream stream, string type = "raw", string format = "txt")
+    {
+        var container = await GetContainerClient(parser);
+        var date = DateTime.UtcNow;
+        try
+        {
+            await container.UploadBlobAsync($"{date:yyyy/MM/dd/HHmm}-{type}.{format}", stream);
         }
         catch (RequestFailedException ex)
         {

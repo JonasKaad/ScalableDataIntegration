@@ -17,14 +17,16 @@ public class BaseDownloaderJob : IDownloaderJob
     protected readonly FilterRegistry _filterRegistry;
     protected readonly ParserRegistry _parserRegistry;
     private readonly ILogger<IDownloaderJob> _logger;
+    protected readonly CommonService _commonService;
     
-    public BaseDownloaderJob(ILogger<BaseDownloaderJob> logger, StatisticsDatabaseService context, SecretService secretService, ParserRegistry parserRegistry, FilterRegistry filterRegistry)
+    public BaseDownloaderJob(ILogger<BaseDownloaderJob> logger, StatisticsDatabaseService context, SecretService secretService, ParserRegistry parserRegistry, FilterRegistry filterRegistry, CommonService commonService)
     {
         _context = context; 
         SecretService = secretService;
         _filterRegistry = filterRegistry;
         _parserRegistry = parserRegistry;
         _logger = logger;
+        _commonService = commonService;
     }
 
     public virtual async Task Download(DownloaderData data)
@@ -42,7 +44,7 @@ public class BaseDownloaderJob : IDownloaderJob
                 _logger.LogError("Unable to fetch bytes from {Url} or {BackUpUrl}", data.DownloadUrl, data.BackUpUrl);
                 return;
             }
-            Log(data.Name, bytes.Length, DateTime.UtcNow);
+            await Log(data.Name, bytes, DateTime.UtcNow);
             var parameters = data.Filters.Select(f => System.Text.Json.JsonSerializer.Serialize(f.Parameters)).ToList();
             var filterNames = data.Filters.Select(f => f.Name).ToList();
             var urls = filterNames.Select(filter => _filterRegistry.GetFilterUrl(filter)).ToList();
@@ -73,13 +75,16 @@ public class BaseDownloaderJob : IDownloaderJob
         }
     }
     
-    protected void Log(string parserName, int bytesAmount, DateTime date)
+    protected async Task Log(string parserName, byte[] bytes, DateTime date)
     {
         // Save to database
+        var stream = new MemoryStream(bytes);
+        await _commonService.SaveDataToBlob(parserName, stream);
+        var bytesAmount = bytes.Length;
         _logger.LogInformation("Downloaded {Bytes} bytes for {Parser} on {Date}", bytesAmount, parserName, date);
         var stats = new Dataset(){Parser = parserName, Date = date, DownloadedAmount = bytesAmount};
         _context.Add(stats);
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
     }
 
     public static async Task SendToParser(byte[] downloadedBytes, List<string> urls, List<string> parameters)

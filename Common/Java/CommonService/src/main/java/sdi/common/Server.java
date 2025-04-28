@@ -192,19 +192,15 @@ public class Server {
 
             ZonedDateTime time = ZonedDateTime.now(ZoneOffset.UTC);
             String formattedTime = String.format("%tY/%tm/%td/%tH%tM", time, time, time, time, time);
-            String rawFileName = formattedTime + "-raw.txt";
             String parsedFileName = formattedTime + "-parsed.txt";
-            logger.info("Raw file name: {}", rawFileName);
             logger.info("Parsed file name: {}", parsedFileName);
             try {
                 // Check if the blob already exists
-                BlobClient rawBlobClient = blobContainerClient.getBlobClient(rawFileName);
                 BlobClient parsedClient = blobContainerClient.getBlobClient(parsedFileName);
-                if (rawBlobClient.exists() || parsedClient.exists()) {
-                    logger.info("Blob files {}, {} already exists. Skipping upload.", rawFileName, parsedFile);
+                if (parsedClient.exists()) {
+                    logger.info("Blob files {} already exists. Skipping upload.", parsedFile);
                     return;
                 }
-                rawBlobClient.upload(new ByteArrayInputStream(rawFile), (long) rawFile.length);
                 parsedClient.upload(new ByteArrayInputStream(parsedFile), (long) parsedFile.length);
                 logger.info("Data uploaded to Blob Storage successfully.");
             } catch (Exception e) {
