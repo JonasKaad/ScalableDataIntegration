@@ -201,10 +201,6 @@ public class DownloaderController : ControllerBase
         {
             await BaseDownloaderJob.SendToParser(totalBytes.ToArray(), urls, parameters);
         }
-        else
-        {
-            await DirectDownloadJob.SendToParser(totalBytes.ToArray(), downloader);
-        }
         return Ok($"Parsing for {downloader} has been started with uploaded data.");
     }
 
