@@ -33,26 +33,10 @@ public class DirectDownloadJob : BaseDownloaderJob
             await Log(data.Name, bytes, DateTime.UtcNow);
             var date = DateTime.UtcNow;
             _logger.LogInformation("Saving raw data to {Container} at {Date}-direct_raw.txt", data.Name, $"{date:yyyy/MM/dd/HHmm}");
-            await SendToParser(bytes, data.Name);
         }
         catch (Exception e)
         {
             _logger.LogError(e, "Error downloading from {Url} or {BackUpUrl} using {Secret} ", data.DownloadUrl, data.BackUpUrl, data.SecretName);
         }
-    }
-
-    public static async Task SendToParser(byte[] downloadedBytes, string name)
-    {
-        var connectionString = Environment.GetEnvironmentVariable("BLOB_CONNECTION_STRING");
-        var blobServiceClient = new BlobServiceClient(connectionString);
-
-        var container = blobServiceClient.GetBlobContainerClient(name);
-        await container.CreateIfNotExistsAsync();
-
-        var date = DateTime.UtcNow.Date;
-        var time = DateTime.UtcNow.ToString("HHmm");
-        
-
-        await container.UploadBlobAsync($"{date:yyyy/MM/dd}/{time}-direct_raw.txt", new BinaryData(downloadedBytes));
     }
 }
